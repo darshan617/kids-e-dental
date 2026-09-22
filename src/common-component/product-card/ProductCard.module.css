@@ -1,0 +1,116 @@
+.prodItemBox {
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  border-radius: clamp(1rem, calc(0.9rem + 0.5vw), 1.5rem);
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  transform-origin: 50% 50%;
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02);
+  }
+}
+
+.pibImgBox {
+  width: 100%;
+  overflow: hidden;
+  margin-top: -1.5rem;
+}
+.pibImgBox .pibProdImg {
+  width: 100%;
+  aspect-ratio: 1;
+  display: block;
+}
+.pibTag {
+  width: auto;
+  border-radius: 3px;
+  font-size: 80%;
+  font-weight: 500;
+  line-height: 1.5;
+  background: #e37000;
+  color: #fff;
+  padding: 0.1rem 0.5rem;
+}
+
+.pibWL {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.wishlistBtn {
+  width: 1rem;
+  height: 1rem;
+  border: 0;
+  padding: 1px;
+  background: transparent;
+}
+.wishlistBtn:before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  display: block;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-1.6 -1.6 35.20 35.20' class='wishlistIcon' fill='%23ffffff' stroke='rgba(100, 100, 100, 1)' stroke-width='2.5'><path d='M0.256 12.16q0.544 2.080 2.080 3.616l13.664 14.144 13.664-14.144q1.536-1.536 2.080-3.616t0-4.128-2.080-3.584-3.584-2.080-4.16 0-3.584 2.080l-2.336 2.816-2.336-2.816q-1.536-1.536-3.584-2.080t-4.128 0-3.616 2.080-2.080 3.584 0 4.128z'></path></svg>");
+}
+.wishlistBtn.active:before {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-1.6 -1.6 35.20 35.20' class='wishlistIcon' fill='%23ff0000' stroke='rgba(228, 0, 37, 1)' stroke-width='2.5'><path d='M0.256 12.16q0.544 2.080 2.080 3.616l13.664 14.144 13.664-14.144q1.536-1.536 2.080-3.616t0-4.128-2.080-3.584-3.584-2.080-4.16 0-3.584 2.080l-2.336 2.816-2.336-2.816q-1.536-1.536-3.584-2.080t-4.128 0-3.616 2.080-2.080 3.584 0 4.128z'></path></svg>");
+}
+
+.pibReview {
+  font-size: 65%;
+}
+.pibStar {
+  display: inline-block;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000000'><path d='M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 90% 40%;
+  background-size: auto 50%;
+  background-color: var(--primary);
+  padding: 0 1rem 0 0.25rem;
+  border-radius: 4px;
+}
+
+.pibProdName {
+  font-size: clamp(0.88rem, calc(0.836rem + 0.22vw), 1.1rem);
+  font-weight: 700;
+}
+.pibPriceBox {
+  font-size: 90%;
+}
+
+.pibBtns {
+  background-color: #f9f9fb;
+}
+.pibBtn {
+  min-width: 50%;
+  display: inline-block;
+  padding: 0.5rem;
+  border-radius: 50rem;
+  background: var(--primary);
+  font-size: clamp(0.63rem, calc(0.596rem + 0.17vw), 0.8rem);
+  text-wrap: nowrap;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.pibBtn.buyBtn {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+}
+.pibBtn.cartBtn {
+  background: #fff;
+  border: 1px solid #aaa;
+}
+.pibBtn:hover {
+  background: #000;
+  color: var(--primary);
+  border-color: #000;
+}

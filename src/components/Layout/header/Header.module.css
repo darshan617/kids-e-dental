@@ -1,0 +1,273 @@
+.pageHeader,
+.stick .pageHeader:hover {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.5s ease;
+}
+.stick .pageHeader {
+  top: -56px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.headTopLinks a {
+  color: #fff;
+  & svg {
+    width: 1.4rem;
+    aspect-ratio: 1;
+    fill: currentColor;
+    opacity: 0.8;
+  }
+  &:hover {
+    color: var(--primary);
+  }
+}
+
+.pgLogo {
+  max-width: 200px;
+  height: auto;
+  display: block;
+  transition: all 0.5s ease;
+  & img {
+    width: 100%;
+    /* height: auto; */
+    display: block;
+  }
+}
+
+.headBtn {
+  /* height: 2rem; */
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  & svg {
+    width: 50%;
+    aspect-ratio: 1;
+    display: block;
+  }
+  & .badge {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    font-size: 13px;
+    color: #000;
+    font-weight: 600;
+  }
+}
+
+.loginBtn {
+  height: 2rem;
+}
+
+.navigation {
+  position: fixed;
+}
+.siteMenu {
+  color: #111;
+  & a {
+    padding: 0.75rem 1rem;
+    display: block;
+  }
+}
+
+@media (min-width: 576px) {
+  .headBtn,
+  .loginBtn {
+    height: 2.5rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .pageHeader {
+    font-size: clamp(0.75rem, calc(0.333rem + 0.556vw), 1rem);
+  }
+
+  .headTopLinks a {
+    & svg {
+      width: 1.17vw;
+    }
+  }
+
+  .pgLogo {
+    max-width: 20vw;
+    .stick & {
+      max-width: 10vw;
+    }
+  }
+
+  .headBtn,
+  .loginBtn {
+    height: 2.5vw;
+  }
+
+  .navigation {
+    position: unset;
+  }
+  .siteMenu {
+    & li {
+      padding: 0 0.5vw;
+    }
+    & a {
+      padding: 0.75rem 0.833vw;
+      position: relative;
+      z-index: 1;
+    }
+    & > li > a:before {
+      content: "";
+      width: 100%;
+      height: 300%;
+      display: none;
+      position: absolute;
+      top: -100%;
+      left: 0;
+      z-index: -1;
+    }
+    & > li:hover > a:before {
+      display: block;
+    }
+  }
+
+  .subMenu {
+    width: 100%;
+    height: 0;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fafafa;
+    box-shadow: 0 30px 30px rgba(0, 0, 0, 0.2);
+    visibility: hidden;
+    z-index: -50;
+    li:hover & {
+      display: block;
+      visibility: visible;
+      height: auto;
+      z-index: 1;
+    }
+    & li a {
+      display: block;
+      padding: 0.75rem 0.5rem;
+      border-radius: 3px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    & li a:hover {
+      background: #111;
+      color: var(--primary);
+      padding-left: 1rem;
+    }
+  }
+}
+
+@media (max-width: 1199.98px) {
+  .navigation {
+    height: 100vh;
+    padding: 0;
+    box-shadow: -30px 0 30px rgba(0, 0, 0, 0.2);
+  }
+  .siteMenu {
+    overflow: auto;
+    height: 100%;
+    padding: 45px 0 40px;
+    & > li {
+      padding: 0.5vw;
+      border-bottom: 1px solid #eee;
+    }
+    & > li > a {
+      text-transform: uppercase;
+      font-weight: 500;
+      padding: 0.75rem 0.833vw;
+      position: relative;
+      z-index: 1;
+    }
+    & > li > a[role="button"]:after {
+      content: "";
+      width: 1rem;
+      aspect-ratio: 1;
+      display: block;
+      position: absolute;
+      right: 0.5rem;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      background: url("data:image/svg+xml,<svg viewBox='0 0 7 12' xmlns='http://www.w3.org/2000/svg'><path d='M4.94626 6.00001L0.873012 1.92701C0.734678 1.78851 0.663845 1.61443 0.660512 1.40476C0.657345 1.19526 0.728178 1.01801 0.873012 0.873012C1.01801 0.728178 1.19368 0.655762 1.40001 0.655762C1.60634 0.655762 1.78201 0.728178 1.92701 0.873012L6.42126 5.36726C6.51476 5.46093 6.58076 5.55968 6.61926 5.66351C6.65776 5.76735 6.67701 5.87951 6.67701 6.00001C6.67701 6.12051 6.65776 6.23268 6.61926 6.33651C6.58076 6.44035 6.51476 6.5391 6.42126 6.63276L1.92701 11.127C1.78851 11.2653 1.61443 11.3362 1.40476 11.3395C1.19526 11.3427 1.01801 11.2718 0.873012 11.127C0.728178 10.982 0.655762 10.8063 0.655762 10.6C0.655762 10.3937 0.728178 10.218 0.873012 10.073L4.94626 6.00001Z' fill='%231A1A1A'/></svg>")
+        no-repeat center;
+      background-size: contain;
+      transition: all 0.5s ease;
+      transform: rotate(90deg);
+    }
+    & > li > a[aria-expanded="true"]:after {
+      transform: rotate(-90deg);
+    }
+  }
+  .subMenu {
+    width: 100%;
+    padding: 1rem;
+    background: #fafafa;
+    & li a {
+      display: block;
+      padding: 0.75rem 0.5rem;
+      border-radius: 3px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    & li a:hover {
+      background: #111;
+      color: var(--primary);
+      padding-left: 1rem;
+    }
+  }
+
+  .siteMenu > li > a[role="button"] {
+    padding-right: 1rem;
+    position: relative;
+  }
+
+  .pgLogo {
+    max-width: 200px;
+    height: auto;
+    display: block;
+    transition: all 0.5s ease;
+    & img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .pgLogo {
+    max-width: 150px;
+    height: auto;
+    display: block;
+    transition: all 0.5s ease;
+    & img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+  .headTop {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+  .offcanvas-xl {
+    max-width: 90%;
+  }
+  .siteMenu {
+    & > li {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+}
+
+.offcanvas-backdrop {
+  backdrop-filter: blur(10px);
+}
