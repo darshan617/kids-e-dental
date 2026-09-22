@@ -1,0 +1,138 @@
+.homeBanner {
+  width: 100%;
+  height: auto;
+  position: relative;
+  background: #eee;
+  overflow: hidden;
+
+  --swiper-pagination-bullet-inactive-color: #d1d1d1;
+  --swiper-pagination-bullet-inactive-opacity: 1;
+  --swiper-pagination-color: var(--primary);
+  --swiper-pagination-bullet-size: 10px;
+  --swiper-pagination-bullet-horizontal-gap: 4px;
+}
+
+.homeBanner :global(.swiper-slide) {
+  overflow: hidden;
+}
+
+.hbImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.hbPagination {
+  bottom: 1rem !important;
+}
+
+@media (min-width: 768px) {
+  .hbPagination {
+    bottom: 4rem !important;
+  }
+}
+
+.uspSection {
+  margin-top: -1rem;
+}
+.brandUSP {
+  border-radius: 2rem;
+  padding-left: 0;
+  padding-right: 0;
+}
+.uspItem {
+  width: 100%;
+  & .uspIcon {
+    width: 4rem;
+    aspect-ratio: 1;
+    display: flex;
+    border: 2px dotted #111;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    & svg {
+      width: 55%;
+      aspect-ratio: 1;
+      display: block;
+      fill: currentColor;
+      transition: inherit;
+      .uspItem:hover & {
+        transform: rotateY(360deg);
+      }
+    }
+    .uspItem:hover & {
+      background: #111;
+      color: var(--primary);
+    }
+  }
+  & .uspText {
+    width: 100%;
+    font-size: clamp(1rem, calc(0.95rem + 0.25vw), 1.25rem);
+    line-height: 1.2;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+  }
+}
+.brandUSP .row > div:last-child .uspItem .uspText {
+  border-right: 0;
+}
+
+.uspMascot {
+  width: 200px;
+  position: absolute;
+  left: 0;
+  top: unset;
+  bottom: 0;
+  transform: rotate(-35deg) translate3d(-50%, 0, 0);
+  transform-origin: 0 50%;
+  transition: all 2s ease;
+  opacity: 0;
+}
+:global(.in-view) .uspMascot {
+    left: 100%;
+    opacity: 1;
+    transition: left 2s ease;
+  }
+
+@media (min-width: 768px) {
+  .brandUSP {
+    border-radius: 3rem;
+    padding-left: 3vw;
+    padding-right: 3vw;
+  }
+  .uspItem {
+    & .uspIcon {
+      width: 5rem;
+    }
+  }
+}
+@media (min-width: 992px) {
+  .uspSection {
+    margin-top: -3rem;
+  }
+  .uspMascot {
+    width: 200px;
+    left: 0;
+    top: -40%;
+    bottom: unset;
+  }
+  :global(.in-view) .uspMascot {
+    left: 100%;
+  }
+}
+@media (min-width: 1200px) {
+  .uspMascot {
+    width: 270px;
+    top: -70%;
+  }
+  :global(.in-view) .uspMascot {
+    left: 97%;
+  }
+}
+@media (max-width: 575.98px) {
+  .uspMascot {
+    width: 150px;
+  }
+  .uspText {
+    border-right: 0 !important;
+  }
+}

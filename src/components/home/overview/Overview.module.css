@@ -1,0 +1,106 @@
+.aboutSection:before {
+  content: "";
+  width: calc(100vw * 4);
+  aspect-ratio: 1;
+  display: block;
+  background: #fff;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translate3d(-50%, 0, 0);
+}
+
+.aboutText {
+  font-size: clamp(1rem, calc(0.84rem + 0.8vw), 1.8rem);
+}
+
+.statBox {
+  & .statNo {
+    font-size: clamp(2rem, calc(1.407rem + 2.963vw), 4rem);
+    color: var(--primary);
+    display: block;
+    font-weight: 700;
+    line-height: 1;
+  }
+  & .statHead {
+    font-size: clamp(1.13rem, calc(1.076rem + 0.27vw), 1.4rem);
+    font-weight: 600;
+  }
+}
+
+.aboutMascotBox {
+  position: relative;
+  z-index: -1;
+}
+
+.aboutCircle {
+  width: 120px;
+  aspect-ratio: 1;
+  position: relative;
+  border-radius: 50%;
+  background: #111;
+  transition: all 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  color: #fff;
+}
+@keyframes rotate {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+.cirText {
+  max-width: 100%;
+}
+.cirText text {
+  fill: var(--primary);
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  font-variant-ligatures: none;
+  animation: rotate 20s linear infinite;
+  transform-origin: 50% 50%;
+}
+.textcircle {
+  transition: transform 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  transform-origin: 50% 50%;
+}
+.textcircle text {
+  transform-origin: 50% 50%;
+}
+.inCircle {
+  width: 60%;
+  height: 60%;
+  border: 1px solid var(--primary);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  border-radius: 50%;
+  pointer-events: none;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+@media (min-width: 1200px) {
+  .aboutMascotBox {
+    margin-top: -4%;
+  }
+}
+@media (min-width: 768px) {
+  .aboutCircle {
+    width: 180px;
+  }
+  .inCircle {
+    font-size: 3.5rem;
+  }
+}
+@media (min-width: 576px) {
+  .aboutCircle {
+    width: 150px;
+  }
+  .inCircle {
+    font-size: 3rem;
+  }
+}
