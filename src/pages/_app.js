@@ -23,6 +23,11 @@ export default function App({ Component, pageProps, ...rest }) {
 function AppContent({ Component, pageProps }) {
   const router = useRouter();
 
+  // Bootstrap JS (offcanvas, collapse, etc.) — CSS-only import is not enough
+  useEffect(() => {
+    void import("bootstrap/dist/js/bootstrap.bundle.min.js");
+  }, []);
+
   // Initialize AOS
   useEffect(() => {
     const initAos = async () => {

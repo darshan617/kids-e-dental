@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import Swiper from "swiper";
 import "swiper/css";
 import { Autoplay } from "swiper/modules";
+import bgWorldMap from "@/assets/images/bgWorldMap.jpg";
 import styles from "@/components/home/trusted-countries/TrustedCountries.module.css";
 
 const countries = [
@@ -152,7 +153,7 @@ const TrustedCountries = () => {
       <div
         className="w-100 py-sm-5 py-4"
         style={{
-          background: "url(/images/bgWorldMap.jpg) no-repeat center / auto 90%",
+          background: `url(${bgWorldMap.src}) no-repeat center / auto 90%`,
         }}
       >
         <div className="text-center mb-5">

@@ -1,0 +1,295 @@
+.filterSortWrap {
+  position: sticky;
+  top: 90px;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+  transition: all 0.5s ease;
+  font-size: clamp(0.75rem, calc(0.659rem + 0.455vw), 1rem);
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+}
+.filterSortBtn {
+  width: 100%;
+  height: 100%;
+  padding: 1rem 0.5rem;
+  border: 0;
+  font-weight: 600;
+  text-align: center;
+  background-color: transparent;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  font-size: inherit;
+  color: #fff;
+  --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+.filterSortBtn:hover {
+  background-color: #000;
+  color: var(--primary);
+}
+.filterSortBtn option {
+  background: #fff;
+  color: #666;
+}
+.prodListCount {
+  border-left: 1px solid #888;
+  border-right: 1px solid #888;
+}
+
+.filterMain {
+  --bs-offcanvas-padding-x: 1.5rem;
+  --bs-offcanvas-padding-y: 1rem;
+}
+
+.filterBox ul {
+  margin: 0;
+  padding: 0;
+}
+.filterBox ul > li {
+  list-style: none;
+  border-bottom: 1px solid #ddd;
+}
+.filterBox ul > li:last-child {
+  border-bottom: unset;
+  margin-bottom: 10px;
+}
+
+.rfiHead {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  padding: 1.25rem 0;
+  margin-bottom: 0;
+  position: relative;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.rfiHead:after {
+  content: "";
+  width: 1rem;
+  height: 1rem;
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  transition: all 0.4s ease;
+  transform: rotate(0);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='currentColor' viewBox='0 0 16 16'><path d='M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z'/></svg>");
+  background-size: cover;
+}
+.rfiHead[aria-expanded="true"]:after {
+  transform: rotate(135deg);
+}
+
+.filterprodCount {
+  float: right;
+}
+.filterBox ul.afiContent {
+  padding: 0 0 1rem;
+  overflow: auto;
+  max-height: 450px;
+}
+.filterBox ul.afiContent li {
+  margin: 0 0 0.8rem;
+  border: 0;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.afiContent :global(.form-check-input),
+.afiContent :global(.form-check-input):focus {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0;
+  margin-right: 0;
+  vertical-align: text-bottom;
+  border-radius: 0.25rem;
+  box-shadow: unset;
+}
+.afiContent :global(.form-check-input):checked + :global(.form-check-label) {
+  font-weight: 600;
+}
+
+.filterMain .ctaBtn {
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50rem;
+  background: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 0.3s ease;
+  border: 1px solid var(--primary);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+.filterMain .ctaBtn:global(.white) {
+  background: #fff;
+  border-color: #ccc;
+}
+.filterMain .ctaBtn:hover {
+  background: #000;
+  color: var(--primary);
+  border-color: #000;
+}
+
+@media (max-width: 425px) {
+  .productListing {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
+    /* padding: 0 10px; */
+  }
+}
+
+@media (max-width: 575.98px) {
+  .prodListCount {
+    border-bottom: 1px solid #888;
+    border-right: 0;
+    border-left: 0;
+  }
+  .order-sm-1 .filterSortBtn {
+    border-right: 1px solid #888;
+  }
+  .filterSortBtn {
+    padding: 0.5rem;
+  }
+  .filterSortWrap {
+    top: 70px;
+  }
+}
+
+/* price range slider */
+
+.priceSliderContainer {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  height: 20px;
+}
+
+.sliderTrack {
+  width: 100%;
+  height: 5px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 3px;
+  background-color: #eee;
+}
+
+.priceRange {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  outline: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.priceRange::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 13px;
+  width: 13px;
+  background-color: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  border: 1px solid #666;
+}
+
+.priceRange::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  background-color: var(--primary);
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  border: 1px solid #666;
+}
+
+.searchClose {
+  transform: scale(0.8);
+}
+
+.headBtn {
+  height: 2rem;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.headBtn {
+  & svg {
+    width: 50%;
+    aspect-ratio: 1;
+    display: block;
+  }
+}
+/* product listing */
+
+@media (min-width: 1200px) {
+  .productListing :global(.col):nth-child(4n-3) {
+    transition-delay: 0.3s;
+  }
+  .productListing :global(.col):nth-child(4n-2) {
+    transition-delay: 0.5s;
+  }
+  .productListing :global(.col):nth-child(4n-1) {
+    transition-delay: 0.7s;
+  }
+  .productListing :global(.col):nth-child(4n) {
+    transition-delay: 0.9s;
+  }
+  @media (min-width: 1200px) {
+    .headBtn,
+    .loginBtn.headBtn {
+      height: 2.5vw;
+    }
+  }
+}
+@media (min-width: 768px) and (max-width: 1199.98px) {
+  .productListing :global(.col):nth-child(3n-2) {
+    transition-delay: 0.3s;
+  }
+  .productListing :global(.col):nth-child(3n-1) {
+    transition-delay: 0.5s;
+  }
+  .productListing :global(.col):nth-child(3n) {
+    transition-delay: 0.7s;
+  }
+}
+@media (max-width: 767.98px) {
+  .productListing :global(.col):nth-child(2n-1) {
+    transition-delay: 0.3s;
+  }
+  .productListing :global(.col):nth-child(2n) {
+    transition-delay: 0.5s;
+  }
+  .productListing {
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+  }
+  .productListing .prodItemBox {
+    border-radius: 0.5rem;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);
+  }
+}
