@@ -7,55 +7,86 @@ import CanineMasterKit from "@/assets/images/products/Canine-Master-Kit.jpg";
 import styles from "@/common-component/product-card/ProductCard.module.css";
 import Image from "next/image";
 
-const ProductCard = () => {
+export const ProductCard = ({
+  id,
+  name = "Kids-e-Crown",
+  image,
+  price = "8343.00",
+  oldPrice = "9859.00",
+  rating = 4.5,
+  reviews = 35,
+  tag = "New",
+}) => {
   return (
-    <div className={`${styles.prodItemBox}`}>
-      <div className="p-3 p-lg-4 vstack gap-1 h-100">
-        <div className="d-flex justify-content-between align-items-center position-relative z-3">
-          <div>
-            <div className={`${styles.pibTag}`}>New</div>
+    <div className="order-md-3 position-relative animateThis slideLeft">
+      <div className={`${styles.prodItemBox}`}>
+        <div className="p-3 p-lg-4 vstack gap-1 h-100">
+          <div className="d-flex justify-content-between align-items-center position-relative z-3">
+            <div>
+              <div className={`${styles.pibTag}`}>{tag}</div>
+            </div>
+            <div className={`${styles.pibWL} align-self-end`}>
+              <button
+                type="button"
+                data-bs-toggle="button"
+                className={styles.wishlistBtn}
+                title="Add to Wishlist"
+              ></button>
+            </div>
           </div>
-          <div className={`${styles.pibWL} align-self-end`}>
-            <button
-              type="button"
-              data-bs-toggle="button"
-              className={styles.wishlistBtn}
-              title="Add to Wishlist"
-            ></button>
+          <div className={`${styles.pibImgBox} mx-auto`}>
+            <Image
+              src={image || CanineMasterKit}
+              alt={name}
+              className={`${styles.pibProdImg} w-100 h-auto`}
+            />
           </div>
-        </div>
-        <div className={`${styles.pibImgBox} mx-auto`}>
-          <Image src={CanineMasterKit} className={`${styles.pibProdImg} w-100 h-auto`} />
-        </div>
-        <div className={`${styles.pibReview} hstack gap-2`}>
-          <span className={styles.pibStar}>4.5</span> (35 Reviews)
-        </div>
-        <div className="">
-          <h3 className={`${styles.pibProdName} mb-0 text-truncate`}>
-            Kids-e-Crown
-          </h3>
+          <div className={`${styles.pibReview} hstack gap-2`}>
+            <span className={styles.pibStar}>{rating}</span> ({reviews} Reviews)
+          </div>
+          <div className="">
+            <h3 className={`${styles.pibProdName} mb-0 text-truncate`}>
+              {name}
+            </h3>
+          </div>
+          <div
+            className={`${styles.pibPriceBox} d-flex align-items-center gap-2`}
+          >
+            <strong className="pibProdPrice">₹ {price}</strong>
+            {oldPrice && (
+              <del className="pibStikePrice opacity-50">₹ {oldPrice}</del>
+            )}
+          </div>
         </div>
         <div
-          className={`${styles.pibPriceBox} d-flex align-items-center gap-2`}
+          className={`${styles.pibBtns} d-flex justify-content-center mt-auto gap-2 p-3 position-relative z-3`}
         >
-          <strong className="pibProdPrice">₹ 8343.00</strong>
-          <del className="pibStikePrice opacity-50">₹ 9859.00</del>
+          <button className={`${styles.pibBtn} ${styles.cartBtn}`}>
+            Add to Cart
+          </button>
+          <button className={`${styles.pibBtn} ${styles.buyBtn}`}>
+            Buy Now
+          </button>
         </div>
+        <a href="" className="stretched-link" title={name}></a>
       </div>
-      <div
-        className={`${styles.pibBtns} d-flex justify-content-center mt-auto gap-2 p-3 position-relative z-3`}
-      >
-        <button className={`${styles.pibBtn} ${styles.cartBtn}`}>
-          Add to Cart
-        </button>
-        <button className={`${styles.pibBtn} ${styles.buyBtn}`}>Buy Now</button>
-      </div>
-      <a href="" className="stretched-link" title="Kids-e-Crown"></a>
     </div>
   );
 };
 
-const ProductSlider = ({ products = [] }) => {
+// const baseProduct = {
+//   name: "Kids-e-Crown",
+//   price: "8343.00",
+//   oldPrice: "9859.00",
+//   rating: 4.5,
+//   reviews: 35,
+// };
+
+const defaultProducts = Array.from({ length: 8 }, (_, i) => ({
+  id: i + 1,
+}));
+
+const ProductSlider = ({ products = defaultProducts }) => {
   const swiperRef = useRef(null);
   const swiperInstance = useRef(null);
 
@@ -110,7 +141,7 @@ const ProductSlider = ({ products = [] }) => {
       <button className="psNext" type="button" aria-label="Next">
         &#10095;
       </button> */}
-      <div class="swiper-pagination end-0 psPagination"></div>
+      <div className="swiper-pagination end-0 psPagination"></div>
     </div>
   );
 };

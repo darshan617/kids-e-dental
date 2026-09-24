@@ -228,7 +228,7 @@ const Banner = () => {
         <Image
           src={uspMascot}
           alt=""
-          className={`${styles.uspMascot} d-block`}
+          className={`${styles.uspMascot} d-block h-auto`}
         />
       </section>
     </>

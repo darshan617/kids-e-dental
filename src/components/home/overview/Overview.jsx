@@ -113,7 +113,7 @@ const Overview = () => {
             <Image
               src={aboutMascot}
               alt=""
-              className="mx-auto mw-100 d-block abtMascotImg animateThis fadeGrow"
+              className="mx-auto mw-100 d-block abtMascotImg animateThis fadeGrow h-auto"
             />
           </div>
           <div className="col d-none d-sm-block"></div>
