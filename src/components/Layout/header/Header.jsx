@@ -1,14 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Logo from "@/assets/images/KidseDental_Logo.png";
 import distributorImg from "@/assets/images/distributorImg.png";
 import styles from "@/components/Layout/header/Header.module.css";
 import { useRouter } from "next/router";
+import AuthPopup from "@/common-component/auth-popup/AuthPopup";
 
 const Header = () => {
   const headerRef = useRef(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
     let ticking = false;
@@ -141,6 +143,8 @@ const Header = () => {
                 <button
                   className={`${styles.headBtn} rounded-circle d-sm-none`}
                   title="Login"
+                  type="button"
+                  onClick={() => setIsAuthOpen(true)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -153,6 +157,8 @@ const Header = () => {
                 <button
                   className={`${styles.loginBtn} ctaBtn d-none d-sm-block`}
                   title="Login"
+                  type="button"
+                  onClick={() => setIsAuthOpen(true)}
                 >
                   Login/Register
                 </button>
@@ -311,6 +317,7 @@ const Header = () => {
           </div>
         </div>
       </div>
+      <AuthPopup isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </header>
   );
 };

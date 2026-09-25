@@ -160,8 +160,9 @@ const CaseStudy = () => {
 
         <div className="container-fluid position-relative z-2">
           <div className="row align-items-center justify-content-between">
+            {/* Content */}
             <div className="col">
-              <div className="vstack gap-md-4 gap-3">
+              <div className="vstack gap-md-4 gap-3 animateThis slideRight">
                 <h2 className="sectionHead fw-bold">
                   Become A
                   <br />
@@ -182,8 +183,14 @@ const CaseStudy = () => {
               </div>
             </div>
 
+            {/* Image */}
             <div className="col-md col-lg-7 px-0 align-self-end">
-              <Image src={distributorImg} alt="" className="w-100 h-auto" />
+              <Image
+                src={distributorImg}
+                alt=""
+                className="w-100 h-auto animateThis curtainLeft fadeGrow"
+                style={{ transitionDelay: "0.5s" }}
+              />
             </div>
           </div>
         </div>
