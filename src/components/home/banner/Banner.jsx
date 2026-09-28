@@ -196,7 +196,7 @@ const Banner = () => {
         </div>
         <div
           ref={paginationRef}
-          className={`${styles.hbPagination} swiper-pagination`}
+          className={`${styles.hbPagination} swiper-pagination sitePadding`}
         />
       </section>
       <section

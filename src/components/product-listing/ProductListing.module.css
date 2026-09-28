@@ -142,6 +142,16 @@
   border-color: #000;
 }
 
+.paginationStyle{
+  --bs-pagination-active-bg: var(--primary);
+  --bs-pagination-color: #111;
+  --bs-pagination-active-color: #111;
+  --bs-pagination-active-border-color: var(--primary);
+  --bs-pagination-hover-color: #111;
+  --bs-pagination-focus-color: #111;
+  --bs-pagination-focus-box-shadow: none;
+}
+
 @media (max-width: 425px) {
   .productListing {
     --bs-gutter-x: 0.5rem;

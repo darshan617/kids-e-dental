@@ -3,15 +3,15 @@ import React, { useState } from "react";
 import distributorImg from "@/assets/images/distributorImg.png";
 import styles from "@/components/product-listing/ProductListing.module.css";
 import { ProductCard } from "@/common-component/product-card/ProductCard";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { VscSettings } from "react-icons/vsc";
 
-/* ---------- Config & data ---------- */
-
-const PRODUCTS_PER_PAGE = 2;
+const PRODUCTS_PER_PAGE = 12;
 const MIN_PRICE = 1000;
 const MAX_PRICE = 50000;
 const MIN_GAP = 1000;
 
-const allProducts = Array.from({ length: 3 }, (_, i) => ({
+const allProducts = Array.from({ length: 13 }, (_, i) => ({
   id: i + 1,
   name: "Kids-e-Crown",
 }));
@@ -35,30 +35,6 @@ const SORT_OPTIONS = [
   { value: "brand-desc", label: "Brands (Z-A)" },
 ];
 
-const paginationStyle = {
-  "--bs-pagination-active-bg": "var(--primary)",
-  "--bs-pagination-color": "#111",
-  "--bs-pagination-active-color": "#111",
-  "--bs-pagination-active-border-color": "var(--primary)",
-  "--bs-pagination-hover-color": "#111",
-  "--bs-pagination-focus-color": "#111",
-  "--bs-pagination-focus-box-shadow": "none",
-};
-
-/* ---------- Small icons ---------- */
-
-const Icon = ({ path, className, fillRule }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    fill="currentColor"
-    viewBox="0 0 16 16"
-    className={className}
-  >
-    <path fillRule={fillRule} d={path} />
-  </svg>
-);
 
 const ICONS = {
   filter:
@@ -68,8 +44,6 @@ const ICONS = {
   close:
     "M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z",
 };
-
-/* ---------- Pagination ---------- */
 
 const Pagination = ({ currentPage, totalPages, onChange }) => {
   if (totalPages <= 1) return null;
@@ -84,8 +58,7 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
   return (
     <nav aria-label="Page navigation">
       <ul
-        className="pagination justify-content-center py-4"
-        style={paginationStyle}
+        className={`${styles.paginationStyle} pagination justify-content-center py-4`}
       >
         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
           <a
@@ -94,7 +67,7 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
             aria-label="Previous"
             onClick={go(currentPage - 1)}
           >
-            <Icon path={ICONS.prev} fillRule="evenodd" />
+            <FaChevronLeft />
           </a>
         </li>
 
@@ -119,15 +92,13 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
             aria-label="Next"
             onClick={go(currentPage + 1)}
           >
-            <Icon path={ICONS.next} fillRule="evenodd" />
+            <FaChevronRight />
           </a>
         </li>
       </ul>
     </nav>
   );
 };
-
-/* ---------- Filters ---------- */
 
 const FilterSection = ({ id, title, open = false, children }) => (
   <li>
@@ -151,7 +122,6 @@ const FilterSection = ({ id, title, open = false, children }) => (
   </li>
 );
 
-// A list of checkboxes from an array of { id, label }
 const CheckboxList = ({ items }) => (
   <ul className={styles.afiContent}>
     {items.map(({ id, label }) => (
@@ -165,7 +135,6 @@ const CheckboxList = ({ items }) => (
   </ul>
 );
 
-// Dual-handle price slider, driven by React state (no DOM queries)
 const PriceFilter = () => {
   const [min, setMin] = useState(MIN_PRICE);
   const [max, setMax] = useState(MAX_PRICE);
@@ -273,8 +242,6 @@ const FilterDrawer = () => (
   </div>
 );
 
-/* ---------- Main component ---------- */
-
 const ProductListing = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -284,7 +251,6 @@ const ProductListing = () => {
   const endIndex = Math.min(startIndex + PRODUCTS_PER_PAGE, total);
 
   const visibleProducts = allProducts.slice(startIndex, endIndex);
-  const showingFrom = total === 0 ? 0 : startIndex + 1;
 
   return (
     <>
@@ -312,11 +278,8 @@ const ProductListing = () => {
             style={{ fontSize: "85%" }}
           >
             <span>
-              Showing{" "}
-              <strong className="textPrimary">
-                {showingFrom}-{endIndex}
-              </strong>{" "}
-              out of <span>{total}</span> Products
+              Showing <strong className="textPrimary">{total}</strong> out of{" "}
+              <span>{total}</span> Products
             </span>
           </div>
 
@@ -327,7 +290,7 @@ const ProductListing = () => {
               data-bs-toggle="offcanvas"
               data-bs-target="#filterMain"
             >
-              <Icon path={ICONS.filter} fillRule="evenodd" className="me-2" />
+              <VscSettings />{" "}
               Filters
             </button>
           </div>
@@ -350,8 +313,7 @@ const ProductListing = () => {
         </div>
       </div>
 
-      {/* Product grid + pagination */}
-      <div className="container-fluid sitePadding">
+      <div className="container-fluid sitePadding py-5 pt-0">
         <div className={`row g-5  ${styles.productListing}`}>
           {visibleProducts.map((product) => (
             <div className="col-6 col-md-4 col-xl-3" key={product.id}>

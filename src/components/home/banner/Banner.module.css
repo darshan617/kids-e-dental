@@ -25,6 +25,9 @@
 
 .hbPagination {
   bottom: 1rem !important;
+  display: flex;
+  
+
 }
 
 @media (min-width: 768px) {

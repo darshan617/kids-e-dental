@@ -74,13 +74,7 @@ export const ProductCard = ({
   );
 };
 
-// const baseProduct = {
-//   name: "Kids-e-Crown",
-//   price: "8343.00",
-//   oldPrice: "9859.00",
-//   rating: 4.5,
-//   reviews: 35,
-// };
+
 
 const defaultProducts = Array.from({ length: 8 }, (_, i) => ({
   id: i + 1,
@@ -134,13 +128,6 @@ const ProductSlider = ({ products = defaultProducts }) => {
           ))}
         </div>
       </div>
-
-      {/* <button className="psPrev" type="button" aria-label="Previous">
-        &#10094;
-      </button>
-      <button className="psNext" type="button" aria-label="Next">
-        &#10095;
-      </button> */}
       <div className="swiper-pagination end-0 psPagination"></div>
     </div>
   );

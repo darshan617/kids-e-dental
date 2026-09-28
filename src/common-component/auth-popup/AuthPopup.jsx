@@ -7,10 +7,13 @@ import Image from "next/image";
 import aboutMascot from "@/assets/images/aboutMascot.png";
 import { FaRegEye } from "react-icons/fa";
 import { FaRegEyeSlash } from "react-icons/fa";
+import { useRegisterMutation } from "@/redux/apis/registerApi";
 
 const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
   const [mode, setMode] = useState(initialMode);
-
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [register, { isLoading }] = useRegisterMutation();
   useEffect(() => {
     if (isOpen) setMode(initialMode);
   }, [isOpen, initialMode]);
@@ -19,12 +22,32 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
   const isSignup = mode === "signup";
   const isForgot = mode === "forgot";
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-  };
-
   const [showLoginPwd, setShowLoginPwd] = useState(false);
   const [showSignupPwd, setShowSignupPwd] = useState(false);
+  const [password, setPassword] = useState("");
+  // const [password_confirmation, setPasswordConfirmation] = useState("")
+
+  const handleSignup = async () => {
+    const body = {
+      name,
+      email,
+      password,
+      password_confirmation: password,
+    };
+  
+    try {
+      const response = await register({ body }).unwrap();
+      console.log(response, "response");
+
+      setName("");
+      setEmail("");
+      setPassword("");
+      setShowSignupPwd(false);
+
+    } catch (err) {
+      console.error("Signup failed:", err);
+    }
+  };
 
   return (
     <CustomPopup isOpen={isOpen} onClose={onClose} size="lg">
@@ -36,10 +59,7 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                 Login
               </h3>
 
-              <form
-                onSubmit={handleSubmit}
-                className={`${styles.formFormat} row g-4`}
-              >
+              <form className={`${styles.formFormat} row g-4`}>
                 <div className="col-12">
                   <input
                     type="email"
@@ -134,10 +154,7 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                 Sign Up
               </h3>
 
-              <form
-                onSubmit={handleSubmit}
-                className={`${styles.formFormat} row g-4 `}
-              >
+              <form className={`${styles.formFormat} row g-4 `}>
                 <div className="col-12">
                   <input
                     type="text"
@@ -145,6 +162,8 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                     name="name"
                     id="signupName"
                     placeholder="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                   />
                 </div>
                 <div className="col-12">
@@ -154,6 +173,8 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                     name="email"
                     id="signupEmail"
                     placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
                 <div className="col-12">
@@ -164,6 +185,8 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                       name="password"
                       id="signupPasswordInput"
                       placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <button
                       type="button"
@@ -176,8 +199,12 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                   </div>
                 </div>
                 <div className="col-12 text-center">
-                  <button type="submit" className="ctaBtn arw">
-                    Continue
+                  <button
+                    type="button"
+                    className="ctaBtn arw"
+                    onClick={handleSignup}
+                  >
+                    {isLoading ? "Signing up..." : "Continue"}
                   </button>
                   <small className="d-block mt-3" style={{ fontSize: "11px" }}>
                     By continuing, you agree to our <a href="">Terms of Use</a>{" "}
@@ -218,10 +245,7 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                 Reset Password
               </h3>
 
-              <form
-                onSubmit={handleSubmit}
-                className={`${styles.formFormat} row g-4 `}
-              >
+              <form className={`${styles.formFormat} row g-4 `}>
                 <div className="col-12">
                   Enter your registered email id to receive a password reset
                   link.
