@@ -1,7 +1,11 @@
 import ProductCard from "@/common-component/product-card/ProductCard";
+import { useRouter } from "next/router";
 import React from "react";
 
 const FeaturedProduct = () => {
+
+  const router = useRouter();
+
   return (
     <section class="sitePadding py-sm-5 py-4">
       <div class="container-fluid">
@@ -45,8 +49,8 @@ const FeaturedProduct = () => {
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-auto order-md-2 text-center animateThis fadeIn">
-            <a href="" class="ctaBtn arw">
+          <div class="col-12 col-md-auto order-md-2 text-center animateThis fadeIn ">
+            <a onClick={() => router.push("/product-listing")}  class="ctaBtn arw ">
               View All Products
             </a>
           </div>
