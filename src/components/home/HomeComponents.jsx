@@ -5,6 +5,7 @@ import FeaturedProduct from './featured-product/FeaturedProduct'
 import Overview from './overview/Overview'
 import WhyChoose from './why-choose/WhyChoose'
 import TrustedCountries from './trusted-countries/TrustedCountries'
+import CaseStudy from './case-study/CaseStudy'
 
 const HomeComponents = () => {
   return (
@@ -14,6 +15,7 @@ const HomeComponents = () => {
       <Overview />
       <WhyChoose />
       <TrustedCountries />
+      <CaseStudy />
     </Layout>
   )
 }

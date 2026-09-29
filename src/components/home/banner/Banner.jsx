@@ -196,7 +196,7 @@ const Banner = () => {
         </div>
         <div
           ref={paginationRef}
-          className={`${styles.hbPagination} swiper-pagination`}
+          className={`${styles.hbPagination} swiper-pagination sitePadding`}
         />
       </section>
       <section
@@ -228,7 +228,7 @@ const Banner = () => {
         <Image
           src={uspMascot}
           alt=""
-          className={`${styles.uspMascot} d-block`}
+          className={`${styles.uspMascot} d-block h-auto`}
         />
       </section>
     </>

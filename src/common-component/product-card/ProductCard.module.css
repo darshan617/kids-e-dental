@@ -1,19 +1,27 @@
+:global(.productSlider) {
+  overflow: visible;
+}
+
+:global(.productSlider .swiper-slide) {
+  padding: 0.5rem;
+  overflow: visible;
+}
+
 .prodItemBox {
   overflow: hidden;
   position: relative;
   background: #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   border-radius: clamp(1rem, calc(0.9rem + 0.5vw), 1.5rem);
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   transform-origin: 50% 50%;
   &:hover {
-    border-color: var(--primary);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow:
+      0 0 0 1px var(--primary),
+      0 0 10px rgba(0, 0, 0, 0.1);
     transform: scale(1.02);
   }
 }
-
 .pibImgBox {
   width: 100%;
   overflow: hidden;
@@ -24,6 +32,7 @@
   aspect-ratio: 1;
   display: block;
 }
+
 .pibTag {
   width: auto;
   border-radius: 3px;
@@ -114,3 +123,4 @@
   color: var(--primary);
   border-color: #000;
 }
+
