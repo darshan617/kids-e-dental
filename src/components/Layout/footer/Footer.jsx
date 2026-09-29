@@ -30,7 +30,7 @@ const Footer = () => {
                   aria-label="Button"
                   aria-describedby=""
                 />
-                <button className={`${styles.nlBtn} btn px-sm-4`} type="button" id="">
+                <button className={`${styles.nlBtn} btn px-sm-4 `} type="button" id="">
                   Subscribe
                 </button>
               </div>
