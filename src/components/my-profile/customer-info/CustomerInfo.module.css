@@ -1,0 +1,177 @@
+
+.sidebar {
+  position: sticky;
+  top: 40px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+  margin-bottom: 20px;
+}
+
+.breadcrumb ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 35px 0 0;
+  font-size: 14px;
+  color: #545454;
+}
+
+.breadcrumbSeparator {
+  margin: 0 8px;
+  color: #6c757d;
+}
+
+.breadcrumbActive {
+
+  font-weight: 600;
+}
+
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 16px;
+  background: #FFCC00;
+  border-radius: 10px;
+  color: #fff;
+}
+
+.profileAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff;
+  color: #000000;
+  font-size: 22px;
+}
+
+.profileMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profileLabel {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.profileName {
+    color: #000000;
+  text-transform: capitalize;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.navMenu {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.navItem + .navItem {
+  border-top: 1px solid #ececec;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #545454;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.navLink:hover {
+  background: #000000;
+  color: var(--primary);
+}
+
+.navLink:hover .navIcon {
+  color: var(--primary);
+}
+
+.navIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #6b7785;
+  font-size: 20px;
+  transition: color 0.18s ease;
+}
+
+.navLinkActive {
+  color: #e9bc07;
+  font-weight: 600;
+  background: rgba(var(--primaryRGB), 0.12);
+}
+
+.navLinkActive .navIcon {
+  color: var(--primary);
+}
+
+.navLinkActive:hover {
+  background: rgba(var(--primaryRGB), 0.12);
+  color: var(--primary);
+}
+
+.navLinkActive:hover .navIcon {
+  color: var(--primary);
+}
+
+.navLinkLogout {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  color: #dc3545;
+  cursor: pointer;
+}
+
+.navLinkLogout:hover {
+  color: #dc3545;
+}
+
+@media (max-width: 1366px) {
+  .breadcrumb ul {
+    padding: 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    position: static;
+    top: auto;
+  }
+
+  .breadcrumb ul {
+    font-size: 12px;
+  }
+}
+
