@@ -7,6 +7,8 @@ import "swiper/css/bundle";
 import csImg from "@/assets/images/csImg.jpg";
 import distributorImg from "@/assets/images/distributorImg.png";
 import styles from "@/components/home/case-study/CaseStudy.module.css";
+import {useGetHomeDataQuery } from "@/redux/apis/homeApi";
+
 
 const slides = [
   {
@@ -44,6 +46,10 @@ const slides = [
 ];
 
 const CaseStudy = () => {
+
+  const { data, isLoading } = useGetHomeDataQuery();
+  const caseStudy = data?.data?.case_study ;
+
   useEffect(() => {
     const csSlider = new Swiper(".csSlider", {
       slidesPerView: 1.1,
@@ -98,14 +104,16 @@ const CaseStudy = () => {
             <div className="col-12 order-md-3 position-relative animateThis slideLeft">
               <div className="swiper csSlider overflow-visible pb-sm-5 pb-4">
                 <div className="swiper-wrapper">
-                  {slides.map((slide, index) => (
+                  {caseStudy?.map((slide, index) => (
                     <div className="swiper-slide" key={index}>
                       <div
                         className={`${styles.csItem} d-flex flex-wrap align-items-center p-lg-4 p-sm-3 p-2 gap-3 gap-sm-0 rounded-4 order-sm-last`}
                       >
                         <div className="csImgbox col-sm-4 col-12 rounded-3 overflow-hidden d-sm-flex">
                           <Image
-                            src={slide.img}
+                            src={slide.image}
+                            width={300}
+                            height={200}
                             alt=""
                             className={styles.csImg}
                           />
@@ -125,7 +133,7 @@ const CaseStudy = () => {
                               <strong>Application :</strong> {slide.application}
                             </li>
                             <li>
-                              <strong>Key Benefit :</strong> {slide.benefit}
+                              <strong>Key Benefit :</strong> {slide.key_benefit}
                             </li>
                           </ul>
                           <a href="" className={styles.csBtn}>

@@ -28,6 +28,7 @@
     box-shadow: none;
   }
   & .nlBtn {
+    border: none;
     background: #000;
     color: #fff;
     &:hover {
