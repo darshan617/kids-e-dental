@@ -2,6 +2,7 @@ import ProductCard from "@/common-component/product-card/ProductCard";
 import { useRouter } from "next/router";
 import React from "react";
 
+
 const FeaturedProduct = () => {
 
   const router = useRouter();

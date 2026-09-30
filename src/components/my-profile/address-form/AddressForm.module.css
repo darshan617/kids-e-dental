@@ -122,29 +122,14 @@
     padding: 12px 28px;
     border: none;
     border-radius: 4px;
-    background: #239c3d;
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    cursor: pointer;
     transition: background 0.2s ease;
   }
   
-  .cancelBtn:hover {
-    background: #1a7a30;
-  }
   
   .saveBtn {
     padding: 12px 28px;
     border: none;
     border-radius: 4px;
-    background: #239c3d;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    cursor: pointer;
     transition: background 0.2s ease;
   }
   

@@ -5,61 +5,182 @@ import CustomPopup from "@/common-component/custom-popup/CustomPopup";
 import styles from "@/common-component/auth-popup/AuthPopup.module.css";
 import Image from "next/image";
 import aboutMascot from "@/assets/images/aboutMascot.png";
-import { FaRegEye } from "react-icons/fa";
-import { FaRegEyeSlash } from "react-icons/fa";
-import { useRegisterMutation } from "@/redux/apis/registerApi";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import {
+  useLoginMutation,
+  useRegisterMutation,
+  useResetPasswordMutation,
+} from "@/redux/apis/registerApi";
 
-const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
+const CloseIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
+    viewBox="0 0 16 16"
+  >
+    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+  </svg>
+);
+
+const TermsNote = () => (
+  <small className="d-block mt-3" style={{ fontSize: "11px" }}>
+    By continuing, you agree to our <a href="#">Terms of Use</a> &{" "}
+    <a href="#">Privacy Policy</a>
+  </small>
+);
+
+const ErrorMessage = ({ message }) =>
+  message ? (
+    <div className="col-12 text-danger small" role="alert">
+      {message}
+    </div>
+  ) : null;
+
+const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [mode, setMode] = useState(initialMode);
+
+  const [register, { isLoading: isSignupLoading }] = useRegisterMutation();
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [passwordReset, {isLoading: isResetPasswordLoading}] = useResetPasswordMutation();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [register, { isLoading }] = useRegisterMutation();
+  const [password, setPassword] = useState("");
+  const [showSignupPwd, setShowSignupPwd] = useState(false);
+
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPwd, setShowLoginPwd] = useState(false);
+
+  const [resetEmail, setResetEmail] = useState("");
+  const [token, settoken] = useState("");
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetPasswordConfirm, setResetPasswordConfirm] = useState("");
+
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    if (isOpen) setMode(initialMode);
+    if (isOpen) {
+      setMode(initialMode);
+      setError("");
+    }
   }, [isOpen, initialMode]);
 
   const isLogin = mode === "login";
   const isSignup = mode === "signup";
   const isForgot = mode === "forgot";
 
-  const [showLoginPwd, setShowLoginPwd] = useState(false);
-  const [showSignupPwd, setShowSignupPwd] = useState(false);
-  const [password, setPassword] = useState("");
-  // const [password_confirmation, setPasswordConfirmation] = useState("")
+  const switchMode = (e, nextMode) => {
+    e.preventDefault();
+    setError("");
+    setMode(nextMode);
+  };
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError("");
+
     const body = {
       name,
       email,
       password,
       password_confirmation: password,
     };
-  
+
     try {
-      const response = await register({ body }).unwrap();
-      console.log(response, "response");
+      await register({ body }).unwrap();
 
       setName("");
       setEmail("");
       setPassword("");
       setShowSignupPwd(false);
-
-    } catch (err) {
-      console.error("Signup failed:", err);
+      setMode("login");
+    } catch (error) {
+      console.error("Signup failed:", error);
+      setError(error?.data?.message || "Signup failed. Please try again.");
     }
   };
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    const body = {
+      email: loginEmail,
+      password: loginPassword,
+    };
+
+    try {
+      const response = await login({ body }).unwrap();
+      console.log("Login success:", response);
+
+      setLoginEmail("");
+      setLoginPassword("");
+      setShowLoginPwd(false);
+      onClose?.();
+    } catch (error) {
+      console.error("Login failed:", error);
+      setError(error?.data?.message || "Login failed. Please try again.");
+    }
+  };
+
+  const handleReset = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    const body = {
+      token: token,
+      email: resetEmail,
+      password: resetPassword,
+      password_confirmation: resetPasswordConfirm,
+    };
+
+    try {
+      const response = await passwordReset({body}).unwrap();
+      console.log("reset success:", response);
+
+      setResetEmail("");
+      settoken("");
+      setResetPassword("");
+      setResetPasswordConfirm("");
+    } catch (error) {
+      console.error("reset failed:", error);
+      setError(error?.data?.message || "reset failed. Please try again.");
+      
+    }
+
+
+
+  };
+
   return (
-    <CustomPopup isOpen={isOpen} onClose={onClose} size="lg">
+    <CustomPopup
+      isOpen={isOpen}
+      onClose={onClose}
+      closeIcon={false}
+      maxWidth="800px"
+    >
       <div className="loginModal bgPrimary d-flex flex-wrap align-items-stretch p-1">
         <div className="col-md-7 p-sm-5 p-4 pb-4 bg-white position-relative">
+          <button
+            type="button"
+            className={`${styles.closeBtn} rounded-circle position-absolute top-0 end-0 m-sm-3 m-2`}
+            aria-label="Close"
+            onClick={onClose}
+          >
+            <CloseIcon />
+          </button>
+
           {isLogin && (
             <>
               <h3 className="sectionHead mb-4 d-inline-flex align-items-center gap-3">
                 Login
               </h3>
 
-              <form className={`${styles.formFormat} row g-4`}>
+              <form
+                className={`${styles.formFormat} row g-4`}
+                onSubmit={handleLogin}
+              >
                 <div className="col-12">
                   <input
                     type="email"
@@ -67,22 +188,12 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                     name="email"
                     id="loginEmail"
                     placeholder="Email"
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="col-12">
-                  <button
-                    className={`${styles.closeBtn} rounded-circle position-absolute top-0 end-0 m-sm-3 m-2`}
-                    aria-label="Close"
-                    onClick={onClose}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                    </svg>
-                  </button>
                   <div className="position-relative">
                     <input
                       type={showLoginPwd ? "text" : "password"}
@@ -90,11 +201,17 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                       name="password"
                       id="loginPasswordInput"
                       placeholder="Password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      required
                     />
                     <button
                       type="button"
-                      className={`${styles.passwordBtn}`}
+                      className={styles.passwordBtn}
                       id="loginPswdSH"
+                      aria-label={
+                        showLoginPwd ? "Hide password" : "Show password"
+                      }
                       onClick={() => setShowLoginPwd((prev) => !prev)}
                     >
                       {showLoginPwd ? <FaRegEye /> : <FaRegEyeSlash />}
@@ -104,28 +221,32 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                     <a
                       href="#"
                       role="button"
-                      onClick={() => setMode("forgot")}
+                      onClick={(e) => switchMode(e, "forgot")}
                       className={`${styles.forgotBtn} mt-1 float-end`}
                     >
                       Forgot Password?
                     </a>
                   </small>
                 </div>
+
+                <ErrorMessage message={error} />
+
                 <div className="col-12 text-center">
-                  <button type="submit" className="ctaBtn arw">
-                    Continue
+                  <button
+                    type="submit"
+                    className="ctaBtn arw"
+                    disabled={isLoginLoading}
+                  >
+                    {isLoginLoading ? "Logging in..." : "Continue"}
                   </button>
-                  <small className="d-block mt-3" style={{ fontSize: "11px" }}>
-                    By continuing, you agree to our <a href="">Terms of Use</a>{" "}
-                    & <a href="">Privacy Policy</a>
-                  </small>
+                  <TermsNote />
                 </div>
                 <div className="col-12 text-center mt-sm-5 mt-4 py-3 bg-secondary-subtle rounded-pill">
-                  Didn't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <a
                     href="#"
                     role="button"
-                    onClick={() => setMode("signup")}
+                    onClick={(e) => switchMode(e, "signup")}
                     className="fw-semibold"
                   >
                     Signup
@@ -137,24 +258,14 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
 
           {isSignup && (
             <>
-              <button
-                className={`${styles.closeBtn} rounded-circle position-absolute top-0 end-0 m-sm-3 m-2`}
-                aria-label="Close"
-                onClick={onClose}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-              </button>
               <h3 className="sectionHead mb-4 d-inline-flex align-items-center gap-3">
                 Sign Up
               </h3>
 
-              <form className={`${styles.formFormat} row g-4 `}>
+              <form
+                className={`${styles.formFormat} row g-4`}
+                onSubmit={handleSignup}
+              >
                 <div className="col-12">
                   <input
                     type="text"
@@ -164,6 +275,7 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                     placeholder="Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="col-12">
@@ -175,6 +287,7 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="col-12">
@@ -187,36 +300,40 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      required
                     />
                     <button
                       type="button"
                       className={styles.passwordBtn}
                       id="signupPswdSH"
+                      aria-label={
+                        showSignupPwd ? "Hide password" : "Show password"
+                      }
                       onClick={() => setShowSignupPwd((prev) => !prev)}
                     >
                       {showSignupPwd ? <FaRegEye /> : <FaRegEyeSlash />}
                     </button>
                   </div>
                 </div>
+
+                <ErrorMessage message={error} />
+
                 <div className="col-12 text-center">
                   <button
-                    type="button"
+                    type="submit"
                     className="ctaBtn arw"
-                    onClick={handleSignup}
+                    disabled={isSignupLoading}
                   >
-                    {isLoading ? "Signing up..." : "Continue"}
+                    {isSignupLoading ? "Signing up..." : "Continue"}
                   </button>
-                  <small className="d-block mt-3" style={{ fontSize: "11px" }}>
-                    By continuing, you agree to our <a href="">Terms of Use</a>{" "}
-                    & <a href="">Privacy Policy</a>
-                  </small>
+                  <TermsNote />
                 </div>
                 <div className="col-12 text-center mt-sm-5 mt-4 py-3 bg-secondary-subtle rounded-pill">
                   Already have an account?{" "}
                   <a
                     href="#"
                     role="button"
-                    onClick={() => setMode("login")}
+                    onClick={(e) => switchMode(e, "login")}
                     className="fw-semibold"
                   >
                     Login
@@ -225,27 +342,13 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
               </form>
             </>
           )}
-
           {isForgot && (
             <>
-              <button
-                className={`${styles.closeBtn} rounded-circle position-absolute top-0 end-0 m-sm-3 m-2`}
-                aria-label="Close"
-                onClick={onClose}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                </svg>
-              </button>
               <h3 className="sectionHead mb-4 d-inline-flex align-items-center gap-3">
                 Reset Password
               </h3>
 
-              <form className={`${styles.formFormat} row g-4 `}>
+              <form className={`${styles.formFormat} row g-4`}>
                 <div className="col-12">
                   Enter your registered email id to receive a password reset
                   link.
@@ -257,23 +360,30 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
                     name="email"
                     id="forgotEmail"
                     placeholder="Email"
+                    // value={forgotEmail}
+                    // onChange={(e) => setForgotEmail(e.target.value)}
+                    required
                   />
                 </div>
+
+                <ErrorMessage message={error} />
+
                 <div className="col-12 text-center">
-                  <button type="submit" className="ctaBtn arw">
+                  <button
+                    type="submit"
+                    className="ctaBtn arw"
+                    onClick={handleReset}
+                  >
                     Continue
                   </button>
-                  <small className="d-block mt-3" style={{ fontSize: "11px" }}>
-                    By continuing, you agree to our <a href="">Terms of Use</a>{" "}
-                    & <a href="">Privacy Policy</a>
-                  </small>
+                  <TermsNote />
                 </div>
                 <div className="col-12 text-center mt-sm-5 mt-4 py-3 bg-secondary-subtle rounded-pill">
                   Back to{" "}
                   <a
                     href="#"
                     role="button"
-                    onClick={() => setMode("login")}
+                    onClick={(e) => switchMode(e, "login")}
                     className="fw-semibold"
                   >
                     Login
@@ -299,7 +409,7 @@ const AuthPopup = ({ isOpen, onClose, initialMode = "login" }) => {
             </h3>
           </div>
           <div className="col-auto mt-auto">
-            <Image src={aboutMascot} alt="" className="w-75 h-auto  " />
+            <Image src={aboutMascot} alt="" className="w-75 h-auto" />
           </div>
         </div>
       </div>

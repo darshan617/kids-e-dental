@@ -50,23 +50,33 @@ const DeliveryAddress = ({
   showAddressForm,
   refetchCartData,
 }) => {
-  // Works even if the parent doesn't pass these props
   const [localShowForm, setLocalShowForm] = useState(false);
-  const formVisible = showAddressForm ?? localShowForm;
-  const setFormVisible = setShowAddressForm ?? setLocalShowForm;
+
+  const isControlled =
+    typeof showAddressForm === "boolean" &&
+    typeof setShowAddressForm === "function";
+
+  const formVisible = isControlled ? showAddressForm : localShowForm;
+  const setFormVisible = isControlled ? setShowAddressForm : setLocalShowForm;
 
   const [addresses, setAddresses] = useState(DUMMY_ADDRESSES);
   const [selectedAddressId, setSelectedAddressId] = useState(
-    DUMMY_ADDRESSES[0]?.id ?? null
+    DUMMY_ADDRESSES[0]?.id ?? null,
   );
   const [editingAddress, setEditingAddress] = useState(null);
 
+  const [showEditPopup, setShowEditPopup] = useState(false);
+
+  const popupOpen = showEditPopup || formVisible;
+
   const openAddForm = () => {
     setEditingAddress(null);
+    setShowEditPopup(false);
     setFormVisible(true);
   };
 
   const closeForm = () => {
+    setShowEditPopup(false);
     setFormVisible(false);
     setEditingAddress(null);
   };
@@ -76,12 +86,14 @@ const DeliveryAddress = ({
     if (handleUpdateCart) handleUpdateCart(null, null, id);
   };
 
-  const handleEditAddress = (addr) => {
+  const handleEditAddress = (e, addr) => {
+    e.stopPropagation();
     setEditingAddress(addr);
-    setFormVisible(true);
+    setShowEditPopup(true);
   };
 
-  const handleDeleteAddress = (addr) => {
+  const handleDeleteAddress = (e, addr) => {
+    e.stopPropagation();
     const updated = addresses.filter((item) => item.id !== addr.id);
     setAddresses(updated);
     if (selectedAddressId === addr.id) {
@@ -94,7 +106,9 @@ const DeliveryAddress = ({
 
     if (saved.id) {
       setAddresses((prev) =>
-        prev.map((item) => (item.id === saved.id ? { ...item, ...saved } : item))
+        prev.map((item) =>
+          item.id === saved.id ? { ...item, ...saved } : item,
+        ),
       );
       setSelectedAddressId(saved.id);
     } else {
@@ -140,7 +154,9 @@ const DeliveryAddress = ({
                       checked={isSelected}
                       onChange={() => handleSelect(addr.id)}
                     />
-                    <span className={styles.selectAddressName}>{addr.name}</span>
+                    <span className={styles.selectAddressName}>
+                      {addr.name}
+                    </span>
                   </label>
 
                   <p className={styles.selectAddressLine}>
@@ -151,14 +167,11 @@ const DeliveryAddress = ({
                   </p>
 
                   {isSelected && (
-                    <div
-                      className={styles.selectAddressActions}
-                      onClick={(e) => e.stopPropagation()}
-                    >
+                    <div className={styles.selectAddressActions}>
                       <button
                         type="button"
                         className={`${styles.editAddressBtn} ctaBtn`}
-                        onClick={() => handleEditAddress(addr)}
+                        onClick={(e) => handleEditAddress(e, addr)}
                       >
                         EDIT
                       </button>
@@ -166,7 +179,7 @@ const DeliveryAddress = ({
                       <button
                         type="button"
                         className={styles.deleteAddressBtn}
-                        onClick={() => handleDeleteAddress(addr)}
+                        onClick={(e) => handleDeleteAddress(e, addr)}
                       >
                         <FaTrash size={16} />
                       </button>
@@ -183,16 +196,18 @@ const DeliveryAddress = ({
         </div>
       </div>
 
-      {formVisible && (
-        <CustomPopup wide onclose={closeForm} maxWidth="700px">
+      {popupOpen && (
+        <CustomPopup isOpen={popupOpen} onClose={closeForm} size="lg">
           <AddressForm
+            key={editingAddress?.id ?? "new"}
             initialValues={editingAddress}
-            title={editingAddress ? "Edit Delivery Address" : "Add Delivery Address"}
+            title={
+              editingAddress ? "Edit Delivery Address" : "Add Delivery Address"
+            }
             onClose={closeForm}
             onSave={handleAddressSave}
             isEditing={!!editingAddress}
             addressId={editingAddress?.id}
-            refetchCartData={refetchCartData}
           />
         </CustomPopup>
       )}

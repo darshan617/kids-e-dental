@@ -193,7 +193,6 @@
   .addBtn {
     border: none;
     background: transparent;
-    color: var(--primary);
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.03em;

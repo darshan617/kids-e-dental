@@ -1,65 +1,86 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import styles from "@/common-component/custom-popup/CustomPopup.module.css";
-
-const SIZE_CLASS = {
-  sm: styles.sm,
-  md: styles.md,
-  lg: styles.lg,
-};
+import { IoClose } from "react-icons/io5";
+import styles from "./CustomPopup.module.css";
 
 const CustomPopup = ({
-  isOpen,
+  isOpen = true, 
+  onclose,
   onClose,
-  title,
   children,
-  size = "md",
-  closeOnBackdrop = true,
-  showClose = true,
+  wide = false,
+  closeIcon = true,
+  maxWidth,
 }) => {
-  useEffect(() => {
-    if (!isOpen) return;
+  const handleClose = onclose || onClose || (() => {});
 
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") onClose?.();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !isOpen) return undefined;
+
+    const scrollY = window.scrollY;
+    const prev = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      top: document.body.style.top,
+      width: document.body.style.width,
     };
 
-    document.body.classList.add("stopScroll");
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
     document.addEventListener("keydown", onKeyDown);
 
     return () => {
-      document.body.classList.remove("stopScroll");
       document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prev.overflow;
+      document.body.style.position = prev.position;
+      document.body.style.top = prev.top;
+      document.body.style.width = prev.width;
+      window.scrollTo(0, scrollY);
     };
-  }, [isOpen, onClose]);
+  }, [mounted, isOpen]);
 
-  if (!isOpen || typeof document === "undefined") return null;
-
-  const handleBackdropClick = (event) => {
-    if (closeOnBackdrop && event.target === event.currentTarget) {
-      onClose?.();
-    }
-  };
+  if (!mounted || !isOpen) return null;
 
   return createPortal(
-    <div
-      className={styles.overlay}
-      onClick={handleBackdropClick}
-      role="presentation"
-    >
-      <div
-        className={`${styles.dialog} ${SIZE_CLASS[size] || styles.md}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label={typeof title === "string" ? title : "Popup"}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className={styles.body}>{children}</div>
+    <div className={styles.root}>
+      <div className={styles.overlay} onClick={handleClose}>
+        <div
+          className={`${styles.popup} ${wide ? styles.popupWide : ""}`}
+          style={maxWidth ? { maxWidth } : undefined}
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+
+          {closeIcon && (
+            <button
+              type="button"
+              className={styles.closeBtn}
+              onClick={handleClose}
+              aria-label="Close"
+            >
+              <IoClose size={20} color="#555" />
+            </button>
+          )}
+        </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 
