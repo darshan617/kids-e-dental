@@ -11,6 +11,7 @@ import { BsCart, BsSearch } from "react-icons/bs";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { MdHeadsetMic } from "react-icons/md";
 import { IoSearchOutline } from "react-icons/io5";
+import Link from "next/link";
 
 // Extracted Data Arrays
 const TOP_BAR_LINKS = [
@@ -190,13 +191,13 @@ const Header = () => {
                 </button>
               </div>
               <div>
-                <button
+                <Link href="/my-cart" 
                   className={`${styles.headBtn} rounded-circle`}
                   title="Cart"
                 >
-                  <span className={`${styles.badge} bgPrimary`}>2</span>
+                  <span className={`${styles.badge} bgPrimary`}>0</span>
                   <BsCart size={28} />
-                </button>
+                </Link>
               </div>
               <div className="d-xl-none">
                 <button
