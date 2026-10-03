@@ -1,0 +1,70 @@
+.summaryCard {
+    width: 100%;
+    /* max-width: 560px; */
+    background: #f4f4f4;
+    border-radius: 16px;
+    overflow: hidden;
+    color: #1a1a1a;
+  }
+  
+  .summaryTitle {
+    margin: 0;
+    padding: 24px 35px;
+    font-size: 16px;
+    font-weight: 700;
+    border-bottom: 1px solid #e3e3e3;
+  }
+  
+  .summaryBody {
+    padding: 0 35px 24px;
+  }
+  
+  .summaryRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 26px 0 22px;
+    border-bottom: 1px solid #e8e8e8;
+  }
+  
+  .summaryLabel {
+    font-size: 15px;
+    color: #555;
+  }
+  
+  .summaryValue {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  
+  .totalRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: 22px;
+  }
+  
+  .totalLabel {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  
+  .taxNote {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .totalValue {
+    font-size: 17px;
+    font-weight: 700;
+  }
+  
+  @media (max-width: 480px) {
+    .summaryTitle {
+      padding: 18px 20px;
+    }
+    .summaryBody {
+      padding: 0 20px 20px;
+    }
+  }
