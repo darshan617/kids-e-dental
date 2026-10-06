@@ -11,6 +11,7 @@ import { BsCart, BsSearch } from "react-icons/bs";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { MdHeadsetMic } from "react-icons/md";
 import { IoSearchOutline } from "react-icons/io5";
+import Link from "next/link";
 
 // Extracted Data Arrays
 const TOP_BAR_LINKS = [
@@ -62,7 +63,7 @@ const PRODUCT_LIST = [
 ];
 
 const NAVIGATION_MENU = [
-  { id: 1, label: "About Us", url: "" },
+  { id: 1, label: "About Us", url: "/about-us" },
   { id: 2, label: "Products", isDropdown: true },
   { id: 3, label: "Catalogue", url: "" },
   { id: 4, label: "Education", url: "" },
@@ -128,7 +129,7 @@ const Header = () => {
             <div className={`${styles.headTopLinks} d-flex gap-5`}>
               {TOP_BAR_LINKS.map((link) => (
                 <div key={link.id} className="col-auto">
-                  <a href={link.url}>
+                  <a onClick={() => router.push(link.url)} >
                     {link.icon} {link.label}
                   </a>
                 </div>
@@ -190,13 +191,13 @@ const Header = () => {
                 </button>
               </div>
               <div>
-                <button
+                <Link href="/my-cart" 
                   className={`${styles.headBtn} rounded-circle`}
                   title="Cart"
                 >
-                  <span className={`${styles.badge} bgPrimary`}>2</span>
+                  <span className={`${styles.badge} bgPrimary`}>0</span>
                   <BsCart size={28} />
-                </button>
+                </Link>
               </div>
               <div className="d-xl-none">
                 <button
@@ -276,7 +277,7 @@ const Header = () => {
                             <ul className="row g-1 row-cols-xl-3 row-cols-1">
                               {PRODUCT_LIST.map((product) => (
                                 <li key={product.id}>
-                                  <a href={product.url}>{product.label}</a>
+                                  <a onClick={() => router.push(product.url)}>{product.label}</a>
                                 </li>
                               ))}
                             </ul>
@@ -285,7 +286,7 @@ const Header = () => {
                       </div>
                     </>
                   ) : (
-                    <a href={menuItem.url}>{menuItem.label}</a>
+                    <a onClick={() => router.push(menuItem.url)} >{menuItem.label}</a>
                   )}
                 </li>
               ))}

@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Provider } from "react-redux";
 import "flag-icons/css/flag-icons.min.css";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 import { storeWrapper } from "@/redux/store";
 

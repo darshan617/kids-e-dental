@@ -12,7 +12,8 @@ export const apiSlice = createApi({
     }
   },
   tagTypes: [
-    "registerApi"
+    "registerApi",
+    "categoryApi"
 
   ],
   overrideExisting: true,

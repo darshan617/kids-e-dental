@@ -1,13 +1,13 @@
-
 .sidebar {
-  position: sticky;
-  top: 40px;
+  position: sticky !important;
+  top: 40px !important;
   align-self: flex-start;
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding: 0;
   margin-bottom: 20px;
+  height: fit-content;
 }
 
 .breadcrumb ul {

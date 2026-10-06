@@ -5,6 +5,7 @@ import styles from "@/components/product-listing/ProductListing.module.css";
 import { ProductCard } from "@/common-component/product-card/ProductCard";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { VscSettings } from "react-icons/vsc";
+import { useGetCategoryDataQuery } from "@/redux/apis/categoryApi";
 
 const PRODUCTS_PER_PAGE = 12;
 const MIN_PRICE = 1000;
@@ -54,6 +55,9 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
   };
 
   const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+ 
+
+  const { data: Categories } = useGetCategoryDataQuery();
 
   return (
     <nav aria-label="Page navigation">
