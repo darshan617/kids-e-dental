@@ -96,6 +96,7 @@
 }
 .siteMenu {
   color: #111;
+  cursor: pointer;
   & a {
     padding: 0.75rem 1rem;
     display: block;
@@ -308,7 +309,7 @@
     }
     & li a:hover {
       background: #111;
-      color: var(--primary);
+      color: #ffcc00 !important;
       padding-left: 1rem;
     }
   }

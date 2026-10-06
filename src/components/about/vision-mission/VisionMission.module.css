@@ -1,0 +1,128 @@
+@keyframes move-forever {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+
+.mvMascotBox {
+  width: 300px;
+  aspect-ratio: 1;
+  position: relative;
+  pointer-events: none;
+}
+.mvMascotImg {
+  height: 100%;
+  position: relative;
+  margin-top: -15%;
+}
+.mvMascotImg.in-view {
+  transition-delay: 1.3s;
+}
+.mvArrow {
+  width: calc(100% * 2.9);
+  height: auto;
+  position: absolute;
+  transform-origin: 50% 50%;
+}
+.mvTop {
+  top: 0;
+  right: 0.5%;
+}
+.mvBtm {
+  bottom: 0;
+  left: 0.5%;
+}
+
+.teamBox {
+  background: #fff;
+  & .teamImg {
+    max-width: 370px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    background: #fff;
+  }
+  & .teamImg img {
+    filter: drop-shadow(-20px 20px 10px rgba(0, 0, 0, 0.2));
+  }
+  & .teamImg:before {
+    content: "";
+    width: 100%;
+    height: 90%;
+    display: block;
+    background: var(--primary);
+    position: absolute;
+    bottom: 0;
+    border-radius: 50rem 50rem 0 0;
+    z-index: -1;
+  }
+  & .teamProfile {
+    position: relative;
+    border-bottom: 1px solid #aaa;
+    padding-bottom: 10px;
+  }
+  & .teamProfile:after {
+    content: "";
+    width: 50px;
+    height: 3px;
+    display: block;
+    background: var(--primary);
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    border-radius: 50rem;
+  }
+}
+
+@media (min-width: 576px) {
+}
+@media (min-width: 768px) {
+}
+@media (min-width: 992px) {
+  .mvMascotBox {
+    width: 400px;
+  }
+  .promiseList {
+    font-size: 1.3rem;
+    & .promIcBox {
+      width: 4rem;
+    }
+  }
+  .wduBox {
+    & .wdu_title {
+      font-size: 1.3rem;
+    }
+  }
+}
+@media (min-width: 1200px) {
+  .abtContImgBox:before {
+    content: "";
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #fff;
+    position: absolute;
+    right: 50%;
+    top: 0;
+    z-index: 0;
+    transition: all 1s ease;
+    clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+  }
+  .in-view .abtContImgBox:before {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  .wduBox {
+    & .wdu_title {
+      font-size: 1.8rem;
+    }
+  }
+}
+@media (min-width: 1400px) {
+  .mvMascotBox {
+    width: 500px;
+  }
+}

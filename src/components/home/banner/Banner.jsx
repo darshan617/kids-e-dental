@@ -162,7 +162,7 @@ const Banner = () => {
       id: item.id ?? index,
       href: item.link || "#",
       desktopSrc: item.image || item.desktopImage,
-      mobileSrc: item.mobileImage || item.image ,
+      mobileSrc: item.mobileImage || item.image,
       alt: item.title || item.alt || "Hero Banner",
       priority: index === 0,
     }));
