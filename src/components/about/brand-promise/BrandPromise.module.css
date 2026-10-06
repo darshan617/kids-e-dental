@@ -1,0 +1,69 @@
+.promiseList {
+  font-size: 1rem;
+  & .promIcBox {
+    width: 3.5rem;
+    aspect-ratio: 1;
+    display: block;
+    border-radius: 50rem;
+    background: #fff;
+    padding: 0.7rem;
+    & svg {
+      width: 100%;
+      aspect-ratio: 1;
+      display: block;
+    }
+  }
+}
+
+.waves {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 20;
+  min-height: 50px;
+  margin-bottom: -5px;
+  .parallax > use {
+    animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+  }
+  .parallax > use:nth-child(1) {
+    animation-delay: -2s;
+    animation-duration: 7s;
+  }
+  .parallax > use:nth-child(2) {
+    animation-delay: -3s;
+    animation-duration: 10s;
+  }
+  .parallax > use:nth-child(3) {
+    animation-delay: -4s;
+    animation-duration: 13s;
+  }
+  .parallax > use:nth-child(4) {
+    animation-delay: -5s;
+    animation-duration: 20s;
+  }
+}
+
+@keyframes move-forever {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+
+@media (min-width: 992px) {
+  .mvMascotBox {
+    width: 400px;
+  }
+  .promiseList {
+    font-size: 1.3rem;
+    & .promIcBox {
+      width: 4rem;
+    }
+  }
+  .wduBox {
+    & .wdu_title {
+      font-size: 1.3rem;
+    }
+  }
+}
