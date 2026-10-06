@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from '@/components/my-wishlist/MyWishlist.module.css'
 import { ProductCard } from "@/common-component/product-card/ProductCard";
-import EMPTY_IMAGE from '@/assets/images/wishlist.avif'
+import EMPTY_IMAGE from '@/assets/images/wishlist.jpg'
 
 const STATIC_CATEGORIES = [
   { name: "Safety", slug: "safety", image: "/category-image/1.png" },
