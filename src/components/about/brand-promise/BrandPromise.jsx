@@ -15,7 +15,6 @@ const BrandPromise = () => {
     if (!section || !canvas) return;
     const ctx = canvas.getContext("2d");
 
-    // ---- config ----
     const gap = 42;
     const waveSpeed = 1200;
     const waveWidth = 180;
@@ -25,14 +24,12 @@ const BrandPromise = () => {
     const maxHoverScale = 2.4;
     const speedIn = 0.5;
     const speedOut = 0.6;
-    const color = { h: 190, s: 100, l: 60 }; // cyan, change h for another hue
+    const color = { h: 190, s: 100, l: 60 }; 
 
-    // ---- state ----
     let grid = null;
     let waves = [];
     let rafId = null;
 
-    // ---- helpers ----
     const rnd = (min, max) => Math.random() * (max - min) + min;
     const smoothstep = (t) => {
       const c = Math.max(0, Math.min(1, t));
@@ -40,7 +37,6 @@ const BrandPromise = () => {
     };
     const durationToFactor = (s) => 1 - Math.pow(0.05, 1 / (60 * s));
 
-    // ---- build grid sized to the section ----
     const init = () => {
       const rect = section.getBoundingClientRect();
       const W = rect.width;
@@ -75,7 +71,6 @@ const BrandPromise = () => {
       grid = { shapes, width: W, height: H };
     };
 
-    // ---- wave spawner ----
     const triggerWave = (x, y) => {
       const rect = section.getBoundingClientRect();
       waves.push({
@@ -85,7 +80,6 @@ const BrandPromise = () => {
       });
     };
 
-    // ---- animation loop ----
     const tick = () => {
       if (!grid) {
         rafId = requestAnimationFrame(tick);
@@ -172,7 +166,7 @@ const BrandPromise = () => {
 
   return (
     <section ref={sectionRef} className="bgPrimary position-relative">
-      <canvas
+      {/* <canvas
         ref={canvasRef}
         style={{
           position: "absolute",
@@ -181,7 +175,7 @@ const BrandPromise = () => {
           zIndex: 0,
           pointerEvents: "none",
         }}
-      />
+      /> */}
 
       <div
         className="position-absolute top-0 start-0 w-100 bg-white"
