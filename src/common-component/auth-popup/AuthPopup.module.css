@@ -20,8 +20,8 @@
   font-weight: 500;
   color: #666;
 }
-.formFormat :global(.form-control) ,
-.formFormat :global(.form-select)  {
+.formFormat :global(.form-control),
+.formFormat :global(.form-select) {
   min-height: 2.8rem;
   background-color: transparent;
   border: unset;
@@ -63,5 +63,67 @@
     width: 50%;
     aspect-ratio: 1;
     display: block;
+  }
+}
+
+.otpWrap {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.otpInput {
+  width: 100%;
+  max-width: 52px;
+  aspect-ratio: 1 / 1.1;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border: 1.5px solid #ced4da;
+  border-radius: 12px;
+  background: #fff;
+  outline: none;
+  padding: 0;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
+}
+
+.otpInput:focus {
+  border-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+}
+
+.otpFilled {
+  background: #f4f8ff;
+  border-color: var(--bs-primary, #0d6efd);
+}
+
+.otpError {
+  border-color: #dc3545;
+  animation: otpShake 0.3s;
+}
+
+@keyframes otpShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 575px) {
+  .otpWrap {
+    gap: 6px;
+  }
+  .otpInput {
+    font-size: 1.15rem;
+    border-radius: 10px;
   }
 }

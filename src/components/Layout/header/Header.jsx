@@ -13,7 +13,6 @@ import { MdHeadsetMic } from "react-icons/md";
 import { IoSearchOutline } from "react-icons/io5";
 import Link from "next/link";
 
-// Extracted Data Arrays
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -45,30 +44,70 @@ const TOP_BAR_LINKS = [
   },
 ];
 
-const PRODUCT_LIST = [
-  { id: 1, label: "Bioflx", url: "" },
-  { id: 2, label: "Kids-e-Crown®", url: "" },
-  { id: 3, label: "Scented-e-Pens", url: "" },
-  { id: 4, label: "E Space Maintainer", url: "" },
-  { id: 5, label: "e-Sdf®", url: "" },
-  { id: 6, label: "e-MTA®", url: "" },
-  { id: 7, label: "e-MTA Carrier", url: "" },
-  { id: 8, label: "e-MTA Putty", url: "" },
-  { id: 9, label: "e-MTA Sealer", url: "" },
-  { id: 10, label: "e-IodoCal", url: "" },
-  { id: 11, label: "e-Splint", url: "" },
-  { id: 12, label: "Kids-e-Files", url: "" },
-  { id: 13, label: "e-Pit And Fissure Sealant", url: "" },
-  { id: 14, label: "Kids-e-Restore", url: "" },
+const PRODUCT_COLUMNS = [
+  [
+    {
+      id: "restorative",
+      label: "Restorative",
+      products: [
+        { id: 1, label: "Bioflx", url: "" },
+        { id: 2, label: "Kids-e-Crown®", url: "" },
+        { id: 3, label: "Kids-e-Restore", url: "" },
+        { id: 4, label: "Kids-e-SSC", url: "" },
+      ],
+    },
+  ],
+  [
+    {
+      id: "preventive",
+      label: "Preventive",
+      products: [
+        { id: 5, label: "e-Sdf®", url: "" },
+        { id: 6, label: "e-Pit And Fissure Sealant", url: "" },
+        { id: 7, label: "e-Space Maintainer", url: "" },
+      ],
+    },
+  ],
+  [
+    {
+      id: "endodontics",
+      label: "Endodontics",
+      products: [
+        { id: 8, label: "e-MTA®", url: "" },
+        { id: 9, label: "e-MTA Putty", url: "" },
+        { id: 10, label: "e-MTA Sealer", url: "" },
+        { id: 11, label: "e-MTA Carrier", url: "" },
+        { id: 12, label: "Kids-e-Files", url: "" },
+        { id: 13, label: "e-IodoCal", url: "" },
+      ],
+    },
+  ],
+  [
+    {
+      id: "consumables",
+      label: "Consumables",
+      products: [{ id: 14, label: "Scented-e-Pens", url: "" }],
+    },
+    {
+      id: "periodontics",
+      label: "Periodontics",
+      products: [{ id: 15, label: "e-Splint", url: "" }],
+    },
+  ],
 ];
 
 const NAVIGATION_MENU = [
   { id: 1, label: "About Us", url: "/about-us" },
   { id: 2, label: "Products", isDropdown: true },
-  { id: 3, label: "Catalogue", url: "" },
+  {
+    id: 3,
+    label: "Catalogue",
+    url: "/pdf/Kids-e-Dental_Brochure_C2C.pdf",
+    target: "_blank",
+  },
   { id: 4, label: "Education", url: "" },
   { id: 5, label: "Case Studies", url: "" },
-  { id: 6, label: "Contact Us", url: "" },
+  { id: 6, label: "Contact Us", url: "/contact-us" },
 ];
 
 const TRENDING_SEARCHES = [
@@ -120,7 +159,9 @@ const Header = () => {
 
   return (
     <header ref={headerRef} className={`${styles.pageHeader} w-100`}>
-      <div className={`${styles.headTop} bg-black text-white py-sm-3 py-1 container-fluid sitePadding`}>
+      <div
+        className={`${styles.headTop} bg-black text-white py-sm-3 py-1 container-fluid sitePadding`}
+      >
         <div className="row">
           <div className="col text-center text-lg-start">
             India's Dedicated Pediatric Dental Products Brand
@@ -129,7 +170,7 @@ const Header = () => {
             <div className={`${styles.headTopLinks} d-flex gap-5`}>
               {TOP_BAR_LINKS.map((link) => (
                 <div key={link.id} className="col-auto">
-                  <a onClick={() => router.push(link.url)} >
+                  <a onClick={() => router.push(link.url)}>
                     {link.icon} {link.label}
                   </a>
                 </div>
@@ -152,7 +193,9 @@ const Header = () => {
             </a>
           </div>
           <div className="col-auto order-xl-3">
-            <div className={`${styles.headBtns} d-flex gap-xxl-4 gap-sm-3 gap-2`}>
+            <div
+              className={`${styles.headBtns} d-flex gap-xxl-4 gap-sm-3 gap-2`}
+            >
               <div>
                 <button
                   className={`${styles.headBtn} headBtn rounded-circle searchMenuBtn`}
@@ -191,7 +234,8 @@ const Header = () => {
                 </button>
               </div>
               <div>
-                <Link href="/my-cart" 
+                <Link
+                  href="/my-cart"
                   className={`${styles.headBtn} rounded-circle`}
                   title="Cart"
                 >
@@ -248,45 +292,89 @@ const Header = () => {
                 <li key={menuItem.id}>
                   {menuItem.isDropdown ? (
                     <>
-                      <a href="#productMenu" role="button" data-bs-toggle="collapse">
+                      <a
+                        href="#productMenu"
+                        role="button"
+                        data-bs-toggle="collapse"
+                      >
                         {menuItem.label}
                       </a>
                       <div
                         className={`${styles.subMenu} container-fluid sitePadding collapse`}
                         id="productMenu"
                       >
-                        <div className="row g-xl-5 g-4 py-xl-4">
+                        <div className="row gx-xl-5 gx-4 py-xl-4">
                           <div className="col-xl-4 col-12">
-                            <div className="p-3 bgPrimary rounded-3 overflow-hidden position-relative">
+                            <div className="p-3 mb-4 mb-xl-0 bgPrimary rounded-3 overflow-hidden position-relative">
                               <Image
                                 src={distributorImg}
                                 alt=""
-                                className="w-100 h-auto"
+                                className="w-100 h-auto mb-5"
                               />
                               <div className="position-absolute bottom-0 py-4 w-100 d-flex justify-content-center">
-                                <a
-                                  href=""
-                                  className="ctaBtn arw white d-inline-block shadow-lg"
+                                <Link
+                                  href="/product-listing"
+                                  className="ctaBtn white arw d-inline-block shadow-lg"
                                 >
                                   View All Products
-                                </a>
+                                </Link>
                               </div>
                             </div>
                           </div>
+
                           <div className="col-xl col-12">
-                            <ul className="row g-1 row-cols-xl-3 row-cols-1">
-                              {PRODUCT_LIST.map((product) => (
-                                <li key={product.id}>
-                                  <a onClick={() => router.push(product.url)}>{product.label}</a>
-                                </li>
+                            <div className="row row-cols-1 row-cols-xl-4">
+                              {PRODUCT_COLUMNS.map((column, colIndex) => (
+                                <div className="col" key={colIndex}>
+                                  {column.map((category) => (
+                                    <div
+                                      key={category.id}
+                                      className={`${styles.subMenuBox} vstack gap-1`}
+                                    >
+                                      <a
+                                        className={styles.subMenuBtn}
+                                        role="button"
+                                        data-bs-toggle="collapse"
+                                        href={`#mcat_${category.id}`}
+                                        aria-expanded="false"
+                                      >
+                                        {category.label}
+                                      </a>
+                                      <div
+                                        className="collapse d-xl-block"
+                                        id={`mcat_${category.id}`}
+                                      >
+                                        <ul className="row g-1">
+                                          {category.products.map((product) => (
+                                            <li key={product.id}>
+                                              <Link href={product.url || "#"}>
+                                                {product.label}
+                                              </Link>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </>
+                  ) : menuItem.target === "_blank" ? (
+                    <a
+                      href={menuItem.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {menuItem.label}
+                    </a>
                   ) : (
-                    <a onClick={() => router.push(menuItem.url)} >{menuItem.label}</a>
+                    <a onClick={() => router.push(menuItem.url)}>
+                      {menuItem.label}
+                    </a>
                   )}
                 </li>
               ))}

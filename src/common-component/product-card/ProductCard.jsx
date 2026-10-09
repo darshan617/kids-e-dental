@@ -3,7 +3,7 @@ import Swiper from "swiper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-
+import { Navigation, Pagination } from "swiper/modules";
 import CanineMasterKit from "@/assets/images/products/Canine-Master-Kit.jpg";
 import styles from "@/common-component/product-card/ProductCard.module.css";
 import Image from "next/image";
@@ -64,9 +64,7 @@ export const ProductCard = ({
             <strong className="pibProdPrice">₹ {price}</strong>
 
             {oldPrice && (
-              <del className="pibStikePrice opacity-50">
-                ₹ {oldPrice} 
-              </del>
+              <del className="pibStikePrice opacity-50">₹ {oldPrice}</del>
             )}
           </div>
         </div>
@@ -89,22 +87,22 @@ export const ProductCard = ({
   );
 };
 
-const defaultProducts = Array.from({ length: 8 }, (_, i) => ({
+const defaultProducts = Array.from({ length: 4 }, (_, i) => ({
   id: i + 1,
 }));
 
+
 const ProductSlider = ({ products = defaultProducts }) => {
   const swiperRef = useRef(null);
-  const swiperInstance = useRef(null);
+  const prevRef = useRef(null);
+  const nextRef = useRef(null);
+  const paginationRef = useRef(null);
 
   const { data: homeResult } = useGetHomeDataQuery();
 
   const featuredProducts = useMemo(() => {
     const productsList = homeResult?.data?.featured_products;
-
-    if (!Array.isArray(productsList) || productsList.length === 0) {
-      return [];
-    }
+    if (!Array.isArray(productsList) || productsList.length === 0) return [];
 
     return productsList.map((item) => ({
       id: item.id,
@@ -118,24 +116,24 @@ const ProductSlider = ({ products = defaultProducts }) => {
     }));
   }, [homeResult]);
 
-  useEffect(() => {
-    if (!swiperRef.current || featuredProducts.length === 0) return;
+  const items = featuredProducts.length > 0 ? featuredProducts : products;
 
-    swiperInstance.current = new Swiper(swiperRef.current, {
+  useEffect(() => {
+    if (!swiperRef.current || items.length === 0) return;
+
+    const swiper = new Swiper(swiperRef.current, {
+      modules: [Navigation, Pagination],
       slidesPerView: 1.3,
       spaceBetween: 10,
       speed: 500,
-
       navigation: {
-        nextEl: ".psNext",
-        prevEl: ".psPrev",
+        nextEl: nextRef.current,
+        prevEl: prevRef.current,
       },
-
       pagination: {
-        el: ".psPagination",
+        el: paginationRef.current,
         clickable: true,
       },
-
       breakpoints: {
         500: { slidesPerView: 2, spaceBetween: 15 },
         900: { slidesPerView: 3, spaceBetween: 15 },
@@ -144,16 +142,8 @@ const ProductSlider = ({ products = defaultProducts }) => {
       },
     });
 
-    return () => {
-      if (swiperInstance.current) {
-        swiperInstance.current.destroy(true, true);
-        swiperInstance.current = null;
-      }
-    };
-  }, [featuredProducts]);
-
-  const items =
-    featuredProducts.length > 0 ? featuredProducts : products;
+    return () => swiper.destroy(true, true);
+  }, [items]);
 
   return (
     <div className="position-relative">
@@ -167,7 +157,22 @@ const ProductSlider = ({ products = defaultProducts }) => {
         </div>
       </div>
 
-      <div className="swiper-pagination end-0 psPagination"></div>
+      <button
+        ref={prevRef}
+        className="psPrev"
+        type="button"
+        aria-label="Previous"
+      />
+      <button
+        ref={nextRef}
+        className="psNext"
+        type="button"
+        aria-label="Next"
+      />
+      <div
+        ref={paginationRef}
+        className="swiper-pagination end-0 psPagination"
+      ></div>
     </div>
   );
 };

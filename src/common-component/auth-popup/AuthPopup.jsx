@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
 import styles from "@/common-component/auth-popup/AuthPopup.module.css";
 import Image from "next/image";
@@ -11,6 +11,9 @@ import {
   useRegisterMutation,
   useResetPasswordMutation,
 } from "@/redux/apis/registerApi";
+
+const OTP_LENGTH = 6;
+const RESEND_SECONDS = 30;
 
 const CloseIcon = () => (
   <svg
@@ -36,12 +39,23 @@ const ErrorMessage = ({ message }) =>
     </div>
   ) : null;
 
+const maskEmail = (value = "") => {
+  const [user, domain] = value.split("@");
+  if (!domain) return value;
+  const visible = user.slice(0, 2);
+  return `${visible}${"*".repeat(Math.max(user.length - 2, 2))}@${domain}`;
+};
+
 const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [mode, setMode] = useState(initialMode);
 
   const [register, { isLoading: isSignupLoading }] = useRegisterMutation();
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
-  const [passwordReset, {isLoading: isResetPasswordLoading}] = useResetPasswordMutation();
+  const [passwordReset, { isLoading: isResetPasswordLoading }] =
+    useResetPasswordMutation();
+  // OTP API not available yet - design only. Replace with RTK mutations later.
+  const [isVerifyLoading, setIsVerifyLoading] = useState(false);
+  const [isResendLoading, setIsResendLoading] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -57,6 +71,13 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [resetPassword, setResetPassword] = useState("");
   const [resetPasswordConfirm, setResetPasswordConfirm] = useState("");
 
+  // OTP state
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [otpInfo, setOtpInfo] = useState("");
+  const otpRefs = useRef([]);
+
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -66,14 +87,35 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     }
   }, [isOpen, initialMode]);
 
+  // Resend countdown
+  useEffect(() => {
+    if (secondsLeft <= 0) return;
+    const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(id);
+  }, [secondsLeft]);
+
+  // Focus first box when OTP screen opens
+  useEffect(() => {
+    if (mode === "otp") {
+      setTimeout(() => otpRefs.current[0]?.focus(), 50);
+    }
+  }, [mode]);
+
   const isLogin = mode === "login";
   const isSignup = mode === "signup";
   const isForgot = mode === "forgot";
+  const isOtp = mode === "otp";
 
   const switchMode = (e, nextMode) => {
     e.preventDefault();
     setError("");
+    setOtpInfo("");
     setMode(nextMode);
+  };
+
+  const resetOtpBoxes = () => {
+    setOtp(Array(OTP_LENGTH).fill(""));
+    setTimeout(() => otpRefs.current[0]?.focus(), 0);
   };
 
   const handleSignup = async (e) => {
@@ -90,15 +132,91 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     try {
       await register({ body }).unwrap();
 
+      // Go to OTP verification instead of straight to login
+      // (to preview the OTP design without signing up, call setMode("otp") from a temp button)
+      setOtpEmail(email);
       setName("");
       setEmail("");
       setPassword("");
       setShowSignupPwd(false);
-      setMode("login");
+      resetOtpBoxes();
+      setSecondsLeft(RESEND_SECONDS);
+      setMode("otp");
     } catch (error) {
       console.error("Signup failed:", error);
       setError(error?.data?.message || "Signup failed. Please try again.");
     }
+  };
+
+  const handleOtpChange = (index, value) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const next = [...otp];
+    next[index] = digit;
+    setOtp(next);
+    setError("");
+    if (digit && index < OTP_LENGTH - 1) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < OTP_LENGTH - 1) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, OTP_LENGTH);
+    if (!pasted) return;
+    const next = Array(OTP_LENGTH).fill("");
+    pasted.split("").forEach((d, i) => (next[i] = d));
+    setOtp(next);
+    otpRefs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setError("");
+    setOtpInfo("");
+
+    const code = otp.join("");
+    if (code.length < OTP_LENGTH) {
+      setError(`Please enter the ${OTP_LENGTH}-digit code.`);
+      return;
+    }
+
+    // TODO: call verify OTP API here with { email: otpEmail, otp: code }
+    setIsVerifyLoading(true);
+    setTimeout(() => {
+      setIsVerifyLoading(false);
+      setOtp(Array(OTP_LENGTH).fill(""));
+      setLoginEmail(otpEmail);
+      setMode("login");
+    }, 800);
+  };
+
+  const handleResendOtp = async (e) => {
+    e.preventDefault();
+    if (secondsLeft > 0 || isResendLoading) return;
+    setError("");
+    setOtpInfo("");
+
+    // TODO: call resend OTP API here with { email: otpEmail }
+    setIsResendLoading(true);
+    setTimeout(() => {
+      setIsResendLoading(false);
+      setOtpInfo("A new code has been sent to your email.");
+      setSecondsLeft(RESEND_SECONDS);
+      resetOtpBoxes();
+    }, 600);
   };
 
   const handleLogin = async (e) => {
@@ -136,7 +254,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     };
 
     try {
-      const response = await passwordReset({body}).unwrap();
+      const response = await passwordReset({ body }).unwrap();
       console.log("reset success:", response);
 
       setResetEmail("");
@@ -146,11 +264,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     } catch (error) {
       console.error("reset failed:", error);
       setError(error?.data?.message || "reset failed. Please try again.");
-      
     }
-
-
-
   };
 
   return (
@@ -342,6 +456,105 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
               </form>
             </>
           )}
+
+          {isOtp && (
+            <>
+              <h3 className="sectionHead mb-2 d-inline-flex align-items-center gap-3">
+                Verify Email
+              </h3>
+              <p className="mb-4 small text-secondary">
+                We&apos;ve sent a {OTP_LENGTH}-digit code to{" "}
+                <strong className="text-dark">{maskEmail(otpEmail)}</strong>.
+                Enter it below to verify your account.
+              </p>
+
+              <form
+                className={`${styles.formFormat} row g-4`}
+                onSubmit={handleVerifyOtp}
+              >
+                <div className="col-12">
+                  <div
+                    className={styles.otpWrap}
+                    onPaste={handleOtpPaste}
+                    role="group"
+                    aria-label="One-time password"
+                  >
+                    {otp.map((digit, i) => (
+                      <input
+                        key={i}
+                        ref={(el) => (otpRefs.current[i] = el)}
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete={i === 0 ? "one-time-code" : "off"}
+                        maxLength={1}
+                        value={digit}
+                        aria-label={`Digit ${i + 1}`}
+                        className={`${styles.otpInput} ${
+                          digit ? styles.otpFilled : ""
+                        } ${error ? styles.otpError : ""}`}
+                        onChange={(e) => handleOtpChange(i, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                        onFocus={(e) => e.target.select()}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <ErrorMessage message={error} />
+                {otpInfo && (
+                  <div className="col-12 text-success small" role="status">
+                    {otpInfo}
+                  </div>
+                )}
+
+                <div className="col-12 text-center">
+                  <button
+                    type="submit"
+                    className="ctaBtn arw"
+                    disabled={isVerifyLoading || otp.join("").length < OTP_LENGTH}
+                  >
+                    {isVerifyLoading ? "Verifying..." : "Verify"}
+                  </button>
+
+                  <div className="small mt-3">
+                    {secondsLeft > 0 ? (
+                      <span className="text-secondary">
+                        Resend code in{" "}
+                        <strong>
+                          0:{String(secondsLeft).padStart(2, "0")}
+                        </strong>
+                      </span>
+                    ) : (
+                      <>
+                        Didn&apos;t get the code?{" "}
+                        <a
+                          href="#"
+                          role="button"
+                          onClick={handleResendOtp}
+                          className="fw-semibold"
+                        >
+                          {isResendLoading ? "Sending..." : "Resend"}
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="col-12 text-center mt-sm-4 mt-3 py-3 bg-secondary-subtle rounded-pill">
+                  Wrong email?{" "}
+                  <a
+                    href="#"
+                    role="button"
+                    onClick={(e) => switchMode(e, "signup")}
+                    className="fw-semibold"
+                  >
+                    Go back
+                  </a>
+                </div>
+              </form>
+            </>
+          )}
+
           {isForgot && (
             <>
               <h3 className="sectionHead mb-4 d-inline-flex align-items-center gap-3">
@@ -360,8 +573,6 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                     name="email"
                     id="forgotEmail"
                     placeholder="Email"
-                    // value={forgotEmail}
-                    // onChange={(e) => setForgotEmail(e.target.value)}
                     required
                   />
                 </div>

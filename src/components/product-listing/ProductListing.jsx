@@ -15,19 +15,16 @@ const MIN_GAP = 1000;
 const allProducts = Array.from({ length: 13 }, (_, i) => ({
   id: i + 1,
   name: "Kids-e-Crown",
+  categoryId: (i % 5) + 1,
+  subId: String((i % 4) + 1),
 }));
 
-const CATEGORIES = Array.from({ length: 8 }, (_, i) => ({
-  id: `category_${i + 1}`,
-  label: `Category ${i + 1}`,
-}));
-
-const GENDERS = [
+const genders = [
   { id: "genderBoy", label: "Boy" },
   { id: "genderGirl", label: "Girl" },
 ];
 
-const SORT_OPTIONS = [
+const sortOptions = [
   { value: "recent", label: "Recently Added" },
   { value: "relevance", label: "Relevance" },
   { value: "price-asc", label: "Price (low-high)" },
@@ -36,28 +33,27 @@ const SORT_OPTIONS = [
   { value: "brand-desc", label: "Brands (Z-A)" },
 ];
 
+const closeIconPath =
+  "M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z";
 
-const ICONS = {
-  filter:
-    "M11.5 2a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M9.05 3a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0V3zM4.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3M2.05 8a2.5 2.5 0 0 1 4.9 0H16v1H6.95a2.5 2.5 0 0 1-4.9 0H0V8zm9.45 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m-2.45 1a2.5 2.5 0 0 1 4.9 0H16v1h-2.05a2.5 2.5 0 0 1-4.9 0H0v-1z",
-  prev: "M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0",
-  next: "M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708",
-  close:
-    "M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z",
-};
+const formatCategory = (category) => ({
+  id: category.id,
+  label: category.name,
+  subs: (category.subcategories ?? []).map((sub) => ({
+    id: String(sub.id),
+    label: sub.name,
+  })),
+});
 
-const Pagination = ({ currentPage, totalPages, onChange }) => {
+function Pagination({ currentPage, totalPages, onChange }) {
   if (totalPages <= 1) return null;
 
-  const go = (page) => (e) => {
-    e.preventDefault();
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  const goToPage = (event, page) => {
+    event.preventDefault();
     if (page >= 1 && page <= totalPages) onChange(page);
   };
-
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
- 
-
-  const { data: Categories } = useGetCategoryDataQuery();
 
   return (
     <nav aria-label="Page navigation">
@@ -66,10 +62,10 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
       >
         <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
           <a
-            className="page-link "
+            className="page-link"
             href="#"
             aria-label="Previous"
-            onClick={go(currentPage - 1)}
+            onClick={(e) => goToPage(e, currentPage - 1)}
           >
             <FaChevronLeft />
           </a>
@@ -81,7 +77,11 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
             className={`page-item ${currentPage === page ? "active" : ""}`}
             aria-current={currentPage === page ? "page" : undefined}
           >
-            <a className="page-link" href="#" onClick={go(page)}>
+            <a
+              className="page-link"
+              href="#"
+              onClick={(e) => goToPage(e, page)}
+            >
               {page}
             </a>
           </li>
@@ -91,10 +91,10 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
           className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
         >
           <a
-            className="page-link "
+            className="page-link"
             href="#"
             aria-label="Next"
-            onClick={go(currentPage + 1)}
+            onClick={(e) => goToPage(e, currentPage + 1)}
           >
             <FaChevronRight />
           </a>
@@ -102,159 +102,293 @@ const Pagination = ({ currentPage, totalPages, onChange }) => {
       </ul>
     </nav>
   );
-};
+}
 
-const FilterSection = ({ id, title, open = false, children }) => (
-  <li>
-    <button
-      className={styles.rfiHead}
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target={`#${id}`}
-      aria-expanded={open}
-      aria-controls={id}
-    >
-      {title}
-    </button>
-    <div
-      className={`collapse ${open ? "show" : ""}`}
-      id={id}
-      data-bs-parent="#filterWrap"
-    >
-      {children}
-    </div>
-  </li>
-);
+function FilterSection({ id, title, open = false, children }) {
+  return (
+    <li>
+      <button
+        className={styles.rfiHead}
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target={`#${id}`}
+        aria-expanded={open}
+        aria-controls={id}
+      >
+        {title}
+      </button>
 
-const CheckboxList = ({ items }) => (
-  <ul className={styles.afiContent}>
-    {items.map(({ id, label }) => (
-      <li key={id}>
-        <input className="form-check-input" type="checkbox" id={id} />
-        <label className="form-check-label" htmlFor={id}>
-          {label}
-        </label>
-      </li>
-    ))}
-  </ul>
-);
+      <div
+        className={`collapse ${open ? "show" : ""}`}
+        id={id}
+        data-bs-parent="#filterWrap"
+      >
+        {children}
+      </div>
+    </li>
+  );
+}
 
-const PriceFilter = () => {
-  const [min, setMin] = useState(MIN_PRICE);
-  const [max, setMax] = useState(MAX_PRICE);
+function CheckboxList({ items }) {
+  return (
+    <ul className={styles.afiContent}>
+      {items.map((item) => (
+        <li key={item.id}>
+          <input className="form-check-input" type="checkbox" id={item.id} />
+          <label className="form-check-label" htmlFor={item.id}>
+            {item.label}
+          </label>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
-  const minPct = (min / MAX_PRICE) * 100;
-  const maxPct = (max / MAX_PRICE) * 100;
+function CategoryFilter({
+  categories,
+  selectedCategory,
+  selectedSubs,
+  onSelectCategory,
+  onToggleSub,
+}) {
+  return (
+    <ul className={styles.afiContent}>
+      {categories.map((category) => {
+        const isOpen = selectedCategory === category.id;
+
+        return (
+          <li key={category.id}>
+            <div className="w-100">
+              <div className="d-flex align-items-center gap-2">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id={`category_${category.id}`}
+                  checked={isOpen}
+                  onChange={() => onSelectCategory(isOpen ? null : category.id)}
+                />
+                <label
+                  className="form-check-label"
+                  htmlFor={`category_${category.id}`}
+                >
+                  {category.label}
+                </label>
+              </div>
+
+              {isOpen && category.subs.length > 0 && (
+                <ul className="list-unstyled ps-4 mt-3 mb-0">
+                  {category.subs.map((sub) => (
+                    <li
+                      key={sub.id}
+                      role="button"
+                      onClick={() => onToggleSub(sub.id)}
+                      style={{
+                        cursor: "pointer",
+                        fontWeight: selectedSubs.includes(sub.id) ? 700 : 400,
+                      }}
+                    >
+                      {sub.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function PriceFilter() {
+  const [minPrice, setMinPrice] = useState(MIN_PRICE);
+  const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
+
+  const minPercent = (minPrice / MAX_PRICE) * 100;
+  const maxPercent = (maxPrice / MAX_PRICE) * 100;
 
   const trackStyle = {
-    background: `linear-gradient(to right, #eee ${minPct}%, #ffcc00 ${minPct}%, #ffcc00 ${maxPct}%, #eee ${maxPct}%)`,
+    background: `linear-gradient(to right, #eee ${minPercent}%, #ffcc00 ${minPercent}%, #ffcc00 ${maxPercent}%, #eee ${maxPercent}%)`,
   };
 
   return (
     <div className="row g-0 mb-4">
       <div className={`${styles.priceSliderContainer} col-12 mb-0`}>
         <div className={styles.sliderTrack} style={trackStyle} />
+
         <input
           type="range"
           className={styles.priceRange}
           min={MIN_PRICE}
           max={MAX_PRICE}
-          value={min}
-          onChange={(e) => setMin(Math.min(+e.target.value, max - MIN_GAP))}
+          value={minPrice}
+          onChange={(e) =>
+            setMinPrice(Math.min(+e.target.value, maxPrice - MIN_GAP))
+          }
         />
         <input
           type="range"
           className={styles.priceRange}
           min={MIN_PRICE}
           max={MAX_PRICE}
-          value={max}
-          onChange={(e) => setMax(Math.max(+e.target.value, min + MIN_GAP))}
+          value={maxPrice}
+          onChange={(e) =>
+            setMaxPrice(Math.max(+e.target.value, minPrice + MIN_GAP))
+          }
         />
       </div>
-      <div className="col-6">₹ {min}</div>
-      <div className="col-6 text-end">₹ {max}</div>
+
+      <div className="col-6">₹ {minPrice}</div>
+      <div className="col-6 text-end">₹ {maxPrice}</div>
     </div>
   );
-};
+}
 
-const FilterDrawer = () => (
-  <div
-    className={`offcanvas offcanvas-start ${styles.filterMain}`}
-    tabIndex="-1"
-    id="filterMain"
-  >
+function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
+  const [selectedCategory, setSelectedCategory] = useState(applied.category);
+  const [selectedSubs, setSelectedSubs] = useState(applied.subs);
+
+  const handleSelectCategory = (categoryId) => {
+    setSelectedCategory(categoryId);
+    setSelectedSubs([]); 
+  };
+
+  const handleToggleSub = (subId) => {
+    setSelectedSubs(selectedSubs.includes(subId) ? [] : [subId]);
+  };
+
+  const handleClearAll = () => {
+    setSelectedCategory(null);
+    setSelectedSubs([]);
+    onApply({ category: null, subs: [] });
+  };
+
+  const handleApply = () => {
+    onApply({ category: selectedCategory, subs: selectedSubs });
+  };
+
+  let categoryContent;
+  if (isLoading) {
+    categoryContent = (
+      <p className="small text-muted mb-0">Loading categories...</p>
+    );
+  } else if (isError) {
+    categoryContent = (
+      <p className="small text-danger mb-0">Failed to load categories.</p>
+    );
+  } else {
+    categoryContent = (
+      <CategoryFilter
+        categories={categories}
+        selectedCategory={selectedCategory}
+        selectedSubs={selectedSubs}
+        onSelectCategory={handleSelectCategory}
+        onToggleSub={handleToggleSub}
+      />
+    );
+  }
+
+  return (
     <div
-      className="offcanvas-header hstack justify-content-between py-1 pe-2"
-      style={{ backgroundColor: "#f3f3f3" }}
+      className={`offcanvas offcanvas-start ${styles.filterMain}`}
+      tabIndex="-1"
+      id="filterMain"
     >
-      <h5 className="offcanvas-title fs-6" style={{ fontWeight: "800" }}>
-        FILTERS
-      </h5>
-      <button
-        type="button"
-        className={`${styles.searchClose} ${styles.headBtn} rounded-circle bg-white`}
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
+      <div
+        className="offcanvas-header hstack justify-content-between py-1 pe-2"
+        style={{ backgroundColor: "#f3f3f3" }}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="currentColor"
-          viewBox="0 0 16 16"
+        <h5 className="offcanvas-title fs-6" style={{ fontWeight: "800" }}>
+          FILTERS
+        </h5>
+
+        <button
+          type="button"
+          className={`${styles.searchClose} ${styles.headBtn} rounded-circle bg-white`}
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
         >
-          <path d={ICONS.close} />
-        </svg>
-      </button>
-    </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            viewBox="0 0 16 16"
+          >
+            <path d={closeIconPath} />
+          </svg>
+        </button>
+      </div>
 
-    <div className="offcanvas-body py-3">
-      <div className={`${styles.filterBox} mb-3`}>
-        <ul className="accdFilters clearfix" id="filterWrap">
-          <FilterSection id="fltr_Category" title="Categories" open>
-            <CheckboxList items={CATEGORIES} />
-          </FilterSection>
+      <div className="offcanvas-body py-3">
+        <div className={`${styles.filterBox} mb-3`}>
+          <ul className="accdFilters clearfix" id="filterWrap">
+            <FilterSection id="fltr_Category" title="Categories" open>
+              {categoryContent}
+            </FilterSection>
 
-          <FilterSection id="fltr_Price" title="Price">
-            <PriceFilter />
-          </FilterSection>
+            <FilterSection id="fltr_Price" title="Price">
+              <PriceFilter />
+            </FilterSection>
 
-          <FilterSection id="fltr_Gender" title="Gender">
-            <CheckboxList items={GENDERS} />
-          </FilterSection>
-        </ul>
+            <FilterSection id="fltr_Gender" title="Gender">
+              <CheckboxList items={genders} />
+            </FilterSection>
+          </ul>
+        </div>
+      </div>
+
+      <div
+        className="d-flex p-3 gap-3 flex-nowrap"
+        style={{ backgroundColor: "#f3f3f3" }}
+      >
+        <button
+          type="button"
+          className={`${styles.ctaBtn} col p-3 ctaBtn white`}
+          data-bs-dismiss="offcanvas"
+          onClick={handleClearAll}
+        >
+          Clear All
+        </button>
+
+        <button
+          type="button"
+          className={`${styles.ctaBtn} col p-3 ctaBtn`}
+          data-bs-dismiss="offcanvas"
+          onClick={handleApply}
+        >
+          Apply
+        </button>
       </div>
     </div>
+  );
+}
 
-    <div
-      className="d-flex p-3 gap-3 flex-nowrap"
-      style={{ backgroundColor: "#f3f3f3" }}
-    >
-      <button
-        type="button"
-        className={`${styles.ctaBtn} col p-3 ctaBtn white`}
-        data-bs-dismiss="offcanvas"
-      >
-        Clear All
-      </button>
-      <button
-        type="button"
-        className={`${styles.ctaBtn} col p-3 ctaBtn`}
-        data-bs-dismiss="offcanvas"
-      >
-        Apply
-      </button>
-    </div>
-  </div>
-);
-
-const ProductListing = () => {
+function ProductListing() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [applied, setApplied] = useState({ category: null, subs: [] });
 
-  const total = allProducts.length;
+  const { data, isLoading, isError } = useGetCategoryDataQuery();
+  const categories = (data?.data ?? []).map(formatCategory);
+
+  const handleApply = (filters) => {
+    setApplied(filters);
+    setCurrentPage(1);
+  };
+
+  const filteredProducts = allProducts.filter((product) => {
+    const categoryMatches =
+      applied.category === null || product.categoryId === applied.category;
+
+    const subMatches =
+      applied.subs.length === 0 || applied.subs.includes(product.subId);
+
+    return categoryMatches && subMatches;
+  });
+
+  const total = filteredProducts.length;
   const totalPages = Math.ceil(total / PRODUCTS_PER_PAGE);
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
   const endIndex = Math.min(startIndex + PRODUCTS_PER_PAGE, total);
-
-  const visibleProducts = allProducts.slice(startIndex, endIndex);
+  const visibleProducts = filteredProducts.slice(startIndex, endIndex);
 
   return (
     <>
@@ -282,8 +416,9 @@ const ProductListing = () => {
             style={{ fontSize: "85%" }}
           >
             <span>
-              Showing <strong className="textPrimary">{total}</strong> out of{" "}
-              <span>{total}</span> Products
+              Showing{" "}
+              <strong className="textPrimary">{visibleProducts.length}</strong>{" "}
+              out of <span>{total}</span> Products
             </span>
           </div>
 
@@ -294,8 +429,7 @@ const ProductListing = () => {
               data-bs-toggle="offcanvas"
               data-bs-target="#filterMain"
             >
-              <VscSettings />{" "}
-              Filters
+              <VscSettings /> Filters
             </button>
           </div>
 
@@ -307,9 +441,9 @@ const ProductListing = () => {
               <option value="" disabled>
                 Sort By
               </option>
-              {SORT_OPTIONS.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -318,12 +452,16 @@ const ProductListing = () => {
       </div>
 
       <div className="container-fluid sitePadding py-5 pt-0">
-        <div className={`row g-5  ${styles.productListing}`}>
-          {visibleProducts.map((product) => (
-            <div className="col-6 col-md-4 col-xl-3" key={product.id}>
-              <ProductCard {...product} />
-            </div>
-          ))}
+        <div className={`row g-5 ${styles.productListing}`}>
+          {visibleProducts.length === 0 ? (
+            <p className="text-center">No products found.</p>
+          ) : (
+            visibleProducts.map((product) => (
+              <div className="col-6 col-md-4 col-xl-3" key={product.id}>
+                <ProductCard {...product} />
+              </div>
+            ))
+          )}
         </div>
 
         <Pagination
@@ -333,9 +471,15 @@ const ProductListing = () => {
         />
       </div>
 
-      <FilterDrawer />
+      <FilterDrawer
+        categories={categories}
+        isLoading={isLoading}
+        isError={isError}
+        applied={applied}
+        onApply={handleApply}
+      />
     </>
   );
-};
+}
 
 export default ProductListing;
