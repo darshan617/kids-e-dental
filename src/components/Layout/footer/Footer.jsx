@@ -1,9 +1,11 @@
 import Image from "next/image";
 import React from "react";
-import styles from '@/components/Layout/footer/Footer.module.css'
-import footMascot from '@/assets/images/footMascot.png'
+import styles from "@/components/Layout/footer/Footer.module.css";
+import footMascot from "@/assets/images/footMascot.png";
+import { useRouter } from "next/router";
 
 const Footer = () => {
+  const router = useRouter();
   return (
     <footer className={`${styles.pageFooter} sitePadding py-4`}>
       <div className="container-fluid">
@@ -22,7 +24,9 @@ const Footer = () => {
                 Subscribe to our{" "}
                 <strong className="fw-bold d-xl-block">Newsletter</strong>
               </h5>
-              <div className={`${styles.nlfInput} input-group mb-3 rounded-pill overflow-hidden`}>
+              <div
+                className={`${styles.nlfInput} input-group mb-3 rounded-pill overflow-hidden`}
+              >
                 <input
                   type="text"
                   className="form-control rounded-pill border-0"
@@ -30,7 +34,11 @@ const Footer = () => {
                   aria-label="Button"
                   aria-describedby=""
                 />
-                <button className={`${styles.nlBtn} btn px-sm-4 `} type="button" id="">
+                <button
+                  className={`${styles.nlBtn} btn px-sm-4 `}
+                  type="button"
+                  id=""
+                >
                   Subscribe
                 </button>
               </div>
@@ -42,19 +50,19 @@ const Footer = () => {
                 <h5 className="footHead fw-semibold mb-4">Quick Links</h5>
                 <ul className={`${styles.footLinks} vstack gap-2`}>
                   <li>
-                    <a href="#">My Account</a>
-                  </li>
+                  <a onClick={() => router.push("/my-profile")}>My Account</a>
+                    </li>
                   <li>
                     <a href="#">Shop</a>
                   </li>
                   <li>
-                    <a href="#">Privacy Policy</a>
+                    <a onClick={() => router.push("/privacy-policy")}>Privacy Policy</a>
                   </li>
                   <li>
-                    <a href="#">Terms & Conditions</a>
+                    <a onClick={() => router.push("/terms-conditions")}>Terms & Conditions</a>
                   </li>
                   <li>
-                    <a href="#">Sales Policy</a>
+                    <a onClick={() => router.push("/sales-policy")}>Sales Policy</a>
                   </li>
                 </ul>
               </div>
@@ -130,9 +138,13 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className={`${styles.footBtm} row g-sm-0 g-3 justify-content-between pt-sm-4`}>
+        <div
+          className={`${styles.footBtm} row g-sm-0 g-3 justify-content-between pt-sm-4`}
+        >
           <div className="col-sm-auto px-0 text-center text-lg-start">
-            <ul className={`${styles.socialIcons} d-flex w-auto justify-content-center gap-2 mx-auto pe-sm-2`}>
+            <ul
+              className={`${styles.socialIcons} d-flex w-auto justify-content-center gap-2 mx-auto pe-sm-2`}
+            >
               <li>
                 <a
                   href="https://www.facebook.com/kidsedental/"

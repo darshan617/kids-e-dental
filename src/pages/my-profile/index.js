@@ -13,7 +13,7 @@ const ProfilePage = () => {
         </div>
         <div className="col-xl-9 col-md-12 mt-auto mb-auto">
           <ProfileDetail />
-          <DeliveryAddress />
+          <DeliveryAddress type="profile" />
         </div>
       </div>
     </Layout>

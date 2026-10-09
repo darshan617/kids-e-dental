@@ -40,6 +40,7 @@
 
 .footLinks li a {
   line-height: 1;
+  cursor: pointer;
 }
 
 .footBtm {
