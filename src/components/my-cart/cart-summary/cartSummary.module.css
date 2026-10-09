@@ -1,11 +1,13 @@
 .summaryCard {
-    width: 100%;
-    /* max-width: 560px; */
-    background: #f4f4f4;
-    border-radius: 16px;
-    overflow: hidden;
-    color: #1a1a1a;
-  }
+  width: 100%;
+  background: #f4f4f4;
+  border-radius: 16px;
+  overflow: hidden;
+  color: #1a1a1a;
+  position: sticky;
+  top: 100px;
+  align-self: flex-start;
+}
   
   .summaryTitle {
     margin: 0;

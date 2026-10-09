@@ -45,10 +45,15 @@ const formatAddressLine = (a) =>
     .join(", ");
 
 const DeliveryAddress = ({
+  type = "profile", // "cart" | "profile"
   handleUpdateCart,
   setShowAddressForm,
   showAddressForm,
   refetchCartData,
+  // cart-only props
+  address,
+  addressCount,
+  handleChangeDeliveryAddress,
 }) => {
   const [localShowForm, setLocalShowForm] = useState(false);
 
@@ -64,10 +69,10 @@ const DeliveryAddress = ({
     DUMMY_ADDRESSES[0]?.id ?? null,
   );
   const [editingAddress, setEditingAddress] = useState(null);
-
   const [showEditPopup, setShowEditPopup] = useState(false);
 
   const popupOpen = showEditPopup || formVisible;
+  const isCart = type === "cart";
 
   const openAddForm = () => {
     setEditingAddress(null);
@@ -117,84 +122,139 @@ const DeliveryAddress = ({
       setSelectedAddressId(newAddress.id);
     }
 
+    if (isCart && refetchCartData) refetchCartData();
+
     closeForm();
   };
 
   return (
     <section className={styles.checkoutSection}>
-      <div className={styles.content}>
-        <div className="d-flex justify-content-between align-items-center">
+      {isCart ? (
+        /* ---------- CART DESIGN ---------- */
+        <div className={styles.content}>
           <p className={styles.sectionLabel}>
-            Delivery Address ({addresses.length})
+            Delivery Address ({addressCount || 0})
           </p>
 
-          <button type="button" className={styles.addBtn} onClick={openAddForm}>
-            + Add New Delivery Address
-          </button>
+          <div className={styles.addressCard}>
+            {address?.address ? (
+              <>
+                <p className={styles.addressName}>{address?.name}</p>
+                <p className={styles.addressLine}>{address?.address}</p>
+                <p className={styles.addressMobile}>
+                  Mobile : {address?.mobile}
+                </p>
+              </>
+            ) : (
+              <p className="m-0 small">
+                No Address Found. Please add a new address.
+              </p>
+            )}
+
+            <div className={styles.addressActions}>
+              <button
+                type="button"
+                className={styles.changeBtn}
+                onClick={() => handleChangeDeliveryAddress?.()}
+                disabled={!address?.address}
+                style={{
+                  opacity: !address?.address ? 0.5 : 1,
+                  cursor: !address?.address ? "not-allowed" : "pointer",
+                }}
+              >
+                Change Delivery Address
+              </button>
+
+              <button
+                type="button"
+                className={styles.addBtn}
+                onClick={openAddForm}
+              >
+                + Add New Delivery Address
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div className={styles.addressList}>
-          {addresses.length > 0 ? (
-            addresses.map((addr) => {
-              const isSelected = selectedAddressId === addr.id;
-
-              return (
-                <div
-                  key={addr.id}
-                  className={`${styles.selectAddressCard} ${
-                    isSelected ? styles.selectAddressCardActive : ""
-                  }`}
-                  onClick={() => handleSelect(addr.id)}
-                >
-                  <label className={styles.selectAddressHeader}>
-                    <input
-                      type="radio"
-                      name="deliveryAddress"
-                      className={styles.selectAddressRadio}
-                      checked={isSelected}
-                      onChange={() => handleSelect(addr.id)}
-                    />
-                    <span className={styles.selectAddressName}>
-                      {addr.name}
-                    </span>
-                  </label>
-
-                  <p className={styles.selectAddressLine}>
-                    {formatAddressLine(addr)}
-                  </p>
-                  <p className={styles.selectAddressMobile}>
-                    Mobile : {addr.phone}
-                  </p>
-
-                  {isSelected && (
-                    <div className={styles.selectAddressActions}>
-                      <button
-                        type="button"
-                        className={`${styles.editAddressBtn} ctaBtn`}
-                        onClick={(e) => handleEditAddress(e, addr)}
-                      >
-                        EDIT
-                      </button>
-
-                      <button
-                        type="button"
-                        className={styles.deleteAddressBtn}
-                        onClick={(e) => handleDeleteAddress(e, addr)}
-                      >
-                        <FaTrash size={16} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          ) : (
-            <p className="m-0 small">
-              No Address Found. Please add a new address.
+      ) : (
+        /* ---------- PROFILE DESIGN (unchanged) ---------- */
+        <div className={styles.content}>
+          <div className="d-flex justify-content-between align-items-center">
+            <p className={styles.sectionLabel}>
+              Delivery Address ({addresses.length})
             </p>
-          )}
+
+            <button
+              type="button"
+              className={styles.addBtn}
+              onClick={openAddForm}
+            >
+              + Add New Delivery Address
+            </button>
+          </div>
+
+          <div className={styles.addressList}>
+            {addresses.length > 0 ? (
+              addresses.map((addr) => {
+                const isSelected = selectedAddressId === addr.id;
+
+                return (
+                  <div
+                    key={addr.id}
+                    className={`${styles.selectAddressCard} ${
+                      isSelected ? styles.selectAddressCardActive : ""
+                    }`}
+                    onClick={() => handleSelect(addr.id)}
+                  >
+                    <label className={styles.selectAddressHeader}>
+                      <input
+                        type="radio"
+                        name="deliveryAddress"
+                        className={styles.selectAddressRadio}
+                        checked={isSelected}
+                        onChange={() => handleSelect(addr.id)}
+                      />
+                      <span className={styles.selectAddressName}>
+                        {addr.name}
+                      </span>
+                    </label>
+
+                    <p className={styles.selectAddressLine}>
+                      {formatAddressLine(addr)}
+                    </p>
+                    <p className={styles.selectAddressMobile}>
+                      Mobile : {addr.phone}
+                    </p>
+
+                    {isSelected && (
+                      <div className={styles.selectAddressActions}>
+                        <button
+                          type="button"
+                          className={`${styles.editAddressBtn} ctaBtn`}
+                          onClick={(e) => handleEditAddress(e, addr)}
+                        >
+                          EDIT
+                        </button>
+
+                        <button
+                          type="button"
+                          className={styles.deleteAddressBtn}
+                          onClick={(e) => handleDeleteAddress(e, addr)}
+                        >
+                          <FaTrash size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              <p className="m-0 small">
+                No Address Found. Please add a new address.
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {popupOpen && (
         <CustomPopup isOpen={popupOpen} onClose={closeForm} size="lg">
