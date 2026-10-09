@@ -4,8 +4,8 @@ import Link from "next/link";
 import { ImBin } from "react-icons/im";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
-import csImg from '@/assets/images/csImg.jpg'
-
+import csImg from "@/assets/images/csImg.jpg";
+import { useRouter } from "next/router";
 
 const dummyCartItems = [
   {
@@ -66,9 +66,7 @@ const CartRow = ({ item }) => (
 
         <div className={styles.productCartContent}>
           <h4 className={styles.productCartName}>
-            <Link href="/">
-              {item.product.name}
-            </Link>
+            <Link href="/">{item.product.name}</Link>
           </h4>
           <span>SKU: {item.product.sku}</span>
           {item.coupon_applicable && (
@@ -108,10 +106,12 @@ const CartRow = ({ item }) => (
   </div>
 );
 
+
 const CartDetails = () => {
+  const router = useRouter();
+  const isCheckoutPage = router.pathname === "/checkout";
   return (
     <div className={styles.productInfo}>
-
       <div className={styles.productCartHeader}>
         <div>PRODUCT</div>
         <div>Price</div>
@@ -123,19 +123,21 @@ const CartDetails = () => {
         <CartRow key={item.id} item={item} />
       ))}
 
-      <Link href="/" className={styles.checkoutSection}>
-        <button type="button" className={styles.checkoutBtn}>
-          <div>
+      {!isCheckoutPage && (
+        <Link href="/checkout" className={styles.checkoutSection}>
+          <button type="button" className={styles.checkoutBtn}>
             <div>
-              <span>PROCEED TO CHECKOUT</span>
-              <p>₹ {cartTotal}</p>
+              <div>
+                <span>PROCEED TO CHECKOUT</span>
+                <p>₹ {cartTotal}</p>
+              </div>
             </div>
-          </div>
-          <span className={styles.arrow}>
-            <MdOutlineKeyboardArrowRight size={30} />
-          </span>
-        </button>
-      </Link>
+            <span className={styles.arrow}>
+              <MdOutlineKeyboardArrowRight size={30} />
+            </span>
+          </button>
+        </Link>
+      )}
     </div>
   );
 };
