@@ -178,9 +178,9 @@ p {
   transition-delay: 1.3s;
 }
 
-.pageWrapper {
-  /* min-height: calc(100vh - 150px); */
-}
+/* .pageWrapper {
+  min-height: calc(100vh - 150px);
+} */
 @media (min-width: 576px) {
   .sitePadding {
     padding-left: 5vw;

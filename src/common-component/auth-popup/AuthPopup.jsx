@@ -10,6 +10,7 @@ import {
   useLoginMutation,
   useRegisterMutation,
   useResetPasswordMutation,
+  useVerifyOtpMutation,
 } from "@/redux/apis/registerApi";
 
 const OTP_LENGTH = 6;
@@ -53,9 +54,9 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
   const [passwordReset, { isLoading: isResetPasswordLoading }] =
     useResetPasswordMutation();
-  // OTP API not available yet - design only. Replace with RTK mutations later.
   const [isVerifyLoading, setIsVerifyLoading] = useState(false);
   const [isResendLoading, setIsResendLoading] = useState(false);
+  const [verifyOtp, { isLoading: isVerifyOtpLoading }] = useVerifyOtpMutation();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -131,9 +132,6 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
 
     try {
       await register({ body }).unwrap();
-
-      // Go to OTP verification instead of straight to login
-      // (to preview the OTP design without signing up, call setMode("otp") from a temp button)
       setOtpEmail(email);
       setName("");
       setEmail("");
@@ -187,20 +185,21 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     setError("");
     setOtpInfo("");
 
-    const code = otp.join("");
-    if (code.length < OTP_LENGTH) {
-      setError(`Please enter the ${OTP_LENGTH}-digit code.`);
-      return;
-    }
+    const body = {
+      email: otpEmail,
+      otp: otp.join(""),
+    };
 
-    // TODO: call verify OTP API here with { email: otpEmail, otp: code }
-    setIsVerifyLoading(true);
-    setTimeout(() => {
-      setIsVerifyLoading(false);
+    try {
+      const response = await verifyOtp({ body }).unwrap();
+      console.log("OTP verified:", response);
+
       setOtp(Array(OTP_LENGTH).fill(""));
-      setLoginEmail(otpEmail);
-      setMode("login");
-    }, 800);
+      onClose?.();
+    } catch (err) {
+      console.error("OTP verification failed:", err);
+      setError(err?.data?.message || "Invalid code. Please try again.");
+    }
   };
 
   const handleResendOtp = async (e) => {
@@ -209,7 +208,6 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     setError("");
     setOtpInfo("");
 
-    // TODO: call resend OTP API here with { email: otpEmail }
     setIsResendLoading(true);
     setTimeout(() => {
       setIsResendLoading(false);
@@ -511,9 +509,11 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                   <button
                     type="submit"
                     className="ctaBtn arw"
-                    disabled={isVerifyLoading || otp.join("").length < OTP_LENGTH}
+                    disabled={
+                      isVerifyOtpLoading || otp.join("").length < OTP_LENGTH
+                    }
                   >
-                    {isVerifyLoading ? "Verifying..." : "Verify"}
+                    {isVerifyOtpLoading ? "Verifying..." : "Verify"}
                   </button>
 
                   <div className="small mt-3">
