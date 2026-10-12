@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "@/components/my-cart/item-info/CartDetails.module.css";
 import Link from "next/link";
 import { ImBin } from "react-icons/im";
@@ -6,6 +6,7 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
 import csImg from "@/assets/images/csImg.jpg";
 import { useRouter } from "next/router";
+import emptyCartImg from "@/assets/images/wishlist.jpg"
 
 const dummyCartItems = [
   {
@@ -23,12 +24,6 @@ const dummyCartItems = [
     },
   },
 ];
-
-const cartTotal = dummyCartItems.reduce(
-  (acc, item) => acc + item.product.selling_price * item.quantity,
-  0,
-);
-
 export const EmptyCart = () => (
   <div className={styles.emptySection}>
     <div className={styles.emptyVisual}>
@@ -52,13 +47,13 @@ export const EmptyCart = () => (
   </div>
 );
 
-const CartRow = ({ item }) => (
+const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => (
   <div className={styles.productCartWrapper}>
     <div className={styles.productCartRow}>
       <div className={styles.productCartInfo}>
         <Image
           src={item.product.thumbnail}
-          alt="product-img"
+          alt={item.product.name}
           className={styles.productImg}
           width={62}
           height={62}
@@ -68,11 +63,17 @@ const CartRow = ({ item }) => (
           <h4 className={styles.productCartName}>
             <Link href="/">{item.product.name}</Link>
           </h4>
+
           <span>SKU: {item.product.sku}</span>
+
           {item.coupon_applicable && (
             <p
               className="fs-12 small"
-              style={{ fontSize: "12px", fontWeight: "400", color: "#2d8d2f" }}
+              style={{
+                fontSize: "12px",
+                fontWeight: "400",
+                color: "#2d8d2f",
+              }}
             >
               {item.coupon_code} (You save ₹ {item.coupon_discount} on this
               product)
@@ -87,16 +88,32 @@ const CartRow = ({ item }) => (
 
       <div className={styles.productCartQuantity}>
         {item.quantity === 1 ? (
-          <button className={styles.productCartDelete}>
+          <button
+            type="button"
+            className={styles.productCartDelete}
+            onClick={() => onDelete(item.id)}
+          >
             <ImBin />
           </button>
         ) : (
-          <button className={styles.productCartDelete}>-</button>
+          <button
+            type="button"
+            className={styles.productCartDelete}
+            onClick={() => onDecrease(item.id)}
+          >
+            -
+          </button>
         )}
 
         <span className={styles.productCartCount}>{item.quantity}</span>
 
-        <button className={styles.productCartPlus}>+</button>
+        <button
+          type="button"
+          className={styles.productCartPlus}
+          onClick={() => onIncrease(item.id)}
+        >
+          +
+        </button>
       </div>
 
       <div className={styles.productCartSubtotal}>
@@ -106,10 +123,43 @@ const CartRow = ({ item }) => (
   </div>
 );
 
-
 const CartDetails = () => {
   const router = useRouter();
   const isCheckoutPage = router.pathname === "/checkout";
+
+  const [cartItems, setCartItems] = useState(dummyCartItems);
+
+  const onIncrease = (id) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item,
+      ),
+    );
+  };
+
+  const onDecrease = (id) => {
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id && item.quantity > 1
+          ? { ...item, quantity: item.quantity - 1 }
+          : item,
+      ),
+    );
+  };
+
+  const onDelete = (id) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  };
+
+  const cartTotal = cartItems.reduce(
+    (acc, item) => acc + item.product.selling_price * item.quantity,
+    0,
+  );
+
+  if (cartItems.length === 0) {
+    return <EmptyCart />;
+  }
+
   return (
     <div className={styles.productInfo}>
       <div className={styles.productCartHeader}>
@@ -119,8 +169,14 @@ const CartDetails = () => {
         <div>Subtotal</div>
       </div>
 
-      {dummyCartItems.map((item) => (
-        <CartRow key={item.id} item={item} />
+      {cartItems.map((item) => (
+        <CartRow
+          key={item.id}
+          item={item}
+          onIncrease={onIncrease}
+          onDecrease={onDecrease}
+          onDelete={onDelete}
+        />
       ))}
 
       {!isCheckoutPage && (
@@ -132,6 +188,7 @@ const CartDetails = () => {
                 <p>₹ {cartTotal}</p>
               </div>
             </div>
+
             <span className={styles.arrow}>
               <MdOutlineKeyboardArrowRight size={30} />
             </span>

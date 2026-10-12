@@ -14,6 +14,7 @@ import {
   useVerifyOtpMutation,
   useResendOtpMutation,
 } from "@/redux/apis/registerApi";
+import Cookies from "js-cookie";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
@@ -138,7 +139,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
 
       showToast(
         response?.message || "Verification code sent to your email",
-        "success"
+        "success",
       );
 
       setOtpEmail(email);
@@ -156,14 +157,38 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   };
 
   // ---------- Login ----------
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       const response = await login({
-        body: { email: loginEmail, password: loginPassword },
+        body: {
+          email: loginEmail,
+          password: loginPassword,
+        },
       }).unwrap();
+
+      const userData = response?.user;
+      const token = response?.token;
+
+      if (userData) {
+        Cookies.set("userData", JSON.stringify(userData), {
+          expires: 7,
+          sameSite: "Lax",
+        });
+      }
+
+      if (token) {
+        Cookies.set("token", token, {
+          expires: 7,
+          sameSite: "Lax",
+        });
+      }
+
+      console.log("User data saved:", userData);
+      console.log("User ID:", userData?.id);
 
       showToast(response?.message || "Logged in successfully", "success");
 
@@ -244,7 +269,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
 
       showToast(
         response?.message || "A new code has been sent to your email",
-        "success"
+        "success",
       );
 
       setSecondsLeft(RESEND_SECONDS);
@@ -267,7 +292,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
 
       showToast(
         response?.message || "Password reset link sent to your email",
-        "success"
+        "success",
       );
 
       setResetEmail("");

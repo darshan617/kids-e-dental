@@ -216,9 +216,115 @@
   }
 }
 
+.avatarBtn {
+  height: 2rem;
+  display: flex;
+  padding: 0;
+  /* width: 2.75rem; */
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 260px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1050;
+  overflow: hidden;
+}
+
+.userDropdownHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.userAvatar {
+  width: 2.5rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #fc0;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.userName {
+  margin: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userMenuList {
+  list-style: none;
+  margin: 0;
+  padding: 8px 0;
+}
+
+.userMenuLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: #222;
+  text-decoration: none;
+}
+
+.userMenuLink:hover {
+  background: #f5f5f5;
+}
+
+.userMenuIcon {
+  display: inline-flex;
+}
+
+.userSignOutWrap {
+  padding: 8px 16px 16px;
+  border-top: 1px solid #eee;
+}
+
+.userSignOutBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.userSignOutBtn:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.userSignOutBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 @media (min-width: 576px) {
   .headBtn,
-  .loginBtn.headBtn {
+  .loginBtn.headBtn,
+  .avatarBtn {
     height: 2.5rem;
   }
 
@@ -262,7 +368,8 @@
   }
 
   .headBtn,
-  .loginBtn.headBtn {
+  .loginBtn.headBtn,
+  .avatarBtn {
     height: 2.5vw;
   }
 
