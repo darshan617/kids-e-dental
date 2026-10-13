@@ -55,16 +55,7 @@ const registerApi = apiSlice.injectEndpoints({
       invalidatesTags: ["register"],
     }),
 
-    addToCart: builder.mutation({
-      query: ({ body }) => {
-        return {
-          url: "/add-to-cart",
-          method: "POST",
-          body: body,
-        };
-      },
-      invalidatesTags: ["register"],
-    }),
+    
   }),
 });
 

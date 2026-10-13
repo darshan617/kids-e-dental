@@ -8,8 +8,9 @@ import CanineMasterKit from "@/assets/images/products/Canine-Master-Kit.jpg";
 import styles from "@/common-component/product-card/ProductCard.module.css";
 import Image from "next/image";
 import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
-import { useAddToCartMutation } from "@/redux/apis/registerApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useAddToCartMutation } from "@/redux/apis/addToCartApi";
+import { useRouter } from "next/router";
 
 export const ProductCard = ({
   id,
@@ -35,6 +36,8 @@ export const ProductCard = ({
   };
 
   const { showToast } = useToast();
+
+  const router = useRouter();
 
   return (
     <div className="order-md-3 position-relative animateThis slideLeft">
@@ -101,7 +104,7 @@ export const ProductCard = ({
           </button>
         </div>
 
-        <a href="" className="stretched-link" title={name}></a>
+        <a onClick={() => router.push("/product-details")} className="stretched-link" title={name}></a>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ import {
   HiOutlineMapPin,
 } from "react-icons/hi2";
 import Link from "next/link";
-
+import { useGetCartQuery } from "@/redux/apis/addToCartApi";
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -148,6 +148,9 @@ const Header = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const router = useRouter();
+
+  const { data: cartData } = useGetCartQuery();
+  const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
 
   const syncUser = () => setUser(readUserDataFromCookie());
 
@@ -371,10 +374,14 @@ const Header = () => {
               <div>
                 <Link
                   href="/my-cart"
-                  className={`${styles.headBtn} rounded-circle`}
+                  className={`${styles.headBtn} rounded-circle position-relative`}
                   title="Cart"
                 >
-                  <span className={`${styles.badge} bgPrimary`}>0</span>
+                  {cartItems.length > 0 && (
+                    <span className={`${styles.badge} bgPrimary`}>
+                      {cartItems.length}
+                    </span>
+                  )}
                   <BsCart size={28} />
                 </Link>
               </div>
