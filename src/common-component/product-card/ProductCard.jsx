@@ -8,6 +8,9 @@ import CanineMasterKit from "@/assets/images/products/Canine-Master-Kit.jpg";
 import styles from "@/common-component/product-card/ProductCard.module.css";
 import Image from "next/image";
 import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useAddToCartMutation } from "@/redux/apis/addToCartApi";
+import { useRouter } from "next/router";
 
 export const ProductCard = ({
   id,
@@ -19,6 +22,23 @@ export const ProductCard = ({
   reviews = "",
   tag = "New",
 }) => {
+  const [addToCart, { isLoading }] = useAddToCartMutation();
+
+  const handleAddToCart = async () => {
+    try {
+      const res = await addToCart({
+        body: { product_id: id, quantity: 1 },
+      }).unwrap();
+      showToast(res?.message || "Added to cart", "success");
+    } catch (error) {
+      showToast(error?.data?.message || "Failed to add to cart", "error");
+    }
+  };
+
+  const { showToast } = useToast();
+
+  const router = useRouter();
+
   return (
     <div className="order-md-3 position-relative animateThis slideLeft">
       <div className={styles.prodItemBox}>
@@ -72,7 +92,10 @@ export const ProductCard = ({
         <div
           className={`${styles.pibBtns} d-flex justify-content-center mt-auto gap-2 p-3 position-relative z-3`}
         >
-          <button className={`${styles.pibBtn} ${styles.cartBtn}`}>
+          <button
+            className={`${styles.pibBtn} ${styles.cartBtn}`}
+            onClick={handleAddToCart}
+          >
             Add to Cart
           </button>
 
@@ -81,7 +104,7 @@ export const ProductCard = ({
           </button>
         </div>
 
-        <a href="" className="stretched-link" title={name}></a>
+        <a onClick={() => router.push("/product-details")} className="stretched-link" title={name}></a>
       </div>
     </div>
   );
@@ -90,7 +113,6 @@ export const ProductCard = ({
 const defaultProducts = Array.from({ length: 4 }, (_, i) => ({
   id: i + 1,
 }));
-
 
 const ProductSlider = ({ products = defaultProducts }) => {
   const swiperRef = useRef(null);
@@ -113,6 +135,7 @@ const ProductSlider = ({ products = defaultProducts }) => {
       rating: item.average_rating ?? 0,
       reviews: item.total_reviews ?? 0,
       tag: item.badge,
+      productId: item?.id,
     }));
   }, [homeResult]);
 

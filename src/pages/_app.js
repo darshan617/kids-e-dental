@@ -9,14 +9,16 @@ import { storeWrapper } from "@/redux/store";
 
 import "@/styles/globals.css";
 import "aos/dist/aos.css";
-
+import { ToastProvider } from "@/custom-hooks/toast/ToastProvider";
 
 export default function App({ Component, pageProps, ...rest }) {
   const { store } = storeWrapper.useWrappedStore(rest);
 
   return (
     <Provider store={store}>
-      <AppContent Component={Component} pageProps={pageProps} />
+      <ToastProvider>
+        <AppContent Component={Component} pageProps={pageProps} />
+      </ToastProvider>
     </Provider>
   );
 }
@@ -24,7 +26,6 @@ export default function App({ Component, pageProps, ...rest }) {
 function AppContent({ Component, pageProps }) {
   const router = useRouter();
 
-  // Bootstrap JS (offcanvas, collapse, etc.) — CSS-only import is not enough
   useEffect(() => {
     void import("bootstrap/dist/js/bootstrap.bundle.min.js");
   }, []);
@@ -68,17 +69,16 @@ function AppContent({ Component, pageProps }) {
   // Scroll animations + sticky header
   useEffect(() => {
     function checkIfInView() {
-      const animationElements = document.querySelectorAll(".animateThis, .animateOne");
+      const animationElements = document.querySelectorAll(
+        ".animateThis, .animateOne",
+      );
       const windowHeight = window.innerHeight;
       const windowTopPosition = window.scrollY || window.pageYOffset;
       const windowBottomPosition = windowTopPosition + windowHeight;
 
       animationElements.forEach((element) => {
-        const elementHeight = element.offsetHeight;
-
         const elementTopPosition =
           element.getBoundingClientRect().top + windowTopPosition + 100;
-        const elementBottomPosition = elementTopPosition + elementHeight;
 
         if (elementTopPosition <= windowBottomPosition) {
           element.classList.add("in-view");
