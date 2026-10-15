@@ -34,7 +34,36 @@ const registerApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["register"],
     }),
+    verifyOtp: builder.mutation({
+      query: ({ body }) => {
+        return {
+          url: "/verify-otp",
+          method: "POST",
+          body: body,
+        };
+      },
+      invalidatesTags: ["register"],
+    }),
+    resendOtp: builder.mutation({
+      query: ({ body }) => {
+        return {
+          url: "/resend-otp",
+          method: "POST",
+          body: body,
+        };
+      },
+      invalidatesTags: ["register"],
+    }),
+
+    
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation, useResetPasswordMutation  } = registerApi;
+export const {
+  useRegisterMutation,
+  useLoginMutation,
+  useResetPasswordMutation,
+  useVerifyOtpMutation,
+  useResendOtpMutation,
+  useAddToCartMutation
+} = registerApi;

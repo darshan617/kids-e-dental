@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
+import Cookies from "js-cookie";
 import Logo from "@/assets/images/KidseDental_Logo.png";
 import distributorImg from "@/assets/images/distributorImg.png";
 import styles from "@/components/Layout/header/Header.module.css";
@@ -11,8 +12,14 @@ import { BsCart, BsSearch } from "react-icons/bs";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { MdHeadsetMic } from "react-icons/md";
 import { IoSearchOutline } from "react-icons/io5";
+import {
+  HiOutlinePower,
+  HiOutlineUser,
+  HiOutlineShoppingBag,
+  HiOutlineMapPin,
+} from "react-icons/hi2";
 import Link from "next/link";
-
+import { useGetCartQuery } from "@/redux/apis/addToCartApi";
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -118,10 +125,76 @@ const TRENDING_SEARCHES = [
   { id: 5, label: "Zirconia Crown", url: "#" },
 ];
 
+const USER_MENU_ITEMS = [
+  { label: "My Profile", href: "/my-profile", icon: HiOutlineUser },
+  { label: "My Orders", href: "/", icon: HiOutlineShoppingBag },
+];
+
+const readUserDataFromCookie = () => {
+  const raw = Cookies.get("userData");
+  if (!raw) return null;
+  try {
+    return JSON.parse(decodeURIComponent(raw));
+  } catch {
+    return null;
+  }
+};
+
 const Header = () => {
   const headerRef = useRef(null);
+  const userMenuRef = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const router = useRouter();
+
+  const { data: cartData } = useGetCartQuery();
+  const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
+
+  const syncUser = () => setUser(readUserDataFromCookie());
+
+  useEffect(() => {
+    syncUser();
+  }, []);
+
+  const isLoggedIn = !!user;
+  const userInitial = user?.name?.trim()?.charAt(0)?.toUpperCase() || "U";
+
+  const toggleUserMenu = () => setUserMenuOpen((prev) => !prev);
+  const closeUserMenu = () => setUserMenuOpen(false);
+
+  const handleLogout = async () => {
+    setIsLogoutLoading(true);
+    try {
+      Cookies.remove("userData");
+      setUser(null);
+      closeUserMenu();
+      router.push("/");
+    } finally {
+      setIsLogoutLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!userMenuOpen) return;
+
+    const onClickOutside = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") setUserMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [userMenuOpen]);
 
   useEffect(() => {
     let ticking = false;
@@ -209,37 +282,106 @@ const Header = () => {
                   <BsSearch size={28} />
                 </button>
               </div>
-              <div>
-                <button
-                  className={`${styles.headBtn} rounded-circle d-sm-none`}
-                  title="Login"
-                  type="button"
-                  onClick={() => setIsAuthOpen(true)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-                  </svg>
-                </button>
-                <button
-                  className={`${styles.loginBtn} ctaBtn d-none d-sm-block`}
-                  title="Login"
-                  type="button"
-                  onClick={() => setIsAuthOpen(true)}
-                >
-                  Login/Signup
-                </button>
+
+              <div className="position-relative" ref={userMenuRef}>
+                {isLoggedIn ? (
+                  <>
+                    <button
+                      className={`${styles.avatarBtn} bgPrimary rounded-circle`}
+                      title={user?.name || "Account"}
+                      type="button"
+                      aria-haspopup="menu"
+                      aria-expanded={userMenuOpen}
+                      onClick={toggleUserMenu}
+                    >
+                      {userInitial}
+                    </button>
+
+                    {userMenuOpen && (
+                      <div className={`${styles.userDropdown}`} role="menu">
+                        <div className={`${styles.userDropdownHeader}`}>
+                          <div className={`${styles.userAvatar} .bgPrimary`}>
+                            <span>{userInitial}</span>
+                          </div>
+                          <p className={`${styles.userName}`}>{user?.name}</p>
+                        </div>
+
+                        <ul className={`${styles.userMenuList}`}>
+                          {USER_MENU_ITEMS.map((item) => {
+                            const Icon = item.icon;
+                            return (
+                              <li key={item.label}>
+                                <Link
+                                  href={item.href || "#"}
+                                  className={`${styles.userMenuLink}`}
+                                  onClick={closeUserMenu}
+                                  role="menuitem"
+                                >
+                                  <span className={`${styles.userMenuIcon}`}>
+                                    <Icon size={20} />
+                                  </span>
+                                  <span>{item.label}</span>
+                                </Link>
+                              </li>
+                            );
+                          })}
+                        </ul>
+
+                        <div className={`${styles.userSignOutWrap}`}>
+                          <button
+                            type="button"
+                            className={`${styles.userSignOutBtn}`}
+                            onClick={handleLogout}
+                            disabled={isLogoutLoading}
+                          >
+                            <HiOutlinePower size={18} />
+                            <span>
+                              {isLogoutLoading ? "Logging out..." : "Logout"}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className={`${styles.headBtn} rounded-circle d-sm-none`}
+                      title="Login"
+                      type="button"
+                      onClick={() => setIsAuthOpen(true)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                      </svg>
+                    </button>
+                    <button
+                      className={`${styles.loginBtn} ctaBtn d-none d-sm-block`}
+                      title="Login"
+                      type="button"
+                      onClick={() => setIsAuthOpen(true)}
+                    >
+                      Login/Signup
+                    </button>
+                  </>
+                )}
               </div>
+
               <div>
                 <Link
                   href="/my-cart"
-                  className={`${styles.headBtn} rounded-circle`}
+                  className={`${styles.headBtn} rounded-circle position-relative`}
                   title="Cart"
                 >
-                  <span className={`${styles.badge} bgPrimary`}>0</span>
+                  {cartItems.length > 0 && (
+                    <span className={`${styles.badge} bgPrimary`}>
+                      {cartItems.length}
+                    </span>
+                  )}
                   <BsCart size={28} />
                 </Link>
               </div>
@@ -436,7 +578,13 @@ const Header = () => {
           </div>
         </div>
       </div>
-      <AuthPopup isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <AuthPopup
+        isOpen={isAuthOpen}
+        onClose={() => {
+          setIsAuthOpen(false);
+          syncUser();
+        }}
+      />
     </header>
   );
 };

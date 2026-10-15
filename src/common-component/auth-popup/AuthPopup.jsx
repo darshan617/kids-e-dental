@@ -6,11 +6,15 @@ import styles from "@/common-component/auth-popup/AuthPopup.module.css";
 import Image from "next/image";
 import aboutMascot from "@/assets/images/aboutMascot.png";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import {
   useLoginMutation,
   useRegisterMutation,
   useResetPasswordMutation,
+  useVerifyOtpMutation,
+  useResendOtpMutation,
 } from "@/redux/apis/registerApi";
+import Cookies from "js-cookie";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
@@ -42,40 +46,39 @@ const ErrorMessage = ({ message }) =>
 const maskEmail = (value = "") => {
   const [user, domain] = value.split("@");
   if (!domain) return value;
-  const visible = user.slice(0, 2);
-  return `${visible}${"*".repeat(Math.max(user.length - 2, 2))}@${domain}`;
+  return `${user.slice(0, 2)}${"*".repeat(Math.max(user.length - 2, 2))}@${domain}`;
 };
 
 const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [mode, setMode] = useState(initialMode);
+  const { showToast } = useToast();
 
+  // api calls
   const [register, { isLoading: isSignupLoading }] = useRegisterMutation();
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
-  const [passwordReset, { isLoading: isResetPasswordLoading }] =
+  const [passwordReset, { isLoading: isResetLoading }] =
     useResetPasswordMutation();
-  // OTP API not available yet - design only. Replace with RTK mutations later.
-  const [isVerifyLoading, setIsVerifyLoading] = useState(false);
-  const [isResendLoading, setIsResendLoading] = useState(false);
+  const [verifyOtp, { isLoading: isVerifyLoading }] = useVerifyOtpMutation();
+  const [resendOtp, { isLoading: isResendLoading }] = useResendOtpMutation();
 
+  // signup fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showSignupPwd, setShowSignupPwd] = useState(false);
 
+  // login fields
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPwd, setShowLoginPwd] = useState(false);
 
+  // forgot password field
   const [resetEmail, setResetEmail] = useState("");
-  const [token, settoken] = useState("");
-  const [resetPassword, setResetPassword] = useState("");
-  const [resetPasswordConfirm, setResetPasswordConfirm] = useState("");
 
-  // OTP state
+  // otp fields
   const [otpEmail, setOtpEmail] = useState("");
   const [otp, setOtp] = useState(Array(OTP_LENGTH).fill(""));
   const [secondsLeft, setSecondsLeft] = useState(0);
-  const [otpInfo, setOtpInfo] = useState("");
   const otpRefs = useRef([]);
 
   const [error, setError] = useState("");
@@ -87,14 +90,14 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     }
   }, [isOpen, initialMode]);
 
-  // Resend countdown
+  // resend countdown
   useEffect(() => {
     if (secondsLeft <= 0) return;
     const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
     return () => clearTimeout(id);
   }, [secondsLeft]);
 
-  // Focus first box when OTP screen opens
+  // focus first otp box when otp screen opens
   useEffect(() => {
     if (mode === "otp") {
       setTimeout(() => otpRefs.current[0]?.focus(), 50);
@@ -109,51 +112,105 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const switchMode = (e, nextMode) => {
     e.preventDefault();
     setError("");
-    setOtpInfo("");
     setMode(nextMode);
   };
 
-  const resetOtpBoxes = () => {
+  const clearOtpBoxes = () => {
     setOtp(Array(OTP_LENGTH).fill(""));
     setTimeout(() => otpRefs.current[0]?.focus(), 0);
   };
 
+  // show api error in the form and as a toast
+  const showError = (err, fallback) => {
+    const message = err?.data?.message || fallback;
+    setError(message);
+    showToast(message, "error");
+  };
+
+  // ---------- Signup ----------
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
 
-    const body = {
-      name,
-      email,
-      password,
-      password_confirmation: password,
-    };
-
     try {
-      await register({ body }).unwrap();
+      const response = await register({
+        body: { name, email, password, password_confirmation: password },
+      }).unwrap();
 
-      // Go to OTP verification instead of straight to login
-      // (to preview the OTP design without signing up, call setMode("otp") from a temp button)
+      showToast(
+        response?.message || "Verification code sent to your email",
+        "success",
+      );
+
       setOtpEmail(email);
       setName("");
       setEmail("");
       setPassword("");
       setShowSignupPwd(false);
-      resetOtpBoxes();
+      clearOtpBoxes();
       setSecondsLeft(RESEND_SECONDS);
       setMode("otp");
-    } catch (error) {
-      console.error("Signup failed:", error);
-      setError(error?.data?.message || "Signup failed. Please try again.");
+    } catch (err) {
+      console.error("Signup failed:", err);
+      showError(err, "Signup failed. Please try again.");
     }
   };
 
+  // ---------- Login ----------
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await login({
+        body: {
+          email: loginEmail,
+          password: loginPassword,
+        },
+      }).unwrap();
+
+      const userData = response?.user;
+      const token = response?.token;
+
+      if (userData) {
+        Cookies.set("userData", JSON.stringify(userData), {
+          expires: 7,
+          sameSite: "Lax",
+        });
+      }
+
+      if (token) {
+        Cookies.set("token", token, {
+          expires: 7,
+          sameSite: "Lax",
+        });
+      }
+
+      console.log("User data saved:", userData);
+      console.log("User ID:", userData?.id);
+
+      showToast(response?.message || "Logged in successfully", "success");
+
+      setLoginEmail("");
+      setLoginPassword("");
+      setShowLoginPwd(false);
+      onClose?.();
+    } catch (err) {
+      console.error("Login failed:", err);
+      showError(err, "Login failed. Please try again.");
+    }
+  };
+
+  // ---------- OTP ----------
   const handleOtpChange = (index, value) => {
     const digit = value.replace(/\D/g, "").slice(-1);
     const next = [...otp];
     next[index] = digit;
     setOtp(next);
     setError("");
+
+    // move to next box
     if (digit && index < OTP_LENGTH - 1) {
       otpRefs.current[index + 1]?.focus();
     }
@@ -176,8 +233,9 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
       .replace(/\D/g, "")
       .slice(0, OTP_LENGTH);
     if (!pasted) return;
+
     const next = Array(OTP_LENGTH).fill("");
-    pasted.split("").forEach((d, i) => (next[i] = d));
+    pasted.split("").forEach((digit, i) => (next[i] = digit));
     setOtp(next);
     otpRefs.current[Math.min(pasted.length, OTP_LENGTH - 1)]?.focus();
   };
@@ -185,85 +243,62 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setError("");
-    setOtpInfo("");
 
-    const code = otp.join("");
-    if (code.length < OTP_LENGTH) {
-      setError(`Please enter the ${OTP_LENGTH}-digit code.`);
-      return;
+    try {
+      const response = await verifyOtp({
+        body: { email: otpEmail, otp: otp.join("") },
+      }).unwrap();
+
+      showToast(response?.message || "Email verified successfully", "success");
+
+      clearOtpBoxes();
+      onClose?.();
+    } catch (err) {
+      console.error("OTP verification failed:", err);
+      showError(err, "Invalid code. Please try again.");
     }
-
-    // TODO: call verify OTP API here with { email: otpEmail, otp: code }
-    setIsVerifyLoading(true);
-    setTimeout(() => {
-      setIsVerifyLoading(false);
-      setOtp(Array(OTP_LENGTH).fill(""));
-      setLoginEmail(otpEmail);
-      setMode("login");
-    }, 800);
   };
 
   const handleResendOtp = async (e) => {
     e.preventDefault();
     if (secondsLeft > 0 || isResendLoading) return;
     setError("");
-    setOtpInfo("");
-
-    // TODO: call resend OTP API here with { email: otpEmail }
-    setIsResendLoading(true);
-    setTimeout(() => {
-      setIsResendLoading(false);
-      setOtpInfo("A new code has been sent to your email.");
-      setSecondsLeft(RESEND_SECONDS);
-      resetOtpBoxes();
-    }, 600);
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    const body = {
-      email: loginEmail,
-      password: loginPassword,
-    };
 
     try {
-      const response = await login({ body }).unwrap();
-      console.log("Login success:", response);
+      const response = await resendOtp({ body: { email: otpEmail } }).unwrap();
 
-      setLoginEmail("");
-      setLoginPassword("");
-      setShowLoginPwd(false);
-      onClose?.();
-    } catch (error) {
-      console.error("Login failed:", error);
-      setError(error?.data?.message || "Login failed. Please try again.");
+      showToast(
+        response?.message || "A new code has been sent to your email",
+        "success",
+      );
+
+      setSecondsLeft(RESEND_SECONDS);
+      clearOtpBoxes();
+    } catch (err) {
+      console.error("Resend OTP failed:", err);
+      showError(err, "Could not resend code. Try again.");
     }
   };
 
+  // ---------- Forgot password ----------
   const handleReset = async (e) => {
     e.preventDefault();
     setError("");
 
-    const body = {
-      token: token,
-      email: resetEmail,
-      password: resetPassword,
-      password_confirmation: resetPasswordConfirm,
-    };
-
     try {
-      const response = await passwordReset({ body }).unwrap();
-      console.log("reset success:", response);
+      const response = await passwordReset({
+        body: { email: resetEmail },
+      }).unwrap();
+
+      showToast(
+        response?.message || "Password reset link sent to your email",
+        "success",
+      );
 
       setResetEmail("");
-      settoken("");
-      setResetPassword("");
-      setResetPasswordConfirm("");
-    } catch (error) {
-      console.error("reset failed:", error);
-      setError(error?.data?.message || "reset failed. Please try again.");
+    } catch (err) {
+      console.error("Reset failed:", err);
+      showError(err, "Reset failed. Please try again.");
     }
   };
 
@@ -285,6 +320,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
             <CloseIcon />
           </button>
 
+          {/* ---------- LOGIN ---------- */}
           {isLogin && (
             <>
               <h3 className="sectionHead mb-4 d-inline-flex align-items-center gap-3">
@@ -326,7 +362,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                       aria-label={
                         showLoginPwd ? "Hide password" : "Show password"
                       }
-                      onClick={() => setShowLoginPwd((prev) => !prev)}
+                      onClick={() => setShowLoginPwd(!showLoginPwd)}
                     >
                       {showLoginPwd ? <FaRegEye /> : <FaRegEyeSlash />}
                     </button>
@@ -370,6 +406,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
             </>
           )}
 
+          {/* ---------- SIGNUP ---------- */}
           {isSignup && (
             <>
               <h3 className="sectionHead mb-4 d-inline-flex align-items-center gap-3">
@@ -423,7 +460,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                       aria-label={
                         showSignupPwd ? "Hide password" : "Show password"
                       }
-                      onClick={() => setShowSignupPwd((prev) => !prev)}
+                      onClick={() => setShowSignupPwd(!showSignupPwd)}
                     >
                       {showSignupPwd ? <FaRegEye /> : <FaRegEyeSlash />}
                     </button>
@@ -457,6 +494,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
             </>
           )}
 
+          {/* ---------- VERIFY OTP ---------- */}
           {isOtp && (
             <>
               <h3 className="sectionHead mb-2 d-inline-flex align-items-center gap-3">
@@ -501,17 +539,14 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                 </div>
 
                 <ErrorMessage message={error} />
-                {otpInfo && (
-                  <div className="col-12 text-success small" role="status">
-                    {otpInfo}
-                  </div>
-                )}
 
                 <div className="col-12 text-center">
                   <button
                     type="submit"
                     className="ctaBtn arw"
-                    disabled={isVerifyLoading || otp.join("").length < OTP_LENGTH}
+                    disabled={
+                      isVerifyLoading || otp.join("").length < OTP_LENGTH
+                    }
                   >
                     {isVerifyLoading ? "Verifying..." : "Verify"}
                   </button>
@@ -555,13 +590,17 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
             </>
           )}
 
+          {/* ---------- FORGOT PASSWORD ---------- */}
           {isForgot && (
             <>
               <h3 className="sectionHead mb-4 d-inline-flex align-items-center gap-3">
                 Reset Password
               </h3>
 
-              <form className={`${styles.formFormat} row g-4`}>
+              <form
+                className={`${styles.formFormat} row g-4`}
+                onSubmit={handleReset}
+              >
                 <div className="col-12">
                   Enter your registered email id to receive a password reset
                   link.
@@ -573,6 +612,8 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                     name="email"
                     id="forgotEmail"
                     placeholder="Email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
                     required
                   />
                 </div>
@@ -583,9 +624,9 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                   <button
                     type="submit"
                     className="ctaBtn arw"
-                    onClick={handleReset}
+                    disabled={isResetLoading}
                   >
-                    Continue
+                    {isResetLoading ? "Sending..." : "Continue"}
                   </button>
                   <TermsNote />
                 </div>

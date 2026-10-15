@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "@/components/my-cart/item-info/CartDetails.module.css";
 import Link from "next/link";
 import { ImBin } from "react-icons/im";
@@ -6,28 +6,7 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
 import csImg from "@/assets/images/csImg.jpg";
 import { useRouter } from "next/router";
-
-const dummyCartItems = [
-  {
-    id: 1,
-    quantity: 1,
-    coupon_applicable: true,
-    coupon_code: "SAVE10",
-    coupon_discount: 50,
-    product: {
-      name: "Organic Basmati Rice 5kg",
-      slug: "organic-basmati-rice-5kg",
-      sku: "RICE-001",
-      selling_price: 499,
-      thumbnail: csImg,
-    },
-  },
-];
-
-const cartTotal = dummyCartItems.reduce(
-  (acc, item) => acc + item.product.selling_price * item.quantity,
-  0,
-);
+import emptyCartImg from "@/assets/images/wishlist.jpg";
 
 export const EmptyCart = () => (
   <div className={styles.emptySection}>
@@ -45,71 +24,143 @@ export const EmptyCart = () => (
     <div className={styles.emptyContent}>
       <h2 className={styles.emptyTitle}>Your Cart is empty!</h2>
       <p className={styles.emptyText}>Add product and proceed</p>
-      <Link href="/product-category/all" className={styles.shopBtn}>
+      <Link href="/product-category/all" className='ctaBtn'>
         CONTINUE SHOPPING
       </Link>
     </div>
   </div>
 );
 
-const CartRow = ({ item }) => (
-  <div className={styles.productCartWrapper}>
-    <div className={styles.productCartRow}>
-      <div className={styles.productCartInfo}>
-        <Image
-          src={item.product.thumbnail}
-          alt="product-img"
-          className={styles.productImg}
-          width={62}
-          height={62}
-        />
+const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
+  const product = item.product ?? {};
 
-        <div className={styles.productCartContent}>
-          <h4 className={styles.productCartName}>
-            <Link href="/">{item.product.name}</Link>
-          </h4>
-          <span>SKU: {item.product.sku}</span>
-          {item.coupon_applicable && (
-            <p
-              className="fs-12 small"
-              style={{ fontSize: "12px", fontWeight: "400", color: "#2d8d2f" }}
+  return (
+    <div className={styles.productCartWrapper}>
+      <div className={styles.productCartRow}>
+        <div className={styles.productCartInfo}>
+          <Image
+            src={product.thumbnail || csImg}
+            alt={product.name || "Product"}
+            className={styles.productImg}
+            width={62}
+            height={62}
+          />
+
+          <div className={styles.productCartContent}>
+            <h4 className={styles.productCartName}>
+              <Link href={`/product/${product.slug || ""}`}>
+                {product.name || "Product"}
+              </Link>
+            </h4>
+
+            <span>SKU: {product.sku || "N/A"}</span>
+
+            {item.coupon_applicable && (
+              <p
+                className="fs-12 small"
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "400",
+                  color: "#2d8d2f",
+                }}
+              >
+                {item.coupon_code} (You save ₹ {item.coupon_discount} on this
+                product)
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.productCartPrice}>
+          ₹ {product.selling_price ?? 0}
+        </div>
+
+        <div className={styles.productCartQuantity}>
+          {item.quantity === 1 ? (
+            <button
+              type="button"
+              className={styles.productCartDelete}
+              onClick={() => onDelete(item.id)}
             >
-              {item.coupon_code} (You save ₹ {item.coupon_discount} on this
-              product)
-            </p>
+              <ImBin />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className={styles.productCartDelete}
+              onClick={() => onDecrease(item.id)}
+            >
+              -
+            </button>
           )}
+
+          <span className={styles.productCartCount}>{item.quantity}</span>
+
+          <button
+            type="button"
+            className={styles.productCartPlus}
+            onClick={() => onIncrease(item.id)}
+          >
+            +
+          </button>
+        </div>
+
+        <div className={styles.productCartSubtotal}>
+          <h5>₹ {(Number(product.selling_price) || 0) * item.quantity}</h5>
         </div>
       </div>
-
-      <div className={styles.productCartPrice}>
-        ₹ {item.product.selling_price}
-      </div>
-
-      <div className={styles.productCartQuantity}>
-        {item.quantity === 1 ? (
-          <button className={styles.productCartDelete}>
-            <ImBin />
-          </button>
-        ) : (
-          <button className={styles.productCartDelete}>-</button>
-        )}
-
-        <span className={styles.productCartCount}>{item.quantity}</span>
-
-        <button className={styles.productCartPlus}>+</button>
-      </div>
-
-      <div className={styles.productCartSubtotal}>
-        <h5>₹ {item.product.selling_price * item.quantity}</h5>
-      </div>
     </div>
-  </div>
-);
+  );
+};
 
-
-const CartDetails = () => {
+const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
   const router = useRouter();
   const isCheckoutPage = router.pathname === "/checkout";
+
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    const items = cartData?.data;
+
+    if (Array.isArray(items)) {
+      setCartItems(
+        items.map((item) => ({
+          ...item,
+          quantity: Number(item.quantity) || 1,
+          product: {
+            ...item.product,
+            thumbnail: item.product?.thumbnail || csImg,
+          },
+        })),
+      );
+    }
+  }, [cartData]);
+
+  const onIncrease = (id, currentQty) => {
+    handleUpdateCart(id, currentQty + 1);
+  };
+
+  const onDecrease = (id, currentQty) => {
+    if (currentQty > 1) {
+      handleUpdateCart(id, currentQty - 1);
+    }
+  };
+
+  // FIXED: Call the delete API handler passed down from the parent
+  const onDelete = (id) => {
+    handleRemoveCart(id);
+  };
+
+  const cartTotal = cartItems.reduce(
+    (acc, item) =>
+      acc + (Number(item.product?.selling_price) || 0) * item.quantity,
+    0,
+  );
+
+  if (cartItems.length === 0) {
+    return <EmptyCart />;
+  }
+
   return (
     <div className={styles.productInfo}>
       <div className={styles.productCartHeader}>
@@ -119,8 +170,14 @@ const CartDetails = () => {
         <div>Subtotal</div>
       </div>
 
-      {dummyCartItems.map((item) => (
-        <CartRow key={item.id} item={item} />
+      {cartItems.map((item) => (
+        <CartRow
+          key={item.id}
+          item={item}
+          onIncrease={() => onIncrease(item.id, item.quantity)}
+          onDecrease={() => onDecrease(item.id, item.quantity)}
+          onDelete={() => onDelete(item.id)}
+        />
       ))}
 
       {!isCheckoutPage && (
@@ -132,6 +189,7 @@ const CartDetails = () => {
                 <p>₹ {cartTotal}</p>
               </div>
             </div>
+
             <span className={styles.arrow}>
               <MdOutlineKeyboardArrowRight size={30} />
             </span>
