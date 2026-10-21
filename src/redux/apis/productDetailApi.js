@@ -2,14 +2,15 @@ import { apiSlice } from "../apiSlice";
 
 const productDetailApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getProductDetails: builder.query({
-      query: ({ slug }) => ({
+    productDetails: builder.mutation({
+      query: ({ slug, body }) => ({
         url: `/product/${slug}`,
-        method: "GET",
+        method: "POST",
+        body: body
       }),
-      providesTags: ["products"],
+      invalidatesTags: ["products"],
     }),
   }),
 });
 
-export const { useGetProductDetailsQuery } = productDetailApi;
+export const { useProductDetailsMutation } = productDetailApi;

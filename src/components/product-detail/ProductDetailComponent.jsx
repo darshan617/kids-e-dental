@@ -10,7 +10,7 @@ const ProductDetailComponent = ({
   isError,
   error,
 }) => {
-  const product = productDetails?.data;
+  const product = productDetails;
 
   let content;
 

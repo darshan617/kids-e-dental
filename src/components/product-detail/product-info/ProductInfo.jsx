@@ -39,11 +39,7 @@ const ProductInfo = ({ product }) => {
   const [deliveryMsg, setDeliveryMsg] = useState(null);
 
   const gallery = useMemo(
-    () => [
-      ...new Set(
-        [product?.thumbnail, ...(product?.gallery ?? [])].filter(Boolean),
-      ),
-    ],
+    () => [...new Set((product?.gallery ?? []).filter(Boolean))],
     [product],
   );
 
