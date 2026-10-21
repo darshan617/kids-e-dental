@@ -42,7 +42,7 @@ export const apiSlice = createApi({
     }
   },
 
-  tagTypes: ["registerApi", "categoryApi"],
+  tagTypes: ["registerApi", "categoryApi", "addToWishlistApi", "products"],
 
   overrideExisting: true,
 

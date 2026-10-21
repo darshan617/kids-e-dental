@@ -32,15 +32,15 @@ export const EmptyCart = () => (
 );
 
 const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
-  const product = item.product ?? {};
+  const product = item?.product ?? {};
 
   return (
     <div className={styles.productCartWrapper}>
       <div className={styles.productCartRow}>
         <div className={styles.productCartInfo}>
           <Image
-            src={product.thumbnail || csImg}
-            alt={product.name || "Product"}
+            src={product?.thumbnail || csImg}
+            alt={product?.name || "Product"}
             className={styles.productImg}
             width={62}
             height={62}
@@ -48,12 +48,12 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
 
           <div className={styles.productCartContent}>
             <h4 className={styles.productCartName}>
-              <Link href={`/product/${product.slug || ""}`}>
-                {product.name || "Product"}
+              <Link href={`/product/${product?.slug || ""}`}>
+                {product?.name || "Product"}
               </Link>
             </h4>
 
-            <span>SKU: {product.sku || "N/A"}</span>
+            <span>SKU: {product?.sku || "N/A"}</span>
 
             {item.coupon_applicable && (
               <p
@@ -64,7 +64,7 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
                   color: "#2d8d2f",
                 }}
               >
-                {item.coupon_code} (You save ₹ {item.coupon_discount} on this
+                {item?.coupon_code} (You save ₹ {item?.coupon_discount} on this
                 product)
               </p>
             )}
@@ -72,15 +72,15 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
         </div>
 
         <div className={styles.productCartPrice}>
-          ₹ {product.selling_price ?? 0}
+          ₹ {product?.selling_price ?? 0}
         </div>
 
         <div className={styles.productCartQuantity}>
-          {item.quantity === 1 ? (
+          {item?.quantity === 1 ? (
             <button
               type="button"
               className={styles.productCartDelete}
-              onClick={() => onDelete(item.id)}
+              onClick={() => onDelete(item?.id)}
             >
               <ImBin />
             </button>
@@ -88,25 +88,25 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
             <button
               type="button"
               className={styles.productCartDelete}
-              onClick={() => onDecrease(item.id)}
+              onClick={() => onDecrease(item?.id)}
             >
               -
             </button>
           )}
 
-          <span className={styles.productCartCount}>{item.quantity}</span>
+          <span className={styles.productCartCount}>{item?.quantity}</span>
 
           <button
             type="button"
             className={styles.productCartPlus}
-            onClick={() => onIncrease(item.id)}
+            onClick={() => onIncrease(item?.id)}
           >
             +
           </button>
         </div>
 
         <div className={styles.productCartSubtotal}>
-          <h5>₹ {(Number(product.selling_price) || 0) * item.quantity}</h5>
+          <h5>₹ {(Number(product?.selling_price) || 0) * item?.quantity}</h5>
         </div>
       </div>
     </div>
@@ -126,10 +126,10 @@ const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
       setCartItems(
         items.map((item) => ({
           ...item,
-          quantity: Number(item.quantity) || 1,
+          quantity: Number(item?.quantity) || 1,
           product: {
             ...item.product,
-            thumbnail: item.product?.thumbnail || csImg,
+            thumbnail: item?.product?.thumbnail || csImg,
           },
         })),
       );
@@ -146,18 +146,17 @@ const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
     }
   };
 
-  // FIXED: Call the delete API handler passed down from the parent
   const onDelete = (id) => {
     handleRemoveCart(id);
   };
 
-  const cartTotal = cartItems.reduce(
+  const cartTotal = cartItems?.reduce(
     (acc, item) =>
-      acc + (Number(item.product?.selling_price) || 0) * item.quantity,
+      acc + (Number(item?.product?.selling_price) || 0) * item?.quantity,
     0,
   );
 
-  if (cartItems.length === 0) {
+  if (cartItems?.length === 0) {
     return <EmptyCart />;
   }
 
@@ -170,13 +169,13 @@ const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
         <div>Subtotal</div>
       </div>
 
-      {cartItems.map((item) => (
+      {cartItems?.map((item) => (
         <CartRow
           key={item.id}
           item={item}
-          onIncrease={() => onIncrease(item.id, item.quantity)}
-          onDecrease={() => onDecrease(item.id, item.quantity)}
-          onDelete={() => onDelete(item.id)}
+          onIncrease={() => onIncrease(item?.id, item?.quantity)}
+          onDecrease={() => onDecrease(item?.id, item?.quantity)}
+          onDelete={() => onDelete(item?.id)}
         />
       ))}
 
