@@ -57,8 +57,8 @@ const PRODUCT_COLUMNS = [
       id: "restorative",
       label: "Restorative",
       products: [
-        { id: 1, label: "Bioflx", url: "" },
-        { id: 2, label: "Kids-e-Crown®", url: "" },
+        { id: 1, label: "Bioflx", url: "/bioflix" },
+        { id: 2, label: "Kids-e-Crown®", url: "/kids-e-Crown" },
         { id: 3, label: "Kids-e-Restore", url: "" },
         { id: 4, label: "Kids-e-SSC", url: "" },
       ],
@@ -489,7 +489,7 @@ const Header = () => {
                                         <ul className="row g-1">
                                           {category?.products?.map((product) => (
                                             <li key={product?.id}>
-                                              <Link href={product?.url || "#"}>
+                                              <Link href={`product-category/${product?.url }`|| "#"}>
                                                 {product?.label}
                                               </Link>
                                             </li>

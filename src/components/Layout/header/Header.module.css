@@ -5,22 +5,28 @@
   transition: box-shadow 0.35s ease;
 }
 :global(.stick) .pageHeader {
+  /* top: var(--hTH); */
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
 .headTop {
   overflow: hidden;
-  transform: translateY(0);
+  max-height: 100px;
   opacity: 1;
+  transform: translateY(0);
   transition:
-    transform 0.35s ease,
-    opacity 0.35s ease;
-  will-change: transform;
+    max-height 0.4s ease,
+    padding 0.4s ease,
+    opacity 0.3s ease,
+    transform 0.4s ease;
+  will-change: max-height, opacity;
 }
 :global(.stick) .headTop {
-  transform: translateY(-100%);
+  max-height: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   opacity: 0;
-  position: absolute;
+  transform: translateY(-100%);
   pointer-events: none;
 }
 
@@ -440,10 +446,19 @@
   }
 }
 
-@media (min-width: 992px) {
+@media (min-width: 992px) and (hover: hover) {
   .pageHeader {
     font-size: clamp(0.75rem, calc(0.333rem + 0.556vw), 1rem);
   }
+
+  /* :global(.stick) .pageHeader:hover .headTop {
+    max-height: 100px;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  } */
 
   .headTopLinks a {
     & svg {
