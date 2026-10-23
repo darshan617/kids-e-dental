@@ -237,7 +237,7 @@ const KitSystem = () => {
                   <div className="mt-auto">
                     <button
                       className="ctaBtn"
-                      onClick={() => router.push(`/faqs/f`)}
+                      onClick={() => router.push(`/faqs/${router?.query?.slug}`)}
                     >
                       View FAQs
                     </button>
@@ -270,6 +270,7 @@ const KitSystem = () => {
                       data-src="video/bioflx_video.mp4"
                       data-fancybox
                       data-aspect-ratio="16/9"
+                      onClick={() => router.push(`/toturial/${router?.query?.slug}`)}
                     >
                       View Tutorials
                     </button>

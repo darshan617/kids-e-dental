@@ -77,3 +77,38 @@
     max-height: 4rem;
   }
 }
+
+.crVideoItem {
+  height: 100%;
+  border: 1px solid #ddd;
+  position: relative;
+  background: #fff;
+  &:hover {
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+}
+.crVideoHead {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.crVideoBox {
+  border: 0.3rem solid #fff;
+  overflow: hidden;
+  position: relative;
+  &:after {
+    content: "";
+    width: 3rem;
+    height: 3rem;
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='%23000' viewBox='0 0 16 16'><path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814z'/></svg>");
+    filter: drop-shadow(0 0 10px #fff);
+  }
+}
