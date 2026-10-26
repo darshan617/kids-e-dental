@@ -1,43 +1,146 @@
+"use client";
+
 import React, { useEffect, useMemo, useRef } from "react";
 import Swiper from "swiper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
 import CanineMasterKit from "@/assets/images/products/Canine-Master-Kit.jpg";
 import styles from "@/common-component/product-card/ProductCard.module.css";
-import Image from "next/image";
 import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useAddToCartMutation } from "@/redux/apis/addToCartApi";
-import { useRouter } from "next/router";
+import { useAddToWishlistMutation } from "@/redux/apis/addToWishlistApi";
+
+const PRODUCT_ROUTE = "/product-details";
+
+const IMAGE_BASE = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "";
+
+const toImageUrl = (path) => {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${IMAGE_BASE.replace(/\/$/, "")}/${String(path).replace(/^\//, "")}`;
+};
+
+const formatPrice = (n) =>
+  new Intl.NumberFormat("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(n) || 0);
+
+const getUserData = () => {
+  try {
+    const raw = Cookies?.get("userData");
+    return raw ? JSON?.parse(decodeURIComponent(raw)) : null;
+  } catch {
+    return null;
+  }
+};
+
+const normalizeProduct = (item) => {
+  const sellingPrice = Number(item?.selling_price ?? item?.price ?? 0);
+  const mrp = Number(item?.price ?? 0);
+
+  const firstGallery = Array.isArray(item?.gallery) ? item?.gallery[0] : null;
+  const galleryUrl =
+    typeof firstGallery === "string"
+      ? firstGallery
+      : firstGallery?.url || firstGallery?.image || firstGallery?.path;
+
+  return {
+    id: item?.id,
+    slug: item?.slug,
+    name: item?.name,
+    image: toImageUrl(item?.thumbnail || galleryUrl),
+    price: sellingPrice,
+    oldPrice: mrp > sellingPrice ? mrp : null,
+    rating: item?.average_rating ?? item?.rating ?? 0,
+    reviews: item?.total_reviews ?? item?.review_count ?? 0,
+    tag: item?.badge,
+    isVariable: Boolean(item.is_variable || item.product_type === "variable"),
+  };
+};
 
 export const ProductCard = ({
   id,
+  slug,
   name = "",
   image,
-  price = "",
-  oldPrice = "",
-  rating = "",
-  reviews = "",
+  price = 0,
+  oldPrice = null,
+  rating = 0,
+  reviews = 0,
   tag = "New",
+  isVariable = false,
 }) => {
-  const [addToCart, { isLoading }] = useAddToCartMutation();
+  const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
+  const [addToWishlist, { isLoading: isWishlistLoading }] =
+    useAddToWishlistMutation();
+  const { showToast } = useToast();
+  const router = useRouter();
 
-  const handleAddToCart = async () => {
+  const detailsHref = slug ? `${PRODUCT_ROUTE}/${slug}` : "#";
+
+  const addItem = async () => {
+    if (isVariable) {
+      router.push(detailsHref);
+      return false;
+    }
+
     try {
       const res = await addToCart({
         body: { product_id: id, quantity: 1 },
       }).unwrap();
       showToast(res?.message || "Added to cart", "success");
+      return true;
     } catch (error) {
       showToast(error?.data?.message || "Failed to add to cart", "error");
+      return false;
     }
   };
 
-  const { showToast } = useToast();
+  const handleAddToCart = () => addItem();
 
-  const router = useRouter();
+  const handleBuyNow = async () => {
+    const ok = await addItem();
+    if (ok) router.push("/cart");
+  };
+
+  const handleAddToWishlist = async () => {
+    const userData = getUserData();
+    if (!userData) {
+      showToast("Please log in to use the wishlist", "error");
+      return;
+    }
+
+    const res = await addToWishlist({
+      body: {
+        user_id: userData?.id,
+        product_id: id,
+        variant_id: null,
+      },
+    });
+
+    if (res.error) {
+      showToast(
+        res.error?.data?.message || "Failed to add to wishlist",
+        "error",
+      );
+      return;
+    }
+
+    if (res?.data?.success || res?.data?.status) {
+      showToast(res?.data?.message || "Added to wishlist", "success");
+    } else {
+      showToast(res?.data?.message || "Failed to add to wishlist", "error");
+    }
+  };
 
   return (
     <div className="order-md-3 position-relative animateThis slideLeft">
@@ -50,10 +153,13 @@ export const ProductCard = ({
 
             <div className={`${styles.pibWL} align-self-end`}>
               <button
+                onClick={handleAddToWishlist}
+                disabled={isWishlistLoading}
                 type="button"
                 data-bs-toggle="button"
                 className={styles.wishlistBtn}
                 title="Add to Wishlist"
+                aria-label="Add to Wishlist"
               ></button>
             </div>
           </div>
@@ -81,10 +187,12 @@ export const ProductCard = ({
           <div
             className={`${styles.pibPriceBox} d-flex align-items-center gap-2`}
           >
-            <strong className="pibProdPrice">₹ {price}</strong>
+            <strong className="pibProdPrice">₹ {formatPrice(price)}</strong>
 
             {oldPrice && (
-              <del className="pibStikePrice opacity-50">₹ {oldPrice}</del>
+              <del className="pibStikePrice opacity-50">
+                ₹ {formatPrice(oldPrice)}
+              </del>
             )}
           </div>
         </div>
@@ -93,53 +201,49 @@ export const ProductCard = ({
           className={`${styles.pibBtns} d-flex justify-content-center mt-auto gap-2 p-3 position-relative z-3`}
         >
           <button
+            type="button"
             className={`${styles.pibBtn} ${styles.cartBtn}`}
             onClick={handleAddToCart}
+            disabled={isCartLoading}
           >
-            Add to Cart
+            {isVariable ? "Select Options" : "Add to Cart"}
           </button>
 
-          <button className={`${styles.pibBtn} ${styles.buyBtn}`}>
+          <button
+            type="button"
+            className={`${styles.pibBtn} ${styles.buyBtn}`}
+            onClick={handleBuyNow}
+            disabled={isCartLoading}
+          >
             Buy Now
           </button>
         </div>
 
-        <a onClick={() => router.push("/product-details")} className="stretched-link" title={name}></a>
+        <Link href={detailsHref} className="stretched-link" title={name} />
       </div>
     </div>
   );
 };
 
-const defaultProducts = Array.from({ length: 4 }, (_, i) => ({
-  id: i + 1,
-}));
-
-const ProductSlider = ({ products = defaultProducts }) => {
+const ProductSlider = ({ products }) => {
   const swiperRef = useRef(null);
   const prevRef = useRef(null);
   const nextRef = useRef(null);
   const paginationRef = useRef(null);
 
-  const { data: homeResult } = useGetHomeDataQuery();
+  const hasCustomProducts = Array.isArray(products) && products.length > 0;
 
-  const featuredProducts = useMemo(() => {
-    const productsList = homeResult?.data?.featured_products;
-    if (!Array.isArray(productsList) || productsList.length === 0) return [];
+  const { data: homeResult } = useGetHomeDataQuery(undefined, {
+    skip: hasCustomProducts,
+  });
 
-    return productsList.map((item) => ({
-      id: item.id,
-      name: item.name,
-      image: item.thumbnail,
-      price: item.selling_price ?? item.price,
-      oldPrice: item.selling_price ? item.price : null,
-      rating: item.average_rating ?? 0,
-      reviews: item.total_reviews ?? 0,
-      tag: item.badge,
-      productId: item?.id,
-    }));
-  }, [homeResult]);
+  const items = useMemo(() => {
+    const source = hasCustomProducts
+      ? products
+      : homeResult?.data?.featured_products;
 
-  const items = featuredProducts.length > 0 ? featuredProducts : products;
+    return Array.isArray(source) ? source.map(normalizeProduct) : [];
+  }, [hasCustomProducts, products, homeResult]);
 
   useEffect(() => {
     if (!swiperRef.current || items.length === 0) return;
@@ -168,12 +272,14 @@ const ProductSlider = ({ products = defaultProducts }) => {
     return () => swiper.destroy(true, true);
   }, [items]);
 
+  if (items?.length === 0) return null;
+
   return (
     <div className="position-relative">
       <div className="productSlider swiper" ref={swiperRef}>
         <div className="swiper-wrapper">
-          {items.map((product, index) => (
-            <div className="swiper-slide" key={product.id ?? index}>
+          {items?.map((product) => (
+            <div className="swiper-slide" key={product?.id}>
               <ProductCard {...product} />
             </div>
           ))}

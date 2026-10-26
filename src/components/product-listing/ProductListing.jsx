@@ -1,5 +1,6 @@
+"use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import { useState } from "react";
 import distributorImg from "@/assets/images/distributorImg.png";
 import styles from "@/components/product-listing/ProductListing.module.css";
 import { ProductCard } from "@/common-component/product-card/ProductCard";
@@ -33,27 +34,8 @@ const sortOptions = [
   { value: "brand-desc", label: "Brands (Z-A)" },
 ];
 
-const closeIconPath =
-  "M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z";
-
-const formatCategory = (category) => ({
-  id: category.id,
-  label: category.name,
-  subs: (category.subcategories ?? []).map((sub) => ({
-    id: String(sub.id),
-    label: sub.name,
-  })),
-});
-
 function Pagination({ currentPage, totalPages, onChange }) {
   if (totalPages <= 1) return null;
-
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-  const goToPage = (event, page) => {
-    event.preventDefault();
-    if (page >= 1 && page <= totalPages) onChange(page);
-  };
 
   return (
     <nav aria-label="Page navigation">
@@ -65,13 +47,16 @@ function Pagination({ currentPage, totalPages, onChange }) {
             className="page-link"
             href="#"
             aria-label="Previous"
-            onClick={(e) => goToPage(e, currentPage - 1)}
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage > 1) onChange(currentPage - 1);
+            }}
           >
             <FaChevronLeft />
           </a>
         </li>
 
-        {pages.map((page) => (
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
           <li
             key={page}
             className={`page-item ${currentPage === page ? "active" : ""}`}
@@ -80,7 +65,10 @@ function Pagination({ currentPage, totalPages, onChange }) {
             <a
               className="page-link"
               href="#"
-              onClick={(e) => goToPage(e, page)}
+              onClick={(e) => {
+                e.preventDefault();
+                onChange(page);
+              }}
             >
               {page}
             </a>
@@ -88,13 +76,18 @@ function Pagination({ currentPage, totalPages, onChange }) {
         ))}
 
         <li
-          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+          className={`page-item ${
+            currentPage === totalPages ? "disabled" : ""
+          }`}
         >
           <a
             className="page-link"
             href="#"
             aria-label="Next"
-            onClick={(e) => goToPage(e, currentPage + 1)}
+            onClick={(e) => {
+              e.preventDefault();
+              if (currentPage < totalPages) onChange(currentPage + 1);
+            }}
           >
             <FaChevronRight />
           </a>
@@ -167,6 +160,7 @@ function CategoryFilter({
                   checked={isOpen}
                   onChange={() => onSelectCategory(isOpen ? null : category.id)}
                 />
+
                 <label
                   className="form-check-label"
                   htmlFor={`category_${category.id}`}
@@ -207,14 +201,15 @@ function PriceFilter() {
   const minPercent = (minPrice / MAX_PRICE) * 100;
   const maxPercent = (maxPrice / MAX_PRICE) * 100;
 
-  const trackStyle = {
-    background: `linear-gradient(to right, #eee ${minPercent}%, #ffcc00 ${minPercent}%, #ffcc00 ${maxPercent}%, #eee ${maxPercent}%)`,
-  };
-
   return (
     <div className="row g-0 mb-4">
       <div className={`${styles.priceSliderContainer} col-12 mb-0`}>
-        <div className={styles.sliderTrack} style={trackStyle} />
+        <div
+          className={styles.sliderTrack}
+          style={{
+            background: `linear-gradient(to right, #eee ${minPercent}%, #ffcc00 ${minPercent}%, #ffcc00 ${maxPercent}%, #eee ${maxPercent}%)`,
+          }}
+        />
 
         <input
           type="range"
@@ -226,6 +221,7 @@ function PriceFilter() {
             setMinPrice(Math.min(+e.target.value, maxPrice - MIN_GAP))
           }
         />
+
         <input
           type="range"
           className={styles.priceRange}
@@ -247,46 +243,6 @@ function PriceFilter() {
 function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
   const [selectedCategory, setSelectedCategory] = useState(applied.category);
   const [selectedSubs, setSelectedSubs] = useState(applied.subs);
-
-  const handleSelectCategory = (categoryId) => {
-    setSelectedCategory(categoryId);
-    setSelectedSubs([]); 
-  };
-
-  const handleToggleSub = (subId) => {
-    setSelectedSubs(selectedSubs.includes(subId) ? [] : [subId]);
-  };
-
-  const handleClearAll = () => {
-    setSelectedCategory(null);
-    setSelectedSubs([]);
-    onApply({ category: null, subs: [] });
-  };
-
-  const handleApply = () => {
-    onApply({ category: selectedCategory, subs: selectedSubs });
-  };
-
-  let categoryContent;
-  if (isLoading) {
-    categoryContent = (
-      <p className="small text-muted mb-0">Loading categories...</p>
-    );
-  } else if (isError) {
-    categoryContent = (
-      <p className="small text-danger mb-0">Failed to load categories.</p>
-    );
-  } else {
-    categoryContent = (
-      <CategoryFilter
-        categories={categories}
-        selectedCategory={selectedCategory}
-        selectedSubs={selectedSubs}
-        onSelectCategory={handleSelectCategory}
-        onToggleSub={handleToggleSub}
-      />
-    );
-  }
 
   return (
     <div
@@ -313,7 +269,7 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
             fill="currentColor"
             viewBox="0 0 16 16"
           >
-            <path d={closeIconPath} />
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
           </svg>
         </button>
       </div>
@@ -322,7 +278,26 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
         <div className={`${styles.filterBox} mb-3`}>
           <ul className="accdFilters clearfix" id="filterWrap">
             <FilterSection id="fltr_Category" title="Categories" open>
-              {categoryContent}
+              {isLoading ? (
+                <p className="small text-muted mb-0">Loading categories...</p>
+              ) : isError ? (
+                <p className="small text-danger mb-0">
+                  Failed to load categories.
+                </p>
+              ) : (
+                <CategoryFilter
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  selectedSubs={selectedSubs}
+                  onSelectCategory={(categoryId) => {
+                    setSelectedCategory(categoryId);
+                    setSelectedSubs([]);
+                  }}
+                  onToggleSub={(subId) =>
+                    setSelectedSubs(selectedSubs.includes(subId) ? [] : [subId])
+                  }
+                />
+              )}
             </FilterSection>
 
             <FilterSection id="fltr_Price" title="Price">
@@ -344,7 +319,11 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
           type="button"
           className={`${styles.ctaBtn} col p-3 ctaBtn white`}
           data-bs-dismiss="offcanvas"
-          onClick={handleClearAll}
+          onClick={() => {
+            setSelectedCategory(null);
+            setSelectedSubs([]);
+            onApply({ category: null, subs: [] });
+          }}
         >
           Clear All
         </button>
@@ -353,7 +332,12 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
           type="button"
           className={`${styles.ctaBtn} col p-3 ctaBtn`}
           data-bs-dismiss="offcanvas"
-          onClick={handleApply}
+          onClick={() =>
+            onApply({
+              category: selectedCategory,
+              subs: selectedSubs,
+            })
+          }
         >
           Apply
         </button>
@@ -367,32 +351,32 @@ function ProductListing() {
   const [applied, setApplied] = useState({ category: null, subs: [] });
 
   const { data, isLoading, isError } = useGetCategoryDataQuery();
-  const categories = (data?.data ?? []).map(formatCategory);
 
-  const handleApply = (filters) => {
-    setApplied(filters);
-    setCurrentPage(1);
-  };
+  const categories = (data?.data ?? []).map((category) => ({
+    id: category.id,
+    label: category.name,
+    subs: (category.subcategories ?? []).map((sub) => ({
+      id: String(sub.id),
+      label: sub.name,
+    })),
+  }));
 
-  const filteredProducts = allProducts.filter((product) => {
-    const categoryMatches =
-      applied.category === null || product.categoryId === applied.category;
-
-    const subMatches =
-      applied.subs.length === 0 || applied.subs.includes(product.subId);
-
-    return categoryMatches && subMatches;
-  });
+  const filteredProducts = allProducts.filter(
+    (product) =>
+      (applied.category === null || product.categoryId === applied.category) &&
+      (applied.subs.length === 0 || applied.subs.includes(product.subId)),
+  );
 
   const total = filteredProducts.length;
   const totalPages = Math.ceil(total / PRODUCTS_PER_PAGE);
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const endIndex = Math.min(startIndex + PRODUCTS_PER_PAGE, total);
-  const visibleProducts = filteredProducts.slice(startIndex, endIndex);
+  const visibleProducts = filteredProducts.slice(
+    startIndex,
+    startIndex + PRODUCTS_PER_PAGE,
+  );
 
   return (
     <>
-      {/* Banner */}
       <section
         className="py-5 bgPrimary position-relative container-fluid sitePadding d-flex justify-content-md-center align-items-center overflow-hidden"
         style={{ marginBottom: "-25px" }}
@@ -402,6 +386,7 @@ function ProductListing() {
           alt="distributorImg"
           className="position-absolute top-0 start-50 end-0 mx-auto animateThis slideRight w-auto h-100"
         />
+
         <h1 className="sectionHead py-md-4 fw-bold animateThis slideTop">
           Products
         </h1>
@@ -441,6 +426,7 @@ function ProductListing() {
               <option value="" disabled>
                 Sort By
               </option>
+
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -476,7 +462,10 @@ function ProductListing() {
         isLoading={isLoading}
         isError={isError}
         applied={applied}
-        onApply={handleApply}
+        onApply={(filters) => {
+          setApplied(filters);
+          setCurrentPage(1);
+        }}
       />
     </>
   );

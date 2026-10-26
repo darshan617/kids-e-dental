@@ -57,8 +57,8 @@ const PRODUCT_COLUMNS = [
       id: "restorative",
       label: "Restorative",
       products: [
-        { id: 1, label: "Bioflx", url: "" },
-        { id: 2, label: "Kids-e-Crown®", url: "" },
+        { id: 1, label: "Bioflx", url: "/bioflix" },
+        { id: 2, label: "Kids-e-Crown®", url: "/kids-e-Crown" },
         { id: 3, label: "Kids-e-Restore", url: "" },
         { id: 4, label: "Kids-e-SSC", url: "" },
       ],
@@ -241,10 +241,10 @@ const Header = () => {
           </div>
           <div className="col-auto d-none d-lg-block">
             <div className={`${styles.headTopLinks} d-flex gap-5`}>
-              {TOP_BAR_LINKS.map((link) => (
-                <div key={link.id} className="col-auto">
-                  <a onClick={() => router.push(link.url)}>
-                    {link.icon} {link.label}
+              {TOP_BAR_LINKS?.map((link) => (
+                <div key={link?.id} className="col-auto">
+                  <a onClick={() => router.push(link?.url)}>
+                    {link?.icon} {link?.label}
                   </a>
                 </div>
               ))}
@@ -307,12 +307,12 @@ const Header = () => {
                         </div>
 
                         <ul className={`${styles.userMenuList}`}>
-                          {USER_MENU_ITEMS.map((item) => {
-                            const Icon = item.icon;
+                          {USER_MENU_ITEMS?.map((item) => {
+                            const Icon = item?.icon;
                             return (
-                              <li key={item.label}>
+                              <li key={item?.label}>
                                 <Link
-                                  href={item.href || "#"}
+                                  href={item?.href || "#"}
                                   className={`${styles.userMenuLink}`}
                                   onClick={closeUserMenu}
                                   role="menuitem"
@@ -320,7 +320,7 @@ const Header = () => {
                                   <span className={`${styles.userMenuIcon}`}>
                                     <Icon size={20} />
                                   </span>
-                                  <span>{item.label}</span>
+                                  <span>{item?.label}</span>
                                 </Link>
                               </li>
                             );
@@ -377,9 +377,9 @@ const Header = () => {
                   className={`${styles.headBtn} rounded-circle position-relative`}
                   title="Cart"
                 >
-                  {cartItems.length > 0 && (
+                  {cartItems?.length > 0 && (
                     <span className={`${styles.badge} bgPrimary`}>
-                      {cartItems.length}
+                      {cartItems?.length}
                     </span>
                   )}
                   <BsCart size={28} />
@@ -430,16 +430,16 @@ const Header = () => {
             </div>
 
             <ul className={`${styles.siteMenu} d-xl-flex justify-content-end`}>
-              {NAVIGATION_MENU.map((menuItem) => (
-                <li key={menuItem.id}>
-                  {menuItem.isDropdown ? (
+              {NAVIGATION_MENU?.map((menuItem) => (
+                <li key={menuItem?.id}>
+                  {menuItem?.isDropdown ? (
                     <>
                       <a
                         href="#productMenu"
                         role="button"
                         data-bs-toggle="collapse"
                       >
-                        {menuItem.label}
+                        {menuItem?.label}
                       </a>
                       <div
                         className={`${styles.subMenu} container-fluid sitePadding collapse`}
@@ -466,31 +466,31 @@ const Header = () => {
 
                           <div className="col-xl col-12">
                             <div className="row row-cols-1 row-cols-xl-4">
-                              {PRODUCT_COLUMNS.map((column, colIndex) => (
+                              {PRODUCT_COLUMNS?.map((column, colIndex) => (
                                 <div className="col" key={colIndex}>
-                                  {column.map((category) => (
+                                  {column?.map((category) => (
                                     <div
-                                      key={category.id}
+                                      key={category?.id}
                                       className={`${styles.subMenuBox} vstack gap-1`}
                                     >
                                       <a
                                         className={styles.subMenuBtn}
                                         role="button"
                                         data-bs-toggle="collapse"
-                                        href={`#mcat_${category.id}`}
+                                        href={`#mcat_${category?.id}`}
                                         aria-expanded="false"
                                       >
-                                        {category.label}
+                                        {category?.label}
                                       </a>
                                       <div
                                         className="collapse d-xl-block"
-                                        id={`mcat_${category.id}`}
+                                        id={`mcat_${category?.id}`}
                                       >
                                         <ul className="row g-1">
-                                          {category.products.map((product) => (
-                                            <li key={product.id}>
-                                              <Link href={product.url || "#"}>
-                                                {product.label}
+                                          {category?.products?.map((product) => (
+                                            <li key={product?.id}>
+                                              <Link href={`product-category/${product?.url }`|| "#"}>
+                                                {product?.label}
                                               </Link>
                                             </li>
                                           ))}
@@ -505,17 +505,17 @@ const Header = () => {
                         </div>
                       </div>
                     </>
-                  ) : menuItem.target === "_blank" ? (
+                  ) : menuItem?.target === "_blank" ? (
                     <a
-                      href={menuItem.url}
+                      href={menuItem?.url}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {menuItem.label}
+                      {menuItem?.label}
                     </a>
                   ) : (
-                    <a onClick={() => router.push(menuItem.url)}>
-                      {menuItem.label}
+                    <a onClick={() => router.push(menuItem?.url)}>
+                      {menuItem?.label}
                     </a>
                   )}
                 </li>
@@ -549,9 +549,9 @@ const Header = () => {
               <div className="col-12 suggestTagList position-relative">
                 <div className="hstack flex-wrap gap-2">
                   {TRENDING_SEARCHES.map((item) => (
-                    <div key={item.id}>
-                      <a href={item.url} className={styles.suggestTag}>
-                        {item.label}
+                    <div key={item?.id}>
+                      <a href={item?.url} className={styles.suggestTag}>
+                        {item?.label}
                       </a>
                     </div>
                   ))}

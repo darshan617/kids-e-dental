@@ -1,9 +1,34 @@
 import Image from "next/image";
 import React from "react";
 import stars from "@/assets/images/stars.gif";
-import styles from '@/components/product-detail/product-info/ProductInfo.module.css'
+import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
 
-const ReviewRating = () => {
+const MAX_VISIBLE_REVIEWS = 3;
+
+const formatDate = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB");
+};
+
+const starClass = (rating) => {
+  const n = Math.min(5, Math.max(0, Math.round(Number(rating) || 0)));
+  return styles[`star${n}`] || "";
+};
+
+const ReviewRating = ({ product }) => {
+  const summary = product?.rating_summary;
+  const reviews = Array.isArray(product?.reviews) ? product.reviews : [];
+
+  const average = Number(summary?.average_rating) || 0;
+  const totalReviews = Number(summary?.total_reviews) || 0;
+  const breakdown = Array.isArray(summary?.rating_breakdown)
+    ? [...summary.rating_breakdown].sort((a, b) => b.star - a.star) // 5 → 1
+    : [5, 4, 3, 2, 1].map((star) => ({ star, count: 0, percentage: 0 }));
+
+  const visibleReviews = reviews.slice(0, MAX_VISIBLE_REVIEWS);
+  const hasReviews = totalReviews > 0 || reviews.length > 0;
+
   return (
     <section className={`${styles.reviewSection} sitePadding py-5`}>
       <div className="container-fluid">
@@ -22,221 +47,168 @@ const ReviewRating = () => {
         </div>
 
         <div className={`${styles.reviewWrap} rounded mb-4`}>
-          {/* <!-- Below Div for Reviews absent --> */}
-
-          <div className="text-center d-none">
-            <Image src={stars} style={{ width: "80%", maxWidth: "300px" }} />
-            <h5 className="">We're looking for stars!</h5>
-            <p>Let us know what do you think.</p>
-            <button
-              type="button"
-              className="ctaBtn ctaBlack"
-              data-bs-toggle="modal"
-              data-bs-target="#reviewModal"
-            >
-              Be the first to write a review
-            </button>
-          </div>
-
-          {/* <!-- Below Div for Review Present --> */}
-
-          <div className="row mb-5 animateThis fadeIn">
-            <div className="col-md col-12">
-              <div className={`${styles.starItemsWrap} float-md-end pe-lg-4 mx-auto animateOne`}>
-                <div className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}>
-                  <div className="col-3">
-                    5 <div className={styles.starIcon}></div>{" "}
-                  </div>
-                  <div
-                    className="col px-0 progress"
-                    role="progressbar"
-                    aria-label="5 Stars"
-                    aria-valuenow="90"
-                  >
+          {!hasReviews ? (
+            <div className="text-center py-4">
+              <Image
+                src={stars}
+                alt="No reviews yet"
+                style={{ width: "80%", maxWidth: "300px", height: "auto" }}
+              />
+              <h5 className="">We're looking for stars!</h5>
+              <p>Let us know what do you think.</p>
+              {product?.can_review && (
+                <button
+                  type="button"
+                  className="ctaBtn ctaBlack"
+                  data-bs-toggle="modal"
+                  data-bs-target="#reviewModal"
+                >
+                  Be the first to write a review
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="row mb-5 animateThis fadeIn">
+              <div className="col-md col-12">
+                <div
+                  className={`${styles.starItemsWrap} float-md-end pe-lg-4 mx-auto animateOne`}
+                >
+                  {breakdown.map(({ star, percentage }) => (
                     <div
-                      className="progress-bar"
-                      style={{ "--pbWidth": "90%" }}
-                    ></div>
-                  </div>
-                  <div className="col-2 text-start">90%</div>
-                </div>
-
-                <div className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}>
-                  <div className="col-3">
-                    4 <div className={styles.starIcon}></div>{" "}
-                  </div>
-                  <div
-                    className="col px-0 progress"
-                    role="progressbar"
-                    aria-label="4 Stars"
-                    aria-valuenow="10"
-                  >
-                    <div className="progress-bar" style={{"--pbWidth":"10%"}}></div>
-                  </div>
-                  <div className="col-2 text-start">10%</div>
-                </div>
-
-                <div className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}>
-                  <div className="col-3">
-                    3 <div className={styles.starIcon}></div>{" "}
-                  </div>
-                  <div
-                    className="col px-0 progress"
-                    role="progressbar"
-                    aria-label="3 Stars"
-                    aria-valuenow="0"
-                  >
-                    <div className="progress-bar" style={{"--pbWidth":"0%"}}></div>
-                  </div>
-                  <div className="col-2 text-start">0%</div>
-                </div>
-
-                <div className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}>
-                  <div className="col-3">
-                    2 <div className={styles.starIcon}></div>{" "}
-                  </div>
-                  <div
-                    className="col px-0 progress"
-                    role="progressbar"
-                    aria-label="2 Stars"
-                    aria-valuenow="0"
-                  >
-                    <div className="progress-bar" style={{"--pbWidth":"0%"}}></div>
-                  </div>
-                  <div className="col-2 text-start">0%</div>
-                </div>
-
-                <div className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}>
-                  <div className="col-3">
-                    1 <div className={styles.starIcon}></div>{" "}
-                  </div>
-                  <div
-                    className="col px-0 progress"
-                    role="progressbar"
-                    aria-label="1 Star"
-                    aria-valuenow="0"
-                  >
-                    <div className="progress-bar" style={{"--pbWidth":"0%"}}></div>
-                  </div>
-                  <div className="col-2 text-start">0%</div>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-auto d-md-block d-none">
-              {" "}
-              <div className="vr h-100"></div>{" "}
-            </div>
-            <div className="col-md col-12">
-              <div className={`${styles.overallreview} text-center mx-auto float-md-start`}>
-                <div className="mx-auto d-inline-block">
-                  <div className={styles.prodRating}>5</div>
-                  <div className={styles.ratingBox}>
-                    {" "}
-                    <div className={`${styles.ratedStars} ${styles.star5}`}></div>{" "}
-                  </div>
-                  <small className="d-block mb-3">
-                    Average rating based on 8 Reviews
-                  </small>
-                  <div className="">
-                    <button
-                      type="button"
-                      className="ctaBtn arw w-100"
-                      data-bs-toggle="modal"
-                      data-bs-target="#reviewModal"
+                      key={star}
+                      className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}
                     >
-                      Write your review
-                    </button>
+                      <div className="col-3">
+                        {star} <div className={styles.starIcon}></div>{" "}
+                      </div>
+                      <div
+                        className="col px-0 progress"
+                        role="progressbar"
+                        aria-label={`${star} ${star === 1 ? "Star" : "Stars"}`}
+                        aria-valuenow={percentage}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      >
+                        <div
+                          className="progress-bar"
+                          style={{ "--pbWidth": `${percentage}%` }}
+                        ></div>
+                      </div>
+                      <div className="col-2 text-start">{percentage}%</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="col-md-auto d-md-block d-none">
+                {" "}
+                <div className="vr h-100"></div>{" "}
+              </div>
+
+              <div className="col-md col-12">
+                <div
+                  className={`${styles.overallreview} text-center mx-auto float-md-start`}
+                >
+                  <div className="mx-auto d-inline-block">
+                    <div className={styles.prodRating}>{average}</div>
+                    <div className={styles.ratingBox}>
+                      {" "}
+                      <div
+                        className={`${styles.ratedStars} ${starClass(average)}`}
+                      ></div>{" "}
+                    </div>
+                    <small className="d-block mb-3">
+                      Average rating based on {totalReviews}{" "}
+                      {totalReviews === 1 ? "Review" : "Reviews"}
+                    </small>
+                    <div className="">
+                      {product?.can_review ? (
+                        <button
+                          type="button"
+                          className="ctaBtn arw w-100"
+                          data-bs-toggle="modal"
+                          data-bs-target="#reviewModal"
+                        >
+                          Write your review
+                        </button>
+                      ) : (
+                        <small className="text-secondary">
+                          Only customers who purchased this product can write a
+                          review.
+                        </small>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="row justify-content-center g-4 mb-4 reviewBoxList staggerList">
-          <div className="col-lg-4 animateThis fadeIn">
-            <div className={`${styles.reviewBox} rounded-4 d-flex flex-column p-sm-4 p-3`}>
-              <div className="col-auto d-flex">
-                <div className="col">
-                  <div className={styles.ratingBox}>
-                    {" "}
-                    <div className={`${styles.ratedStars} ${styles.star5}`}></div>{" "}
+        {visibleReviews?.length > 0 && (
+          <div className="row justify-content-center g-4 mb-4 reviewBoxList staggerList">
+            {visibleReviews?.map((review) => (
+              <div className="col-lg-4 animateThis fadeIn" key={review?.id}>
+                <div
+                  className={`${styles.reviewBox} rounded-4 d-flex flex-column p-sm-4 p-3`}
+                >
+                  <div className="col-auto d-flex">
+                    <div className="col">
+                      <div className={styles.ratingBox}>
+                        {" "}
+                        <div
+                          className={`${styles.ratedStars} ${starClass(
+                            review?.rating,
+                          )}`}
+                        ></div>{" "}
+                      </div>
+                    </div>
+                    <div className={`${styles.reviewDate} col-auto`}>
+                      {formatDate(review?.created_at)}
+                    </div>
+                  </div>
+
+                  <div className="col">
+                    <p>{review?.review}</p>
+
+                    {Array.isArray(review?.image_urls) &&
+                      review?.image_urls?.length > 0 && (
+                        <div className="d-flex flex-wrap gap-2 mb-2">
+                          {review?.image_urls?.map((url) => (
+                            <Image
+                              key={url}
+                              src={url}
+                              alt="Review photo"
+                              width={60}
+                              height={60}
+                              style={{ objectFit: "cover", borderRadius: 6 }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                  </div>
+
+                  <div className={`${styles.reviewAuthor} col-auto mt-auto`}>
+                    By: {review?.user?.name || "Verified Customer"}
                   </div>
                 </div>
-                <div className={`${styles.reviewDate} col-auto`}>08/07/2024</div>
               </div>
-              <div className="col">
-                <h4 className={styles.reviewHead}>Easily can have more than one!</h4>
-                <p>
-                  I loved the material as they are breathable especially the
-                  dark blue top every thing is the same like the picture.
-                </p>
-              </div>
-              <div className={`${styles.reviewAuthor} col-auto mt-auto`}>
-                By: Rasha Salhoub
-              </div>
-            </div>
-          </div>
+            ))}
 
-          <div className="col-lg-4 animateThis fadeIn">
-            <div className={`${styles.reviewBox} rounded-4 d-flex flex-column p-sm-4 p-3`}>
-              <div className="col-auto d-flex">
-                <div className="col">
-                  <div className={styles.ratingBox}>
-                    {" "}
-                    <div className={`${styles.ratedStars} ${styles.star5}`}></div>{" "}
-                  </div>
-                </div>
-                <div className={`${styles.reviewDate} col-auto`}>08/07/2024</div>
+            {reviews.length > MAX_VISIBLE_REVIEWS && (
+              <div className="col-12 text-center">
+                <button
+                  type="button"
+                  className="ctaBtn white arw"
+                  data-bs-toggle="modal"
+                  data-bs-target="#moreReviews"
+                >
+                  View All Review
+                </button>
               </div>
-              <div className="col">
-                <h4 className={styles.reviewHead}>Amazing Product !</h4>
-                <p>
-                  Good quality material, perfect length, and by tying two knots
-                  it doesn't get loose by time.
-                </p>
-              </div>
-              <div className={`${styles.reviewAuthor} col-auto mt-auto`}>
-                By: Nour Koraa
-              </div>
-            </div>
+            )}
           </div>
-
-          <div className="col-lg-4 animateThis fadeIn">
-            <div className={`${styles.reviewBox} rounded-4 d-flex flex-column p-sm-4 p-3`}>
-              <div className="col-auto d-flex">
-                <div className="col">
-                  <div className={styles.ratingBox}>
-                    {" "}
-                    <div className={`${styles.ratedStars} ${styles.star5}`}></div>{" "}
-                  </div>
-                </div>
-                <div className={`${styles.reviewDate} col-auto`}>08/07/2024</div>
-              </div>
-              <div className="col">
-                <h4 className={styles.reviewHead}>Fantastic Bodysuit</h4>
-                <p>
-                  Absolutely fantastic top. True to it size. Good quality, I've
-                  bought another 3 in different colours.
-                </p>
-              </div>
-              <div className={`${styles.reviewAuthor} col-auto mt-auto`}>
-                By: Tracy Entwistle
-              </div>
-            </div>
-          </div>
-
-          <div className="col-12 text-center">
-            <button
-              type="button"
-              className="ctaBtn white arw"
-              data-bs-toggle="modal"
-              data-bs-target="#moreReviews"
-            >
-              View All Review
-            </button>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );
