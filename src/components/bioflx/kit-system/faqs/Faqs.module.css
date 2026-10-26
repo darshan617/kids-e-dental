@@ -1,0 +1,114 @@
+.faqSection {
+  background: #f1f1f1;
+  border: 3px solid var(--primary);
+}
+
+.faqItem {
+  background: #fff;
+  border-bottom: 2px solid #eee;
+  padding: 1.5rem 1rem 1rem;
+  transition: all 0.3s ease;
+  & .faqQ {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    display: flex;
+    &:before {
+      content: "Q.";
+      width: 1.5rem;
+      height: 1.5rem;
+      aspect-ratio: 1;
+      display: block;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-align: center;
+      line-height: 1.5;
+      margin-right: 0.5rem;
+      background: #000;
+      color: #fff;
+      border-radius: 50%;
+    }
+  }
+  & .faqA {
+    padding: 0 1rem 0 2rem;
+    font-size: 0.9rem;
+  }
+  @media (min-width: 992px) {
+    &:hover {
+      background: #f1f1f1;
+      border-color: var(--primary);
+    }
+  }
+}
+
+.catPgLinks {
+  font-size: 0.75rem;
+  line-height: 1;
+  color: #333;
+  & a {
+    min-width: 90px;
+    display: block;
+    border-radius: 50rem;
+    padding: 0.5rem;
+    transition: all 0.3s ease;
+    background: #fff;
+    border: 1px solid #eee;
+  }
+  & a:hover {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+  }
+}
+
+.clisupBanner {
+  background: var(--primary);
+  background: linear-gradient(
+    45deg,
+    rgb(255, 211, 34) 0%,
+    rgb(255, 211, 34) 46%,
+    rgb(251, 236, 177) 54%,
+    rgb(255, 204, 0) 100%
+  );
+  & img {
+    width: auto;
+    height: auto;
+    max-width: 80%;
+    max-height: 4rem;
+  }
+}
+
+.crVideoItem {
+  height: 100%;
+  border: 1px solid #ddd;
+  position: relative;
+  background: #fff;
+  &:hover {
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.2);
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+}
+.crVideoHead {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.crVideoBox {
+  border: 0.3rem solid #fff;
+  overflow: hidden;
+  position: relative;
+  &:after {
+    content: "";
+    width: 3rem;
+    height: 3rem;
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='%23000' viewBox='0 0 16 16'><path d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.79 5.093A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .79.407l3.5-2.5a.5.5 0 0 0 0-.814z'/></svg>");
+    filter: drop-shadow(0 0 10px #fff);
+  }
+}
