@@ -2,14 +2,45 @@
   width: 100%;
   height: auto;
   position: relative;
-  background: #eee;
   overflow: hidden;
+  background: #eee; /* base color shown while images load */
 
   --swiper-pagination-bullet-inactive-color: #d1d1d1;
   --swiper-pagination-bullet-inactive-opacity: 1;
   --swiper-pagination-color: var(--primary);
   --swiper-pagination-bullet-size: 10px;
   --swiper-pagination-bullet-horizontal-gap: 4px;
+}
+
+.homeBanner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-100%) skewX(-20deg);
+  animation: homeBannerShine 1.4s ease-in-out infinite;
+}
+
+@keyframes homeBannerShine {
+  to {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homeBanner::before {
+    animation: none;
+  }
 }
 
 .homeBanner :global(.swiper-slide) {
@@ -26,8 +57,6 @@
 .hbPagination {
   bottom: 1rem !important;
   display: flex;
-  
-
 }
 
 @media (min-width: 768px) {
@@ -91,10 +120,10 @@
   opacity: 0;
 }
 :global(.in-view) .uspMascot {
-    left: 100%;
-    opacity: 1;
-    transition: left 2s ease;
-  }
+  left: 100%;
+  opacity: 1;
+  transition: left 2s ease;
+}
 
 @media (min-width: 768px) {
   .brandUSP {

@@ -229,7 +229,7 @@ const DeliveryAddress = ({
                       <div className={styles.selectAddressActions}>
                         <button
                           type="button"
-                          className={`${styles.editAddressBtn} ctaBtn`}
+                          className={`ctaBtn`}
                           onClick={(e) => handleEditAddress(e, addr)}
                         >
                           EDIT
