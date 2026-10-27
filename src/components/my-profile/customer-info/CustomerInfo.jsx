@@ -22,10 +22,10 @@ const MENU_ITEMS = [
     matchPath: "/my-order",
   },
   {
-    href: "/wishlist",
+    href: "/my-wishlist",
     label: "My Wishlist",
     icon: FaRegHeart,
-    matchPath: "/wishlist",
+    matchPath: "/my-wishlist",
   },
 ];
 

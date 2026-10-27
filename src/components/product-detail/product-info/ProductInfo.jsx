@@ -532,7 +532,7 @@ const ProductInfo = ({ product }) => {
                         openItem === id ? styles.pbcBodyOpen : ""
                       }`}
                     >
-                      <div className={`${styles.prodDescp} pt-3`}>{body}</div>
+                      <div className={`${styles.prodDescp}`}>{body}</div>
                     </div>
                   </div>
                 ))}

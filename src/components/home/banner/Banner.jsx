@@ -11,7 +11,7 @@ import heroBannerMob1 from "@/assets/images/heroBanner_mob1.jpg";
 import heroBanner1 from "@/assets/images/heroBanner_1.jpg";
 import uspMascot from "@/assets/images/uspMascot.png";
 import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
-
+import BannerShimmer from "./BannerShimmer";
 
 const uspItems = [
   {
@@ -148,15 +148,12 @@ const Banner = () => {
   const swiperRef = useRef(null);
   const paginationRef = useRef(null);
 
-  const { data: homeResult } = useGetHomeDataQuery();
+  const { data: homeResult, isLoading } = useGetHomeDataQuery();
 
   const slides = useMemo(() => {
-    const banners =
-      homeResult?.data?.sliders
+    const banners = homeResult?.data?.sliders;
 
-    if (!Array.isArray(banners) || banners.length === 0) {
-      return [];
-    }
+    if (!Array.isArray(banners) || banners.length === 0) return [];
 
     return banners.map((item, index) => ({
       id: item.id ?? index,
@@ -176,58 +173,55 @@ const Banner = () => {
       slidesPerView: 1,
       spaceBetween: 0,
       speed: 1000,
-      loop: slides.length > 1, // Enable loop only if multiple slides exist
+      loop: slides.length > 1,
       grabCursor: true,
-      autoplay: {
-        delay: 4000,
-        disableOnInteraction: false,
-      },
-      pagination: {
-        el: paginationRef.current,
-        clickable: true,
-      },
+      autoplay: { delay: 4000, disableOnInteraction: false },
+      pagination: { el: paginationRef.current, clickable: true },
       parallax: true,
     });
 
-    return () => {
-      homeBanner.destroy(true, true);
-    };
+    return () => homeBanner.destroy(true, true);
   }, [slides]);
 
   return (
     <>
-      <section
-        ref={swiperRef}
-        className={`${styles.homeBanner} swiper overflow-hidden`}
-      >
-        <div className="swiper-wrapper">
-          {slides.map((slide) => (
-            <div className="swiper-slide" key={slide.id}>
-              <a href={slide.href}>
-                <picture>
-                  <source
-                    srcSet={slide.desktopSrc}
-                    media="(min-width: 768px)"
-                  />
-                  <Image
-                    src={slide.mobileSrc}
-                    alt={slide.alt}
-                    className={styles.hbImg}
-                    data-swiper-parallax="50%"
-                    width={768}
-                    height={900}
-                    priority={slide.priority}
-                  />
-                </picture>
-              </a>
-            </div>
-          ))}
-        </div>
-        <div
-          ref={paginationRef}
-          className={`${styles.hbPagination} swiper-pagination sitePadding`}
-        />
-      </section>
+      {isLoading ? (
+        <BannerShimmer />
+      ) : slides.length > 0 ? (
+        <section
+          ref={swiperRef}
+          className={`${styles.homeBanner} swiper overflow-hidden`}
+        >
+          <div className="swiper-wrapper">
+            {slides.map((slide) => (
+              <div className="swiper-slide" key={slide.id}>
+                <a href={slide.href}>
+                  <picture>
+                    <source
+                      srcSet={slide.desktopSrc}
+                      media="(min-width: 768px)"
+                    />
+                    <Image
+                      src={slide.mobileSrc}
+                      alt={slide.alt}
+                      className={styles.hbImg}
+                      data-swiper-parallax="50%"
+                      width={768}
+                      height={900}
+                      priority={slide.priority}
+                    />
+                  </picture>
+                </a>
+              </div>
+            ))}
+          </div>
+          <div
+            ref={paginationRef}
+            className={`${styles.hbPagination} swiper-pagination sitePadding`}
+          />
+        </section>
+      ) : null}
+
       <section
         className={`${styles.uspSection} sitePadding z-1 position-relative mb-5 animateThis`}
       >

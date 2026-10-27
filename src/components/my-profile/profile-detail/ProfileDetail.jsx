@@ -65,7 +65,7 @@ const ProfileDetail = () => {
           <h1 className={styles.profileTitle}>My Profile</h1>
 
           {!isEditing && (
-            <button className={styles.btnEdit} onClick={handleEdit}>
+            <button className="ctaBtn" onClick={handleEdit}>
               <FaRegEdit />
               Edit Profile
             </button>

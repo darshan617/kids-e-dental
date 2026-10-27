@@ -112,8 +112,8 @@ const NAVIGATION_MENU = [
     url: "/pdf/Kids-e-Dental_Brochure_C2C.pdf",
     target: "_blank",
   },
-  { id: 4, label: "Education", url: "" },
-  { id: 5, label: "Case Studies", url: "" },
+  { id: 4, label: "Education", url: "/education" },
+  { id: 5, label: "Case Studies", url: "/case-study" },
   { id: 6, label: "Contact Us", url: "/contact-us" },
 ];
 
@@ -205,9 +205,9 @@ const Header = () => {
       if (!pageBody) return;
 
       const isStuck = pageBody.classList.contains("stick");
-      if (!isStuck && windowTop > 40) {
+      if (!isStuck && windowTop > 120) {
         pageBody.classList.add("stick");
-      } else if (isStuck && windowTop < 10) {
+      } else if (isStuck && windowTop < 20) {
         pageBody.classList.remove("stick");
       }
     }
@@ -487,13 +487,20 @@ const Header = () => {
                                         id={`mcat_${category?.id}`}
                                       >
                                         <ul className="row g-1">
-                                          {category?.products?.map((product) => (
-                                            <li key={product?.id}>
-                                              <Link href={`product-category/${product?.url }`|| "#"}>
-                                                {product?.label}
-                                              </Link>
-                                            </li>
-                                          ))}
+                                          {category?.products?.map(
+                                            (product) => (
+                                              <li key={product?.id}>
+                                                <Link
+                                                  href={
+                                                    `product-category/${product?.url}` ||
+                                                    "#"
+                                                  }
+                                                >
+                                                  {product?.label}
+                                                </Link>
+                                              </li>
+                                            ),
+                                          )}
                                         </ul>
                                       </div>
                                     </div>

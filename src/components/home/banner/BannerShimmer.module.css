@@ -1,0 +1,72 @@
+.bannerShimmer {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #eee;
+  aspect-ratio: 768 / 900;
+}
+
+@media (min-width: 768px) {
+  .bannerShimmer {
+    aspect-ratio: 1920 / 800;
+  }
+}
+
+.shimmer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #eee;
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-100%) skewX(-20deg);
+  animation: bannerShine 1.4s ease-in-out infinite;
+}
+
+@keyframes bannerShine {
+  to {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+.dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d1d1d1;
+}
+
+@media (min-width: 768px) {
+  .dots {
+    bottom: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    animation: none;
+  }
+}
