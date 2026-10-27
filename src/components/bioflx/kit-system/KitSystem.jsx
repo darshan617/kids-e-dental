@@ -137,9 +137,15 @@ const KitSystem = () => {
                     </p>
                   </div>
                   <div className="mt-auto">
-                    <a href="" className="ctaBtn">
+                    <button
+                      href=""
+                      className="ctaBtn"
+                      onClick={() =>
+                        router.push(`/articals/${router?.query?.slug}`)
+                      }
+                    >
                       View Articles
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -237,7 +243,9 @@ const KitSystem = () => {
                   <div className="mt-auto">
                     <button
                       className="ctaBtn"
-                      onClick={() => router.push(`/faqs/${router?.query?.slug}`)}
+                      onClick={() =>
+                        router.push(`/faqs/${router?.query?.slug}`)
+                      }
                     >
                       View FAQs
                     </button>
@@ -270,7 +278,9 @@ const KitSystem = () => {
                       data-src="video/bioflx_video.mp4"
                       data-fancybox
                       data-aspect-ratio="16/9"
-                      onClick={() => router.push(`/toturial/${router?.query?.slug}`)}
+                      onClick={() =>
+                        router.push(`/toturial/${router?.query?.slug}`)
+                      }
                     >
                       View Tutorials
                     </button>

@@ -26,6 +26,37 @@ export default function App({ Component, pageProps, ...rest }) {
 function AppContent({ Component, pageProps }) {
   const router = useRouter();
 
+  // Scroll to top on navigation and prevent browser scroll restoration
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const scrollToTop = () => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "instant",
+      });
+    };
+
+    const handleRouteChangeStart = () => {
+      scrollToTop();
+    };
+
+    router.events.on("routeChangeStart", handleRouteChangeStart);
+    router.events.on("routeChangeComplete", scrollToTop);
+
+    // Handle initial page load
+    scrollToTop();
+
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChangeStart);
+      router.events.off("routeChangeComplete", scrollToTop);
+    };
+  }, [router.events]);
+
+  // Initialize Bootstrap
   useEffect(() => {
     void import("bootstrap/dist/js/bootstrap.bundle.min.js");
   }, []);
@@ -72,6 +103,7 @@ function AppContent({ Component, pageProps }) {
       const animationElements = document.querySelectorAll(
         ".animateThis, .animateOne",
       );
+
       const windowHeight = window.innerHeight;
       const windowTopPosition = window.scrollY || window.pageYOffset;
       const windowBottomPosition = windowTopPosition + windowHeight;

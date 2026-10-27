@@ -1,0 +1,21 @@
+.eduCardItem {
+  background: #fff;
+  transition: all 0.3s ease;
+  height: 100%;
+  cursor: pointer;
+  &:hover {
+    background: #ddd;
+  }
+  & img {
+    filter: grayscale(100%);
+    transition: inherit;
+    aspect-ratio: 2;
+    object-fit: contain;
+    object-position: center;
+    background: #fff;
+    height: auto;
+  }
+  &:hover img {
+    filter: grayscale(0%);
+  }
+}
