@@ -1,4 +1,5 @@
 import { apiSlice } from "../apiSlice";
+
 const addToWishlistApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     addToWishlist: builder.mutation({
@@ -9,10 +10,11 @@ const addToWishlistApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["wishlist"],
     }),
+
     getWishlist: builder.query({
       query: () => ({
-        url: "/getWishlist",
-        method: "GET", 
+        url: "/get-wishlist",
+        method: "GET",
       }),
       providesTags: ["wishlist"],
     }),

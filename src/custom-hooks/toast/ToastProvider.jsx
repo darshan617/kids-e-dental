@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useState } from "react";
 import styles from "@/custom-hooks/toast/ToastProvider.module.css";
 import {
@@ -5,10 +7,9 @@ import {
   IoMdCheckmarkCircleOutline,
 } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
-
 import { IoWarningOutline } from "react-icons/io5";
 
-const ToastContext = createContext();
+const ToastContext = createContext(null);
 
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
@@ -30,19 +31,25 @@ export const ToastProvider = ({ children }) => {
       <div className={styles.toastContainer}>
         {toasts.map((toast) => (
           <div
-            key={toast?.id}
-            className={`${styles.toast} ${styles[toast.type]}`}
+            key={toast.id}
+            className={`${styles.toast} ${styles[toast.type] || ""}`}
           >
             <div>
-              {toast?.type === "success" && (
+              {toast.type === "success" && (
                 <IoMdCheckmarkCircleOutline color="white" size={20} />
               )}
-              {toast?.type === "error" && (
+
+              {toast.type === "error" && (
                 <IoIosCloseCircleOutline color="white" size={20} />
-              )}{" "}
-              {toast?.type === "warning" && <IoWarningOutline size={20} />}{" "}
+              )}
+
+              {toast.type === "warning" && (
+                <IoWarningOutline color="white" size={20} />
+              )}
+
               <span className={styles.toastMessage}>{toast.message}</span>
             </div>
+
             <button
               type="button"
               className={styles.closeButton}
@@ -59,4 +66,12 @@ export const ToastProvider = ({ children }) => {
   );
 };
 
-export const useToast = () => useContext(ToastContext);
+export const useToast = () => {
+  const context = useContext(ToastContext);
+
+  if (context === null) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
+
+  return context;
+};

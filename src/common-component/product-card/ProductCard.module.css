@@ -13,7 +13,9 @@
   background: #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   border-radius: clamp(1rem, calc(0.9rem + 0.5vw), 1.5rem);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   transform-origin: 50% 50%;
   cursor: pointer;
   &:hover {
@@ -84,7 +86,7 @@
   background-repeat: no-repeat;
   background-position: 90% 40%;
   background-size: auto 50%;
-  background-color: var(--primary);
+  background-color: #ffcc00;
   padding: 0 1rem 0 0.25rem;
   border-radius: 4px;
 }
@@ -124,4 +126,3 @@
   color: var(--primary);
   border-color: #000;
 }
-
