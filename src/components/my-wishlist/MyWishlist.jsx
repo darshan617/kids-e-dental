@@ -9,10 +9,15 @@ import { useGetWishlistQuery } from "@/redux/apis/addToWishlistApi";
 
 const normalizeWishlistItems = (res) => {
   if (!res) return [];
+
   if (Array.isArray(res)) return res;
   if (Array.isArray(res.data)) return res.data;
   if (Array.isArray(res.wishlist)) return res.wishlist;
+  if (Array.isArray(res.items)) return res.items;
   if (Array.isArray(res.data?.wishlist)) return res.data.wishlist;
+  if (Array.isArray(res.data?.items)) return res.data.items;
+  if (Array.isArray(res.data?.data)) return res.data.data;
+
   return [];
 };
 

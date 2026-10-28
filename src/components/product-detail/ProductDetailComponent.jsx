@@ -15,13 +15,10 @@ const ProductDetailComponent = ({
   let content;
 
   if (isLoading) {
-    content = <div className="container py-5 text-center">Loading product...</div>;
-  } else if (isError || !productDetails?.status || !product) {
     content = (
-      <div className="container py-5 text-center">
-        {error?.data?.message || "Product not found."}
-      </div>
+      <div className="container py-5 text-center">Loading product...</div>
     );
+  } else if (isError || !productDetails?.status || !product) {
   } else {
     content = (
       <>

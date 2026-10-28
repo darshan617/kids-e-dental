@@ -8,7 +8,7 @@ import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { storeWrapper } from "@/redux/store";
 
 import "@/styles/globals.css";
-import "aos/dist/aos.css";
+// import "aos/dist/aos.css";
 import { ToastProvider } from "@/custom-hooks/toast/ToastProvider";
 
 export default function App({ Component, pageProps, ...rest }) {
@@ -62,40 +62,40 @@ function AppContent({ Component, pageProps }) {
   }, []);
 
   // Initialize AOS
-  useEffect(() => {
-    const initAos = async () => {
-      const Aos = (await import("aos")).default;
+  // useEffect(() => {
+  //   const initAos = async () => {
+  //     const Aos = (await import("aos")).default;
 
-      Aos.init({
-        duration: 1000,
-        once: true,
-      });
-    };
+  //     Aos.init({
+  //       duration: 1000,
+  //       once: true,
+  //     });
+  //   };
 
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(
-        () => {
-          void initAos();
-        },
-        {
-          timeout: 2000,
-        },
-      );
+  //   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+  //     const id = window.requestIdleCallback(
+  //       () => {
+  //         void initAos();
+  //       },
+  //       {
+  //         timeout: 2000,
+  //       },
+  //     );
 
-      return () => {
-        window.cancelIdleCallback(id);
-      };
-    }
+  //     return () => {
+  //       window.cancelIdleCallback(id);
+  //     };
+  //   }
 
-    // Fallback for browsers without requestIdleCallback
-    const timer = window.setTimeout(() => {
-      void initAos();
-    }, 1);
+  //   // Fallback for browsers without requestIdleCallback
+  //   const timer = window.setTimeout(() => {
+  //     void initAos();
+  //   }, 1);
 
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, []);
+  //   return () => {
+  //     window.clearTimeout(timer);
+  //   };
+  // }, []);
 
   // Scroll animations + sticky header
   useEffect(() => {
