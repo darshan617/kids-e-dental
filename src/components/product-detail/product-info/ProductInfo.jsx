@@ -10,21 +10,51 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { CiHeart } from "react-icons/ci";
+import { CiHeart, CiMail } from "react-icons/ci";
+import { IoLogoFacebook, IoShareSocialOutline } from "react-icons/io5";
+import {
+  FaWhatsapp,
+  FaFacebookF,
+  FaEnvelope,
+  FaInstagram,
+} from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { FiInstagram, FiLink } from "react-icons/fi";
 import delivery from "@/assets/images/fast-delivery.png";
 import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
-import { IoShareSocialOutline } from "react-icons/io5";
-const formatPrice = (n) =>
+import { useAddToWishlistMutation } from "@/redux/apis/addToWishlistApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import Cookies from "js-cookie";
+import { useAddToCartMutation } from "@/redux/apis/addToCartApi";
+import CustomPopup from "@/common-component/custom-popup/CustomPopup";
+import { IoIosLink } from "react-icons/io";
+
+const MAX_QTY_PER_ORDER = 10;
+const PINCODE_REGEX = /^[1-9][0-9]{5}$/;
+
+const formatPrice = (amount) =>
   new Intl.NumberFormat("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(Number(n) || 0);
+  }).format(Number(amount) || 0);
 
 const ProductInfo = ({ product }) => {
+  const { showToast } = useToast();
+
+  const [addToWishlist, { isLoading: isWishlistLoading }] =
+    useAddToWishlistMutation();
+  const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
+
   const variants = product?.variants ?? [];
   const variantTypes = product?.variant_types ?? [];
   const isVariable = Boolean(product?.is_variable) && variantTypes.length > 0;
   const initialVariant = product?.selected_variant;
+
+  const specs = product?.specification ?? [];
+  const features = product?.key_features ?? [];
+
+  const rating = product?.rating_summary?.average_rating ?? 0;
+  const totalReviews = product?.rating_summary?.total_reviews ?? 0;
 
   const [arch, setArch] = useState(
     initialVariant?.arch ?? variantTypes[0]?.arch ?? null,
@@ -33,10 +63,11 @@ const ProductInfo = ({ product }) => {
     String(initialVariant?.size ?? variantTypes[0]?.available_sizes?.[0] ?? ""),
   );
   const [qty, setQty] = useState(1);
-  const [wishlisted, setWishlisted] = useState(Boolean(product?.is_wishlist));
+  const [wishlisted, setWishlisted] = useState(false);
   const [openItem, setOpenItem] = useState(null);
   const [pincode, setPincode] = useState("");
   const [deliveryMsg, setDeliveryMsg] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const gallery = useMemo(
     () => [...new Set((product?.gallery ?? []).filter(Boolean))],
@@ -44,16 +75,16 @@ const ProductInfo = ({ product }) => {
   );
 
   const sizeOptions =
-    variantTypes.find((v) => v.arch === arch)?.available_sizes ?? [];
+    variantTypes.find((type) => type.arch === arch)?.available_sizes ?? [];
 
   const selectedVariant = variants.find(
-    (v) => v.arch === arch && String(v.size) === String(size),
+    (variant) => variant.arch === arch && String(variant.size) === String(size),
   );
 
   const sellingPrice = Number(
-    selectedVariant?.selling_price ?? product.selling_price ?? 0,
+    selectedVariant?.selling_price ?? product?.selling_price ?? 0,
   );
-  const mrp = Number(selectedVariant?.price ?? product.price ?? 0);
+  const mrp = Number(selectedVariant?.price ?? product?.price ?? 0);
   const hasDiscount = mrp > sellingPrice && sellingPrice > 0;
   const discountPct = hasDiscount
     ? Math.round(((mrp - sellingPrice) / mrp) * 100)
@@ -63,13 +94,11 @@ const ProductInfo = ({ product }) => {
   const inStock = Boolean(
     selectedVariant ? selectedVariant.in_stock : product?.in_stock,
   );
-  const maxQty = Math.max(1, Math.min(10, stock));
+  const maxQty = Math.max(1, Math.min(MAX_QTY_PER_ORDER, stock));
 
-  const rating = product.rating_summary?.average_rating ?? 0;
-  const totalReviews = product.rating_summary?.total_reviews ?? 0;
-
-  const specs = product.specification ?? [];
-  const features = product.key_features ?? [];
+  const categoryHref = product?.category?.slug
+    ? `/category/${product?.category?.slug}`
+    : "#";
 
   const accordionItems = [
     (product?.description || product?.details) && {
@@ -92,11 +121,11 @@ const ProductInfo = ({ product }) => {
       body: (
         <>
           {[features, specs].map(
-            (list, i) =>
+            (list, index) =>
               list.length > 0 && (
-                <ul key={i}>
-                  {list.map((t) => (
-                    <li key={t}>{t}</li>
+                <ul key={index}>
+                  {list.map((text) => (
+                    <li key={text}>{text}</li>
                   ))}
                 </ul>
               ),
@@ -146,11 +175,14 @@ const ProductInfo = ({ product }) => {
   }, [gallery?.length]);
 
   const changeArch = (nextArch) => {
-    const available =
-      variantTypes.find((v) => v.arch === nextArch)?.available_sizes ?? [];
+    const availableSizes =
+      variantTypes.find((type) => type.arch === nextArch)?.available_sizes ??
+      [];
+
     setArch(nextArch);
-    if (!available.map(String).includes(String(size))) {
-      setSize(String(available[0] ?? ""));
+
+    if (!availableSizes.map(String).includes(String(size))) {
+      setSize(String(availableSizes[0] ?? ""));
     }
     setQty(1);
   };
@@ -161,29 +193,181 @@ const ProductInfo = ({ product }) => {
   };
 
   const changeQty = (value) => {
-    const n = parseInt(value, 10);
-    setQty(Number.isNaN(n) ? 1 : Math.min(maxQty, Math.max(1, n)));
+    const parsed = parseInt(value, 10);
+    setQty(Number.isNaN(parsed) ? 1 : Math.min(maxQty, Math.max(1, parsed)));
   };
 
   const checkDelivery = () => {
-    const valid = /^[1-9][0-9]{5}$/.test(pincode);
+    const isValidPincode = PINCODE_REGEX.test(pincode);
+
     setDeliveryMsg(
-      valid
+      isValidPincode
         ? { ok: true }
         : { ok: false, text: "Enter a valid 6-digit pincode." },
     );
   };
 
-  const handleAddToCart = () => {};
+  const getUserData = () => {
+    try {
+      const raw = Cookies.get("userData");
+
+      if (!raw) return null;
+
+      return JSON.parse(raw);
+    } catch (error) {
+      console.error("Failed to read userData cookie:", error);
+      return null;
+    }
+  };
+
+  const handleAddToWishlist = async () => {
+    const userData = getUserData();
+
+    if (!userData?.id) {
+      showToast("Please log in to use the wishlist", "error");
+      return;
+    }
+
+    if (!product?.id) {
+      showToast("Product ID is missing", "error");
+      return;
+    }
+
+    try {
+      const res = await addToWishlist({
+        body: {
+          user_id: userData.id,
+          product_id: product.id,
+          variant_id: selectedVariant?.id ?? null,
+        },
+      });
+
+      if (res.error) {
+        showToast(
+          res.error?.data?.message || "Failed to add to wishlist",
+          "error",
+        );
+        return;
+      }
+
+      if (res.data?.success || res.data?.status) {
+        setWishlisted(true);
+        showToast(res.data?.message || "Added to wishlist", "success");
+      } else {
+        showToast(res.data?.message || "Failed to add to wishlist", "error");
+      }
+    } catch (error) {
+      console.error("Add to wishlist failed:", error);
+      showToast("Something went wrong. Please try again.", "error");
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!product?.id) {
+      showToast("Product ID is missing", "error");
+      return;
+    }
+
+    if (isVariable && !selectedVariant) {
+      showToast("Please select arch and size", "error");
+      return;
+    }
+
+    try {
+      const res = await addToCart({
+        body: {
+          product_id: product.id,
+          variant_id: selectedVariant?.id ?? null,
+          quantity: qty,
+        },
+      }).unwrap();
+
+      showToast(res?.message || "Added to cart", "success");
+    } catch (error) {
+      showToast(error?.data?.message || "Failed to add to cart", "error");
+    }
+  };
 
   const handleBuyNow = () => {};
 
-  const categoryHref = product?.category?.slug
-    ? `/category/${product?.category?.slug}`
-    : "#";
+  /* ---------- Share ---------- */
+  const copyLink = async () => {
+    const link = window.location.href;
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch {
+      const input = document.createElement("input");
+      input.value = link;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+    }
+    showToast("Link copied", "success");
+    setShareOpen(false);
+  };
+
+  const openShareWindow = (link) => {
+    window.open(link, "_blank", "noopener,noreferrer,width=600,height=500");
+    setShareOpen(false);
+  };
+
+  const shareItems = [
+    {
+      label: "WhatsApp",
+      icon: <FaWhatsapp size={28} />,
+      onClick: () =>
+        openShareWindow(
+          `https://wa.me/?text=${encodeURIComponent(
+            `${product?.name ?? ""} ${window.location.href}`,
+          )}`,
+        ),
+    },
+    {
+      label: "Instagram",
+      icon: <FaInstagram size={28} />,
+      onClick: copyLink,
+    },
+    {
+      label: "Facebook",
+      icon: <IoLogoFacebook size={28} />,
+      onClick: () =>
+        openShareWindow(
+          `https://www.facebook.com/(
+            window.location.href,
+          )}`,
+        ),
+    },
+    {
+      label: "Twitter",
+      icon: <FaXTwitter size={28} />,
+      onClick: () =>
+        openShareWindow(
+          `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+            window.location.href,
+          )}&text=${encodeURIComponent(product?.name ?? "")}`,
+        ),
+    },
+    {
+      label: "Email",
+      icon: <CiMail size={28} />,
+      onClick: () => {
+        window.location.href = `mailto:?subject=${encodeURIComponent(
+          product?.name ?? "",
+        )}&body=${encodeURIComponent(window.location.href)}`;
+        setShareOpen(false);
+      },
+    },
+    {
+      label: "Copy URL",
+      icon: <IoIosLink size={28} />,
+      onClick: copyLink,
+    },
+  ];
 
   return (
     <>
+      {/* Breadcrumb */}
       <section
         className="sitePadding py-sm-3 py-2"
         style={{ background: "#fbfbfb" }}
@@ -295,8 +479,7 @@ const ProductInfo = ({ product }) => {
                   <button
                     type="button"
                     className={`${styles.shareBtn} rounded-circle`}
-                    data-bs-toggle="modal"
-                    data-bs-target="#shareModal"
+                    onClick={() => setShareOpen(true)}
                     aria-label="Share"
                   >
                     <IoShareSocialOutline />
@@ -305,13 +488,14 @@ const ProductInfo = ({ product }) => {
               </div>
 
               <div className={`${styles.pibReview} hstack gap-2 mb-4`}>
-                {totalReviews > 0 ? (
+                {totalReviews > 0 && (
                   <>
-                    <span className="pibStar">{rating}</span> ({totalReviews}{" "}
-                    {totalReviews === 1 ? "Review" : "Reviews"})
+                    <span className={styles.pibStar}>{rating}</span>(
+                    <Link href="#reviews">
+                      {totalReviews} {totalReviews === 1 ? "Review" : "Reviews"}
+                    </Link>
+                    )
                   </>
-                ) : (
-                  <span>No reviews yet</span>
                 )}
               </div>
 
@@ -320,7 +504,7 @@ const ProductInfo = ({ product }) => {
                   {
                     label: "Select Arch",
                     name: "arch",
-                    options: variantTypes.map((v) => v.arch),
+                    options: variantTypes.map((type) => type.arch),
                     value: arch,
                     onChange: changeArch,
                   },
@@ -339,19 +523,19 @@ const ProductInfo = ({ product }) => {
                       role="group"
                       aria-label={label}
                     >
-                      {options?.map((opt) => (
-                        <React.Fragment key={opt}>
+                      {options?.map((option) => (
+                        <React.Fragment key={option}>
                           <input
                             type="radio"
                             className="btn-check"
                             name={name}
-                            id={`${name}${opt}`}
+                            id={`${name}${option}`}
                             autoComplete="off"
-                            checked={String(value) === String(opt)}
-                            onChange={() => onChange(opt)}
+                            checked={String(value) === String(option)}
+                            onChange={() => onChange(option)}
                           />
-                          <label className="btn" htmlFor={`${name}${opt}`}>
-                            {opt}
+                          <label className="btn" htmlFor={`${name}${option}`}>
+                            {option}
                           </label>
                         </React.Fragment>
                       ))}
@@ -426,7 +610,8 @@ const ProductInfo = ({ product }) => {
                     }`}
                     aria-pressed={wishlisted}
                     title="Add to Wishlist"
-                    onClick={() => setWishlisted((v) => !v)}
+                    disabled={isWishlistLoading}
+                    onClick={handleAddToWishlist}
                   >
                     <CiHeart size={20} /> Add to Wishlist
                   </button>
@@ -436,10 +621,10 @@ const ProductInfo = ({ product }) => {
                   <button
                     type="button"
                     className={`${styles.pibBtn} ${styles.cartBtn} w-100`}
-                    disabled={!inStock}
+                    disabled={!inStock || isCartLoading}
                     onClick={handleAddToCart}
                   >
-                    Add to Cart
+                    {isCartLoading ? "Adding..." : "Add to Cart"}
                   </button>
                 </div>
                 <div className="col">
@@ -504,7 +689,11 @@ const ProductInfo = ({ product }) => {
                     </div>
                   )}
                 </div>
-                <Image src={delivery} className={styles.deliveryBg} />
+                <Image
+                  src={delivery}
+                  className={styles.deliveryBg}
+                  alt="Fast delivery"
+                />
               </div>
 
               <div className="prodBriefContent">
@@ -541,6 +730,30 @@ const ProductInfo = ({ product }) => {
           </div>
         </div>
       </section>
+
+      <CustomPopup
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        maxWidth="320px"
+        minHeight="200px"
+      >
+        <div className="d-flex flex-column">
+          <h6 className={styles.shareTitle}>Share This Product</h6>
+          <div className={styles.shareGrid}>
+            {shareItems.map(({ label, icon, onClick }) => (
+              <button
+                key={label}
+                type="button"
+                className={styles.shareItem}
+                onClick={onClick}
+              >
+                {icon}
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </CustomPopup>
     </>
   );
 };

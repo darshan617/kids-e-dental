@@ -87,26 +87,22 @@ export const ProductCard = ({
 
   const detailsHref = slug ? `${PRODUCT_ROUTE}/${slug}` : "#";
 
-  const addItem = async () => {
+  const handleAddToCart = async () => {
     if (isVariable) {
       router.push(detailsHref);
-      return false;
+      return;
     }
 
     try {
       const res = await addToCart({
         body: { product_id: id, quantity: 1 },
       }).unwrap();
+
       showToast(res?.message || "Added to cart", "success");
-      return true;
     } catch (error) {
       showToast(error?.data?.message || "Failed to add to cart", "error");
-      return false;
     }
   };
-
-  const handleAddToCart = () => addItem();
-
   const handleBuyNow = async () => {
     const ok = await addItem();
     if (ok) router.push("/cart");
