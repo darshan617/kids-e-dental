@@ -53,7 +53,7 @@ const Footer = () => {
                   <a onClick={() => router.push("/my-profile")}>My Account</a>
                     </li>
                   <li>
-                    <a href="#">Shop</a>
+                    <a href="/product-listing">Shop</a>
                   </li>
                   <li>
                     <a onClick={() => router.push("/privacy-policy")}>Privacy Policy</a>

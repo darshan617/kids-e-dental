@@ -223,7 +223,7 @@ const Banner = () => {
       ) : null}
 
       <section
-        className={`${styles.uspSection} sitePadding z-1 position-relative mb-5 animateThis`}
+        className={`${styles.uspSection} overflow-hidden sitePadding z-1 position-relative mb-5 animateThis`}
       >
         <div
           className={`${styles.brandUSP} container-fluid bgPrimary py-sm-5 py-4 animateThis curtainLeft`}

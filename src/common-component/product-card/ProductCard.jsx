@@ -55,15 +55,9 @@ export const normalizeProduct = (raw) => {
 
   const sellingPrice = Number(item?.selling_price ?? item?.price ?? 0);
   const mrp = Number(item?.price ?? 0);
+  const productId = item?.id ?? raw?.product_id ?? null;
 
-  const firstGallery = Array.isArray(item?.gallery) ? item.gallery[0] : null;
-  const galleryUrl =
-    typeof firstGallery === "string"
-      ? firstGallery
-      : firstGallery?.url || firstGallery?.image || firstGallery?.path;
-
-  const productId = isFlatRow ? raw.product_id : item?.id;
-
+  // Row id (wishlist / cart row) is kept separately.
   const wishlistId =
     raw?.wishlist_id ??
     raw?.cart_id ??
@@ -312,12 +306,17 @@ export const ProductCard = ({
   const detailsHref = slug ? `${PRODUCT_ROUTE}/${slug}` : "#";
 
   const addItem = async (variantId = null, qty = 1) => {
+    if (!id) {
+      showToast("Product ID is missing", "error");
+      return false;
+    }
+
     try {
       const res = await addToCart({
         body: {
           product_id: id,
+          variant_id: variantId ?? null,
           quantity: qty,
-          ...(variantId ? { variant_id: variantId } : {}),
         },
       }).unwrap();
 
@@ -366,8 +365,14 @@ export const ProductCard = ({
 
   const handleAddToWishlist = async () => {
     const userData = getUserData();
-    if (!userData) {
+
+    if (!userData?.id) {
       showToast("Please log in to use the wishlist", "error");
+      return;
+    }
+
+    if (!id) {
+      showToast("Product ID is missing", "error");
       return;
     }
 
@@ -391,16 +396,15 @@ export const ProductCard = ({
   };
 
   const handleRemoveFromWishlist = async () => {
-    const cartId = wishlistId ?? id;
-
-    if (cartId === undefined || cartId === null || cartId === "") {
-      showToast("Wishlist item id is missing", "error");
+    // Remove uses the product id, same as `product.id` in ProductInfo.
+    if (id === undefined || id === null || id === "") {
+      showToast("Product ID is missing", "error");
       return;
     }
 
     try {
       const res = await removeFromWishlist({
-        body: { cart_id: Number(cartId) },
+        body: { product_id: Number(id) },
       }).unwrap();
 
       if (res?.success || res?.status) {

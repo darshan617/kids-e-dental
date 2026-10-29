@@ -78,7 +78,7 @@ const MyWishlist = ({
             <h2 className={styles.emptyTitle}>{emptyTitle}</h2>
             <p className={styles.emptyText}>{emptyText}</p>
             <Link
-              href={shopBtnHref || "/product-category/safety"}
+              href={shopBtnHref || "/product-listing"}
               className="ctaBtn"
               prefetch={true}
             >
