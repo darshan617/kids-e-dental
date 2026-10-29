@@ -42,16 +42,14 @@ const CustomerInfo = () => {
 
   const [displayName, setDisplayName] = useState(DUMMY_USER.name);
   const [userInitial, setUserInitial] = useState(
-    DUMMY_USER.name.charAt(0).toUpperCase()
+    DUMMY_USER.name.charAt(0).toUpperCase(),
   );
 
   useEffect(() => {
     const name = DUMMY_USER.name || GUEST_DISPLAY_NAME;
 
     setDisplayName(name);
-    setUserInitial(
-      name.charAt(0).toUpperCase() || GUEST_USER_INITIAL
-    );
+    setUserInitial(name.charAt(0).toUpperCase() || GUEST_USER_INITIAL);
   }, []);
 
   const isActive = (matchPath) =>
@@ -66,50 +64,22 @@ const CustomerInfo = () => {
 
   return (
     <div className="">
+      
       <aside className={styles.sidebar}>
-        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
-          <ul>
-            <li>
-              <Link href="/" prefetch={true}>
-                Home
-              </Link>
-            </li>
-
-            <li
-              className={styles.breadcrumbSeparator}
-              aria-hidden
-            >
-              /
-            </li>
-
-            <li
-              className={styles.breadcrumbActive}
-              style={{ textTransform: "capitalize" }}
-            >
-              My Profile
-            </li>
-          </ul>
-        </nav>
+        
 
         <div className={styles.profileCard}>
           <div className={styles.profileAvatar} aria-hidden>
-            {userInitial ? (
-              <span>{userInitial}</span>
-            ) : (
-              <FaUserCircle />
-            )}
+            {userInitial ? <span>{userInitial}</span> : <FaUserCircle />}
           </div>
 
           <div className={styles.profileMeta}>
-            <p className={styles.profileLabel}>Name</p>
+            <p className={styles.profileLabel}>Welcome,</p>
             <p className={styles.profileName}>{displayName}</p>
           </div>
         </div>
 
-        <nav
-          className={styles.navMenu}
-          aria-label="Account navigation"
-        >
+        <nav className={styles.navMenu} aria-label="Account navigation">
           <ul className={styles.navList}>
             {MENU_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -117,22 +87,16 @@ const CustomerInfo = () => {
               const orderDetails =
                 item?.label === "My Orders" && router?.query?.slug;
 
-              const active =
-                isActive(item.matchPath) || orderDetails;
+              const active = isActive(item.matchPath) || orderDetails;
 
               return (
-                <li
-                  key={item.label}
-                  className={styles.navItem}
-                >
+                <li key={item.label} className={styles.navItem}>
                   <Link
                     href={item.href}
                     className={`${styles.navLink} ${
                       active ? styles.navLinkActive : ""
                     }`}
-                    aria-current={
-                      active ? "page" : undefined
-                    }
+                    aria-current={active ? "page" : undefined}
                     prefetch={true}
                   >
                     <span className={styles.navIcon}>
@@ -152,10 +116,7 @@ const CustomerInfo = () => {
                   onClick={handleLogout}
                 >
                   <span className={styles.navIcon}>
-                    <HiOutlinePower
-                      size={20}
-                      color="#dc3545"
-                    />
+                    <HiOutlinePower size={20} color="#dc3545" />
                   </span>
 
                   <span>Logout</span>
@@ -170,4 +131,3 @@ const CustomerInfo = () => {
 };
 
 export default CustomerInfo;
-

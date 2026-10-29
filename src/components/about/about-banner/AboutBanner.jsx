@@ -2,24 +2,30 @@ import Image from "next/image";
 import React from "react";
 import abtBanner from "@/assets/images/aboutBanner.jpg";
 import styles from "@/components/about/about-banner/AboutBanner.module.css";
-import aboutContentImg from '@/assets/images/aboutContentImg.jpg'
+import aboutContentImg from "@/assets/images/aboutContentImg.jpg";
 
 const AboutBanner = () => {
   return (
     <>
       <section className={`${styles.aboutBanner} bg-dark overflow-hidden`}>
-        <Image src={abtBanner} alt="" className="w-100 h-auto animateThis curtain" />
+        <Image
+          src={abtBanner}
+          alt=""
+          className="w-100 h-auto animateThis curtain"
+        />
       </section>
 
       <section className="pt-5">
         <div className="sitePadding">
           <div className="container-fluid text-center py-4 mb-sm-5 mb-3 vstack align-items-center staggerList">
-            <h3 className="sectionHead_sm animateThis slideTop">About Company</h3>
-            <h2 className="sectionHead fw-bold mb-4 animateThis slideTop">
+            <h3 className="sectionHead_sm animateThis slideTop">
+              About Company
+            </h3>
+            <h2 className="sectionHead fw-bold animateThis slideTop">
               A Journey of innovation{" "}
               <span className="textPrimary">for Little Smiles</span>
             </h2>
-            <p
+            {/* <p
               className={`${styles.aboutText} text-secondary lh-base animateThis fadeIn`}
               style={{maxWidth: "1400px"}}
             >
@@ -32,21 +38,34 @@ const AboutBanner = () => {
               Kids-e-Dental LLP was founded with the vision of revolutionizing
               pediatric dentistry through innovation and excellence in
               manufacturing.
-            </p>
+            </p> */}
           </div>
         </div>
         <div className="sitePadding bgPrimary">
           <div className="container-fluid">
             <div className="row gx-lg-5 animateOne">
-              <div className={`${styles.abtContImgBox} col-xl-6 py-5 position-relative z-1`}>
+              <div
+                className={`${styles.abtContImgBox} col-xl-6 py-5 position-relative z-1`}
+              >
                 <Image
                   src={aboutContentImg}
                   alt=""
                   className="rounded-5 w-100 h-100 object-fit-cover animateThis curtain"
-                  style={{transitionDelay: "1s"}}
+                  style={{ transitionDelay: "1s" }}
                 />
               </div>
-              <div className="col-xl-6 px-xl-5 py-xl-4 mb-5 mb-xl-0 align-self-center animateThis slideTop">
+              <div class="col-xl-6 px-xl-5 py-xl-4 mb-5 mb-xl-0 align-self-center animateThis slideTop">
+                <p>
+                  We are a dedicated team of professionals committed to
+                  providing the highest quality dental products for children.{" "}
+                  <strong>
+                    Established in 2017 by Dr. Mukul Jain, a Pediatric &
+                    Preventive Dentist,
+                  </strong>{" "}
+                  Kids-e-Dental LLP was founded with the vision of
+                  revolutionizing pediatric dentistry through innovation and
+                  excellence in manufacturing.
+                </p>
                 <p>
                   In 2021, Dr. Mukul Jain, Founder, CEO & Partner of
                   Kids-e-Dental LLP proudly joined hands with Laxmi Dental Group
@@ -64,7 +83,7 @@ const AboutBanner = () => {
                   successfully developed and introduced innovative pediatric
                   dental solutions, including the BIOFLX Crowns combining
                   clinical expertise, research-driven development, and
-                  world-className manufacturing capabilities to provide advanced
+                  world-class manufacturing capabilities to provide advanced
                   treatment options for pediatric dentists worldwide.
                 </p>
                 <p>

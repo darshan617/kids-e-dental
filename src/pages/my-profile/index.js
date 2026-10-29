@@ -8,6 +8,20 @@ const ProfilePage = () => {
   return (
     <Layout>
       <div className="row sitePadding">
+        <section class="py-sm-3 py-2 mb-3" style={{ background: "#fbfbfb" }}>
+          <div class="container-fluid">
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                  <a href="/">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                  <a href="#">My Profile</a>
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </section>
         <div className="col-xl-3 col-md-12">
           <CustomerInfo />
         </div>

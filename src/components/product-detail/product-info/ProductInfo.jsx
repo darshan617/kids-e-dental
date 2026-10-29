@@ -73,6 +73,10 @@ const ProductInfo = ({ product }) => {
     () => [...new Set((product?.gallery ?? []).filter(Boolean))],
     [product],
   );
+  const allGalleryImages = [
+    ...(product?.thumbnail ? [product.thumbnail] : []),
+    ...(Array.isArray(product?.gallery) ? product.gallery : []),
+  ];
 
   const sizeOptions =
     variantTypes.find((type) => type.arch === arch)?.available_sizes ?? [];
@@ -91,8 +95,9 @@ const ProductInfo = ({ product }) => {
     : 0;
 
   const stock = Number(selectedVariant?.quantity ?? product?.quantity ?? 0);
+
   const inStock = Boolean(
-    selectedVariant ? selectedVariant.in_stock : product?.in_stock,
+    selectedVariant?.in_stock ?? product?.in_stock ?? false,
   );
   const maxQty = Math.max(1, Math.min(MAX_QTY_PER_ORDER, stock));
 
@@ -172,7 +177,7 @@ const ProductInfo = ({ product }) => {
       mainSwiper.destroy(true, true);
       thumbsSwiper.destroy(true, true);
     };
-  }, [gallery?.length]);
+  }, [allGalleryImages?.length]);
 
   const changeArch = (nextArch) => {
     const availableSizes =
@@ -412,7 +417,7 @@ const ProductInfo = ({ product }) => {
                     className={`${styles.prodImgSwiper} swiper pb-4 pb-lg-0`}
                   >
                     <div className="swiper-wrapper">
-                      {gallery.map((img, i) => (
+                      {allGalleryImages?.map((img, i) => (
                         <div className="swiper-slide" key={`main-${i}`}>
                           <a
                             href={img}
@@ -451,7 +456,7 @@ const ProductInfo = ({ product }) => {
                     className={`${styles.prodImgThumbSwiper} swiper`}
                   >
                     <div className="swiper-wrapper">
-                      {gallery?.map((img, i) => (
+                      {allGalleryImages?.map((img, i) => (
                         <div className="swiper-slide" key={`thumb-${i}`}>
                           <div className={styles.pitBox}>
                             <Image

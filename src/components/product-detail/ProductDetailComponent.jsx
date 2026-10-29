@@ -2,14 +2,9 @@ import React from "react";
 import Layout from "../Layout/Layout";
 import ProductInfo from "./product-info/ProductInfo";
 import ReviewRating from "./review-rating/ReviewRating";
-import FeaturedProduct from "../home/featured-product/FeaturedProduct";
+import SimilarProduct from "./similar-product/SimilarProduct";
 
-const ProductDetailComponent = ({
-  productDetails,
-  isLoading,
-  isError,
-  error,
-}) => {
+const ProductDetailComponent = ({ productDetails, isLoading, isError }) => {
   const product = productDetails;
 
   let content;
@@ -18,13 +13,16 @@ const ProductDetailComponent = ({
     content = (
       <div className="container py-5 text-center">Loading product...</div>
     );
-  } else if (isError || !productDetails?.status || !product) {
+  } else if (isError || !product) {
+    content = (
+      <div className="container py-5 text-center">Something went wrong.</div>
+    );
   } else {
     content = (
       <>
         <ProductInfo key={product.id} product={product} />
         <ReviewRating product={product} />
-        <FeaturedProduct products={product.similar_products} />
+        <SimilarProduct products={product.similar_products} />
       </>
     );
   }

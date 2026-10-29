@@ -1,4 +1,5 @@
-:global(.productSlider) {
+.productSlider .swiper-slide { height: auto; }
+.productSlider .swiper-slide > * { width: 100%; }:global(.productSlider) {
   overflow: visible;
 }
 
@@ -125,4 +126,144 @@
   background: #000;
   color: var(--primary);
   border-color: #000;
+}
+.removeWishlistBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Paste into ProductCard.module.css (replaces the old .variantOption / .active rules) */
+
+.vpWrap {
+  text-align: left;
+}
+
+.vpTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 1.25rem;
+}
+
+.vpLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 1rem 0 0.5rem;
+}
+
+.vpOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.variantOption {
+  border: 0;
+  background: #f2f2f2;
+  color: #555;
+  border-radius: 6px;
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.variantOptionSm {
+  min-width: 32px;
+  padding: 0.55rem 0.7rem;
+}
+
+.variantOption.active {
+  background: #000;
+  color: #fff;
+}
+
+.vpQty {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.25rem 0.5rem;
+}
+
+.vpQtyBtn {
+  border: 0;
+  background: transparent;
+  width: 28px;
+  height: 28px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.vpQtyBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.vpQtyVal {
+  min-width: 20px;
+  text-align: center;
+}
+
+.vpStock {
+  color: #0a7d5a;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.vpStock.out {
+  color: #d62c2c;
+}
+
+.vpPrice {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1rem 0 1.25rem;
+}
+
+.vpOld {
+  font-size: 1rem;
+  font-weight: 400;
+  opacity: 0.5;
+  margin-left: 0.5rem;
+}
+
+.vpAddBtn {
+  width: 100%;
+  border: 1px solid #bbb;
+  background: #fff;
+  color: #111;
+  border-radius: 999px;
+  padding: 0.9rem 1rem;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.vpAddBtn:hover:not(:disabled) {
+  background: #000;
+  color: #fff;
+}
+
+.vpAddBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vpImgBox {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.vpImg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  object-fit: contain;
 }

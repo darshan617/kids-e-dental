@@ -14,7 +14,7 @@ const cartPage = () => {
     isLoading: isCartLoading,
     refetch,
   } = useGetCartQuery();
-  
+
   const [updateCart] = useUpdateCartMutation();
   const [removeCart] = useRemoveCartMutation();
 

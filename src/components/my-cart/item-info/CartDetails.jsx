@@ -24,7 +24,7 @@ export const EmptyCart = () => (
     <div className={styles.emptyContent}>
       <h2 className={styles.emptyTitle}>Your Cart is empty!</h2>
       <p className={styles.emptyText}>Add product and proceed</p>
-      <Link href="/product-category/all" className='ctaBtn'>
+      <Link href="/product-listing" className='ctaBtn'>
         CONTINUE SHOPPING
       </Link>
     </div>

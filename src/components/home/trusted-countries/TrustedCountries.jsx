@@ -70,7 +70,7 @@ const CountrySlide = ({ code, name }) => (
   </div>
 );
 
-const TrustedCountries = () => {
+const TrustedCountries = ({ title }) => {
   const sliderRefs = useRef([]);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ const TrustedCountries = () => {
             576: { spaceBetween: 30 },
             768: { spaceBetween: 50 },
           },
-        })
+        }),
     );
 
     return () => {
@@ -106,9 +106,7 @@ const TrustedCountries = () => {
         }}
       >
         <div className="text-center mb-5">
-          <h3 className="sectionHead_sm animateThis slideTop">
-            Supply worldwide
-          </h3>
+          <h3 className="sectionHead_sm animateThis slideTop">{title}</h3>
           <h2 className="sectionHead fw-bold animateThis slideTop">
             Trusted Across 40+ Countries
           </h2>

@@ -18,8 +18,16 @@ const addToWishlistApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["wishlist"],
     }),
+    removeFromWishlist: builder.mutation({
+      query: ({ body }) => ({
+        url: "/remove-cart-item",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["wishlist"],
+    }),
   }),
 });
 
-export const { useAddToWishlistMutation, useGetWishlistQuery } =
+export const { useAddToWishlistMutation, useGetWishlistQuery, useRemoveFromWishlistMutation } =
   addToWishlistApi;

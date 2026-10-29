@@ -12,9 +12,9 @@
     --checkout-danger: #d32f2f;
     --checkout-danger-bg: #fce4e4;
     background: var(--checkout-bg);
-    padding: 0 0 40px;
+    padding: 20px;
     margin-top: 0;
-    margin-bottom: 0;
+    margin-bottom: 20px;
   }
   
   .stepper {
@@ -85,7 +85,7 @@
   .content {
     max-width: 100%;
     margin: 0 auto;
-    padding: 32px 20px 0;
+    /* padding: 32px 20px 0; */
   }
   
   .gstCard {
