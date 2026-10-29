@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "@/components/my-wishlist/MyWishlist.module.css";
-import { ProductCard } from "@/common-component/product-card/ProductCard";
+import {
+  ProductCard,
+  normalizeProduct,
+} from "@/common-component/product-card/ProductCard";
 import EMPTY_IMAGE from "@/assets/images/wishlist.jpg";
 import { useGetWishlistQuery } from "@/redux/apis/addToWishlistApi";
-
 
 const normalizeWishlistItems = (res) => {
   if (!res) return [];
@@ -38,14 +40,7 @@ const MyWishlist = ({
     data: wishlistData,
     isLoading,
     isFetching,
-    isError,
-    error,
   } = useGetWishlistQuery(undefined, { skip: !isMounted });
-
-  useEffect(() => {
-    if (wishlistData) console.log("wishlist response:", wishlistData);
-    if (isError) console.log("wishlist error:", error);
-  }, [wishlistData, isError, error]);
 
   const wishlistItems = useMemo(
     () => normalizeWishlistItems(wishlistData),
@@ -94,41 +89,19 @@ const MyWishlist = ({
       )}
 
       {isLoading || isFetching ? (
-        <div className={styles.productsSection}>
-          {/* <div className={styles.productsGrid}>
-            {Array.from({ length: 4 }).map((_, index) => (
-              <ProductCardShimmer key={index} />
-            ))}
-          </div> */}
-        </div>
+        <div className={styles.productsSection} />
       ) : (
         hasItems && (
           <div className={styles.productsSection}>
             <div className={styles.productsGrid}>
               {wishlistItems.map((item) => {
-                const product = item?.product ?? item;
+                const card = normalizeProduct(item);
+
                 return (
                   <ProductCard
-                    key={item?.id ?? product?.id}
-                    type="productPage"
-                    image={product?.thumbnail}
-                    imageHover={product?.gallery?.[1] ?? product?.gallery?.[0]}
-                    discount={product?.discount}
-                    isBestSeller={product?.is_best_selling}
-                    isTrending={product?.is_trending}
-                    isFeatured={product?.is_featured}
-                    isTopRated={product?.is_top_rated}
-                    name={product?.name}
-                    price={product?.selling_price}
-                    oldPrice={product?.price}
-                    reviews={
-                      product?.reviews?.length ?? product?.total_reviews ?? 0
-                    }
-                    rating={product?.rating ?? "4.5"}
-                    slug={product?.slug}
-                    productId={product?.id}
+                    key={item?.id ?? card.id}
+                    {...card}
                     path="/wishlist"
-                    quantity={product?.quantity}
                   />
                 );
               })}
