@@ -5,7 +5,7 @@ import bioflx from "@/assets/images/bioflx/bioflx_logo.png";
 import styles from "@/components/articals/Articals.module.css";
 
 const breadcrumbs = [
-  { label: "Home", href: "index.html" },
+  { label: "Home", href: "/" },
   { label: "Products", href: "#" },
   { label: "Restorative", href: "#" },
   { label: "Bioflx Crown", href: "bioflx.html" },

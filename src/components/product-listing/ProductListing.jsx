@@ -1,24 +1,22 @@
 "use client";
+
 import Image from "next/image";
 import { useState } from "react";
 import distributorImg from "@/assets/images/distributorImg.png";
 import styles from "@/components/product-listing/ProductListing.module.css";
-import { ProductCard } from "@/common-component/product-card/ProductCard";
+import {
+  ProductCard,
+  normalizeProduct,
+} from "@/common-component/product-card/ProductCard";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { VscSettings } from "react-icons/vsc";
 import { useGetCategoryDataQuery } from "@/redux/apis/categoryApi";
+import { useProductListingQuery } from "@/redux/apis/productListingApi";
 
 const PRODUCTS_PER_PAGE = 12;
 const MIN_PRICE = 1000;
 const MAX_PRICE = 50000;
 const MIN_GAP = 1000;
-
-const allProducts = Array.from({ length: 13 }, (_, i) => ({
-  id: i + 1,
-  name: "Kids-e-Crown",
-  categoryId: (i % 5) + 1,
-  subId: String((i % 4) + 1),
-}));
 
 const genders = [
   { id: "genderBoy", label: "Boy" },
@@ -294,7 +292,9 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
                     setSelectedSubs([]);
                   }}
                   onToggleSub={(subId) =>
-                    setSelectedSubs(selectedSubs.includes(subId) ? [] : [subId])
+                    setSelectedSubs((previous) =>
+                      previous.includes(subId) ? [] : [subId],
+                    )
                   }
                 />
               )}
@@ -349,10 +349,21 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
 function ProductListing() {
   const [currentPage, setCurrentPage] = useState(1);
   const [applied, setApplied] = useState({ category: null, subs: [] });
+  const [sortBy, setSortBy] = useState("");
 
-  const { data, isLoading, isError } = useGetCategoryDataQuery();
+  const {
+    data: categoryData,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+  } = useGetCategoryDataQuery();
 
-  const categories = (data?.data ?? []).map((category) => ({
+  const {
+    data: productData,
+    isLoading: productsLoading,
+    isError: productsError,
+  } = useProductListingQuery();
+
+  const categories = (categoryData?.data ?? []).map((category) => ({
     id: category.id,
     label: category.name,
     subs: (category.subcategories ?? []).map((sub) => ({
@@ -361,16 +372,85 @@ function ProductListing() {
     })),
   }));
 
-  const filteredProducts = allProducts.filter(
-    (product) =>
-      (applied.category === null || product.categoryId === applied.category) &&
-      (applied.subs.length === 0 || applied.subs.includes(product.subId)),
-  );
+  // Support common API response structures.
+  const apiProducts = Array.isArray(productData?.data)
+    ? productData.data
+    : Array.isArray(productData?.data?.products)
+      ? productData.data.products
+      : Array.isArray(productData?.products)
+        ? productData.products
+        : [];
 
-  const total = filteredProducts.length;
+  // Normalize the API product into the props ProductCard expects
+  // (image, price, oldPrice, rating, reviews, variants, ...) while keeping
+  // the raw fields needed for filtering and sorting.
+  const allProducts = apiProducts.map((product) => {
+    const normalized = normalizeProduct(product);
+
+    return {
+      ...product,
+      ...normalized,
+      id: normalized.id ?? product.product_id,
+      name:
+        normalized.name ?? product.product_name ?? product.title ?? "Product",
+      categoryId:
+        product.category_id ?? product.categoryId ?? product.category?.id,
+      subId: String(
+        product.subcategory_id ??
+          product.subcategoryId ??
+          product.subcategory?.id ??
+          "",
+      ),
+    };
+  });
+
+  const filteredProducts = allProducts.filter((product) => {
+    const matchesCategory =
+      applied.category === null ||
+      String(product.categoryId) === String(applied.category);
+
+    const matchesSubcategory =
+      applied.subs.length === 0 || applied.subs.includes(product.subId);
+
+    return matchesCategory && matchesSubcategory;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "price-asc":
+        return (
+          Number(a.price ?? a.selling_price ?? 0) -
+          Number(b.price ?? b.selling_price ?? 0)
+        );
+
+      case "price-desc":
+        return (
+          Number(b.price ?? b.selling_price ?? 0) -
+          Number(a.price ?? a.selling_price ?? 0)
+        );
+
+      case "brand-asc":
+        return String(a.brand ?? "").localeCompare(String(b.brand ?? ""));
+
+      case "brand-desc":
+        return String(b.brand ?? "").localeCompare(String(a.brand ?? ""));
+
+      case "recent":
+        return (
+          new Date(b.created_at ?? b.createdAt ?? 0).getTime() -
+          new Date(a.created_at ?? a.createdAt ?? 0).getTime()
+        );
+
+      default:
+        return 0;
+    }
+  });
+
+  const total = sortedProducts.length;
   const totalPages = Math.ceil(total / PRODUCTS_PER_PAGE);
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const visibleProducts = filteredProducts.slice(
+
+  const visibleProducts = sortedProducts.slice(
     startIndex,
     startIndex + PRODUCTS_PER_PAGE,
   );
@@ -421,7 +501,11 @@ function ProductListing() {
           <div className="col-sm col-6 order-sm-3 text-end">
             <select
               className={`${styles.filterSortBtn} form-select rounded-0`}
-              defaultValue=""
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setCurrentPage(1);
+              }}
             >
               <option value="" disabled>
                 Sort By
@@ -438,29 +522,39 @@ function ProductListing() {
       </div>
 
       <div className="container-fluid sitePadding py-5 pt-0">
-        <div className={`row g-5 ${styles.productListing}`}>
-          {visibleProducts.length === 0 ? (
-            <p className="text-center">No products found.</p>
-          ) : (
-            visibleProducts.map((product) => (
-              <div className="col-6 col-md-4 col-xl-3" key={product.id}>
-                <ProductCard {...product} />
-              </div>
-            ))
-          )}
-        </div>
+        {productsLoading ? (
+          <p className="text-center">Loading products...</p>
+        ) : productsError ? (
+          <p className="text-center text-danger">
+            Failed to load products. Please try again.
+          </p>
+        ) : (
+          <>
+            <div className={`row g-5 ${styles.productListing}`}>
+              {visibleProducts.length === 0 ? (
+                <p className="text-center">No products found.</p>
+              ) : (
+                visibleProducts.map((product) => (
+                  <div className="col-6 col-md-4 col-xl-3" key={product.id}>
+                    <ProductCard {...product} />
+                  </div>
+                ))
+              )}
+            </div>
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onChange={setCurrentPage}
-        />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onChange={setCurrentPage}
+            />
+          </>
+        )}
       </div>
 
       <FilterDrawer
         categories={categories}
-        isLoading={isLoading}
-        isError={isError}
+        isLoading={categoriesLoading}
+        isError={categoriesError}
         applied={applied}
         onApply={(filters) => {
           setApplied(filters);

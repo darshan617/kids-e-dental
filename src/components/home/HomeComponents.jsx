@@ -1,11 +1,11 @@
-import React from 'react'
-import Layout from '../Layout/Layout'
-import Banner from './banner/Banner'
-import FeaturedProduct from './featured-product/FeaturedProduct'
-import Overview from './overview/Overview'
-import WhyChoose from './why-choose/WhyChoose'
-import TrustedCountries from './trusted-countries/TrustedCountries'
-import CaseStudy from './case-study/CaseStudy'
+import React from "react";
+import Layout from "../Layout/Layout";
+import Banner from "./banner/Banner";
+import FeaturedProduct from "./featured-product/FeaturedProduct";
+import Overview from "./overview/Overview";
+import WhyChoose from "./why-choose/WhyChoose";
+import TrustedCountries from "./trusted-countries/TrustedCountries";
+import CaseStudy from "./case-study/CaseStudy";
 
 const HomeComponents = () => {
   return (
@@ -14,10 +14,10 @@ const HomeComponents = () => {
       <FeaturedProduct />
       <Overview />
       <WhyChoose />
-      <TrustedCountries />
+      <TrustedCountries title="Supply worldwide" />
       <CaseStudy />
     </Layout>
-  )
-}
+  );
+};
 
-export default HomeComponents
+export default HomeComponents;
