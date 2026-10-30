@@ -67,6 +67,8 @@
 
 .uspSection {
   margin-top: -1rem;
+  position: relative;
+  z-index: 5;
 }
 .brandUSP {
   border-radius: 2rem;
@@ -111,6 +113,7 @@
 .uspMascot {
   width: 200px;
   position: absolute;
+  z-index: 10;
   left: 0;
   top: unset;
   bottom: 0;
