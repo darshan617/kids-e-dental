@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiInstagram, FiLink } from "react-icons/fi";
-import delivery from "@/assets/images/fast-delivery.png";
+import delivery from "@/assets/images/prd-detail/fast-delivery.png";
 import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
 import { useAddToWishlistMutation } from "@/redux/apis/addToWishlistApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";

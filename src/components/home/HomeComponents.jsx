@@ -15,7 +15,7 @@ const HomeComponents = () => {
       <Overview />
       <WhyChoose />
       <TrustedCountries title="Supply worldwide" />
-      <CaseStudy />
+      {/* <CaseStudy /> */}
     </Layout>
   );
 };
