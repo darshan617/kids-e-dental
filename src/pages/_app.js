@@ -65,13 +65,13 @@ function AppContent({ Component, pageProps }) {
   // useEffect(() => {
   //   const initAos = async () => {
   //     const Aos = (await import("aos")).default;
-
+  //
   //     Aos.init({
   //       duration: 1000,
   //       once: true,
   //     });
   //   };
-
+  //
   //   if (typeof window !== "undefined" && "requestIdleCallback" in window) {
   //     const id = window.requestIdleCallback(
   //       () => {
@@ -81,17 +81,17 @@ function AppContent({ Component, pageProps }) {
   //         timeout: 2000,
   //       },
   //     );
-
+  //
   //     return () => {
   //       window.cancelIdleCallback(id);
   //     };
   //   }
-
+  //
   //   // Fallback for browsers without requestIdleCallback
   //   const timer = window.setTimeout(() => {
   //     void initAos();
   //   }, 1);
-
+  //
   //   return () => {
   //     window.clearTimeout(timer);
   //   };
@@ -134,6 +134,15 @@ function AppContent({ Component, pageProps }) {
           pageBody.classList.remove("stick");
         }
       }
+    }
+
+    const headTop = document.querySelector(".headTop");
+    const pageBody = document.querySelector(".pageBody");
+
+    if (headTop && pageBody) {
+      const headTopHeight = -headTop.getBoundingClientRect().height;
+
+      pageBody.style.setProperty("--hTH", `${headTopHeight}px`);
     }
 
     window.addEventListener("scroll", checkIfInView);

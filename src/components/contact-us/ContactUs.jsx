@@ -1,17 +1,84 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import groupMascot from "@/assets/images/contact-us/groupMascot.png";
 import styles from "@/components/contact-us/ContactUs.module.css";
+import { useContactUsMutation } from "@/redux/apis/contactUsApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
+
+const INITIAL_FORM = {
+  full_name: "",
+  email: "",
+  contact_no: "",
+  comment: "",
+};
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^\+?[0-9\s-]{10,15}$/;
+
+const validate = (values) => {
+  const errors = {};
+  if (!values.full_name.trim()) errors.full_name = "This field is required";
+  if (!values.email.trim()) errors.email = "This field is required";
+  else if (!EMAIL_REGEX.test(values.email.trim()))
+    errors.email = "Enter a valid email address";
+  if (!values.contact_no.trim()) errors.contact_no = "This field is required";
+  else if (!PHONE_REGEX.test(values.contact_no.trim()))
+    errors.contact_no = "Enter a valid mobile number";
+  return errors;
+};
 
 const ContactUs = () => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  };
+  const [contactUs, { isLoading }] = useContactUsMutation();
+
+  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [errors, setErrors] = useState({});
+  const { showToast } = useToast();
 
   const distributorRef = useRef(null);
   const distributorGradRef = useRef(null);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isLoading) return;
+
+    const validationErrors = validate(formData);
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) return;
+
+
+    try {
+      const res = await contactUs({
+        body: {
+          full_name: formData.full_name.trim(),
+          email: formData.email.trim(),
+          contact_no: formData.contact_no.trim(),
+          comment: formData.comment.trim(),
+        },
+      }).unwrap();
+      showToast(
+        res?.message || "Thank you! Your enquiry has been submitted.",
+        "success",
+      );
+      setFormData(INITIAL_FORM);
+      setErrors({});
+    } catch (err) {
+      showToast(
+        err?.data?.message ||
+          err?.data?.error ||
+          err?.error ||
+          "Something went wrong. Please try again.",
+        "error",
+      );
+    }
+  };
 
   const handleMouseMove = (e) => {
     const distributor = distributorRef.current;
@@ -27,6 +94,7 @@ const ContactUs = () => {
     distributorGrad.style.setProperty("--x", `${x}px`);
     distributorGrad.style.setProperty("--y", `${y}px`);
   };
+
   return (
     <section
       className="sitePadding py-5 bgPrimary position-relative distributor"
@@ -165,6 +233,7 @@ const ContactUs = () => {
                 className="row g-3 p-sm-4 p-3 m-0 rounded-3 formFormat"
                 style={{ border: "1px solid #aaa" }}
                 onSubmit={handleSubmit}
+                noValidate
               >
                 <div className="col-12 mt-0">
                   <h4 className="sectionHead_sm mb-0 lh-1">
@@ -172,32 +241,83 @@ const ContactUs = () => {
                   </h4>
                 </div>
                 <div className="col-12">
-                  <label className="form-label">Name *</label>
-                  <input type="text" className="form-control" />
-                  <span className="errorLabel">This field is required</span>
+                  <label className="form-label" htmlFor="full_name">
+                    Name *
+                  </label>
+                  <input
+                    id="full_name"
+                    name="full_name"
+                    type="text"
+                    className="form-control"
+                    value={formData.full_name}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                  />
+                  {errors.full_name && (
+                    <span className="errorLabel d-block">
+                      {errors.full_name}
+                    </span>
+                  )}
                 </div>
                 <div className="col-12">
-                  <label className="form-label">Email *</label>
-                  <input type="text" className="form-control" />
-                  <span className="errorLabel">This field is required</span>
+                  <label className="form-label" htmlFor="email">
+                    Email *
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    className="form-control"
+                    value={formData.email}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                  />
+                  {errors.email && (
+                    <span className="errorLabel d-block">{errors.email}</span>
+                  )}
                 </div>
                 <div className="col-12">
-                  <label className="form-label">Mobile No.*</label>
-                  <input type="text" className="form-control" />
-                  <span className="errorLabel">This field is required</span>
+                  <label className="form-label" htmlFor="contact_no">
+                    Mobile No.*
+                  </label>
+                  <input
+                    id="contact_no"
+                    name="contact_no"
+                    type="tel"
+                    className="form-control"
+                    value={formData.contact_no}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                  />
+                  {errors.contact_no && (
+                    <span className="errorLabel d-block">
+                      {errors.contact_no}
+                    </span>
+                  )}
                 </div>
                 <div className="col-12">
-                  <label className="form-label">Message</label>
-                  <textarea className="form-control" rows="2"></textarea>
-                  <span className="errorLabel">This field is required</span>
+                  <label className="form-label" htmlFor="comment">
+                    Message
+                  </label>
+                  <textarea
+                    id="comment"
+                    name="comment"
+                    className="form-control"
+                    rows="2"
+                    value={formData.comment}
+                    onChange={handleChange}
+                    disabled={isLoading}
+                  ></textarea>
                 </div>
+
                 <div className="col-12 pt-3 text-center">
                   <button
                     type="submit"
                     className="ctaBtn arw"
                     style={{ width: "150px" }}
+                    disabled={isLoading}
                   >
-                    Submit
+                    {isLoading ? "Submitting..." : "Submit"}
                   </button>
                 </div>
               </form>

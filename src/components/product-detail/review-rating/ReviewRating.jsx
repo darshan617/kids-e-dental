@@ -214,7 +214,8 @@ const ReviewRating = ({ product }) => {
                         <button
                           type="button"
                           className="ctaBtn arw w-100"
-                          // disabled={!canReview}
+                          disabled={!canReview}
+                          style={{ opacity: !canReview ? 0.7 : 1 }}
                           onClick={openReviewPopup}
                         >
                           Write your review
