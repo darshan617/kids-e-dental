@@ -57,7 +57,7 @@ const CustomPopup = ({
 
   return createPortal(
     <div className={styles.root}>
-      <div className={styles.overlay} onClick={handleClose}>
+      <div className={styles.overlay}>
         <div
           className={`${styles.popup} ${wide ? styles.popupWide : ""}`}
           style={maxWidth ? { maxWidth } : undefined}

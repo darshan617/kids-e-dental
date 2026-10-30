@@ -392,6 +392,10 @@ a {
   display: block;
 }
 
+.form-control:focus {
+  box-shadow: none !important;
+}
+
 .breadcrumb {
   --bs-breadcrumb-item-padding-x: 0.3rem;
   .breadcrumb-item {
@@ -427,5 +431,15 @@ a {
   display: none;
 }
 
-.productSlider .swiper-slide { height: auto; }
-.productSlider .swiper-slide > * { width: 100%; max-width: 100%; }
+.productSlider .swiper-slide {
+  height: auto;
+}
+.productSlider .swiper-slide > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+:global(.stick) .pageHeader {
+  top: var(--hTH);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}

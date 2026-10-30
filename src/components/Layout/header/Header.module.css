@@ -4,12 +4,12 @@
   z-index: 1000;
   transition: box-shadow 0.35s ease;
 }
-:global(.stick) .pageHeader {
-  /* top: var(--hTH); */
+/* :global(.stick) .pageHeader {
+  top: var(--hTH);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-}
+} */
 
-.headTop {
+/* .headTop {
   overflow: hidden;
   max-height: 100px;
   opacity: 1;
@@ -18,13 +18,9 @@
   transition:
     transform 0.3s ease,
     opacity 0.3s ease;
-  /* transition:
-    max-height 0.4s ease,
-    padding 0.4s ease,
-    opacity 0.3s ease,
-    transform 0.4s ease; */
+
   will-change: max-height, opacity;
-}
+} */
 :global(.stick) .headTop {
   position: absolute;
   top: 0;
