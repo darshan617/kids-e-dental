@@ -49,6 +49,7 @@ export const apiSlice = createApi({
     "products",
     "wishlist",
     "listing",
+    "contactUs",
   ],
 
   overrideExisting: true,

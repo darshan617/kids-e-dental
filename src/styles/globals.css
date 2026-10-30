@@ -247,12 +247,12 @@ p {
   padding: 0.75rem 1.2rem;
   border-radius: 50rem;
   background: var(--primary);
-  font-weight: 500;
   transition: all 0.3s ease;
   border: 1px solid #000;
   position: relative;
   overflow: hidden;
   z-index: 1;
+  &.white {background:#fff;}
   &:hover {
     background: #000;
     color: var(--primary);
@@ -348,25 +348,6 @@ p {
   }
 }
 
-html {
-  max-width: 100vw;
-  overflow-x: clip;
-}
-body {
-  max-width: 100vw;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
 .formFormat .form-label {
   font-size: 0.75rem;
   margin-bottom: 0;
@@ -390,6 +371,10 @@ a {
 }
 .formFormat .error .errorLabel {
   display: block;
+}
+
+.form-control:focus {
+  box-shadow: none !important;
 }
 
 .breadcrumb {
@@ -427,5 +412,15 @@ a {
   display: none;
 }
 
-.productSlider .swiper-slide { height: auto; }
-.productSlider .swiper-slide > * { width: 100%; max-width: 100%; }
+.productSlider .swiper-slide {
+  height: auto;
+}
+.productSlider .swiper-slide > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+:global(.stick) .pageHeader {
+  top: var(--hTH);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
