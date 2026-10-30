@@ -20,7 +20,7 @@ const addToWishlistApi = apiSlice.injectEndpoints({
     }),
     removeFromWishlist: builder.mutation({
       query: ({ body }) => ({
-        url: "/remove-cart-item",
+        url: "/remove-wishlist-item",
         method: "POST",
         body,
       }),

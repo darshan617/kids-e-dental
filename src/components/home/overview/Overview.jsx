@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef } from "react";
-import aboutMascot from "@/assets/images/aboutMascot.png";
+import aboutMascot from "@/assets/images/about/aboutMascot.png";
 import styles from "@/components/home/overview/Overview.module.css";
 
 const Overview = () => {

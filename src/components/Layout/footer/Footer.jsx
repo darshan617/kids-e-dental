@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
 import styles from "@/components/Layout/footer/Footer.module.css";
-import footMascot from "@/assets/images/footMascot.png";
+import footMascot from "@/assets/images/home/footMascot.png";
 import { useRouter } from "next/router";
 
 const Footer = () => {
@@ -53,7 +53,7 @@ const Footer = () => {
                   <a onClick={() => router.push("/my-profile")}>My Account</a>
                     </li>
                   <li>
-                    <a href="#">Shop</a>
+                    <a href="/product-listing">Shop</a>
                   </li>
                   <li>
                     <a onClick={() => router.push("/privacy-policy")}>Privacy Policy</a>

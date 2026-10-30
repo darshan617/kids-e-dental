@@ -5,13 +5,14 @@ import "swiper/css/navigation";
 import styles from "@/components/home/why-choose/WhyChoose.module.css";
 import Image from "next/image";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import {useGetHomeDataQuery } from "@/redux/apis/homeApi";
-
+import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
+import { useRouter } from "next/router";
 
 const WhyChoose = () => {
+  const router = useRouter();
   const { data, isLoading } = useGetHomeDataQuery();
   const whyChooseUsData = data?.data?.why_choose_us || [];
-  
+
   const wcuSliderRef = useRef(null);
   const swiperInstance = useRef(null);
 
@@ -55,18 +56,24 @@ const WhyChoose = () => {
         <div className="row g-sm-4 g-3 justify-content-between">
           <div className="col-md-auto order-md-1 animateThis slideRight">
             <h3 className="sectionHead_sm">Why Choose Us</h3>
-            <h2 className="sectionHead fw-bold">Why Partner With Kids-e-Dental?</h2>
+            <h2 className="sectionHead fw-bold">
+              Why Partner With Kids-e-Dental?
+            </h2>
           </div>
-          
+
           <div className="col-12 order-md-3 position-relative animateThis slideLeft">
             <div className={`${styles.wcuSlider} swiper`} ref={wcuSliderRef}>
               <div className="swiper-wrapper align-content-stretch">
                 {whyChooseUsData?.map((slide) => (
                   <div className="swiper-slide h-auto" key={slide?.id}>
-                    <div className={`${styles.wcuBox} p-2 h-100 rounded-4 vstack`}>
+                    <div
+                      className={`${styles.wcuBox} p-2 h-100 rounded-4 vstack`}
+                    >
                       <div className="p-2 p-md-3">
                         <h3 className={styles.wcuTitle}>{slide?.title}</h3>
-                        <p className="wcu_txt mb-0 lh-base">{slide?.description}</p>
+                        <p className="wcu_txt mb-0 lh-base">
+                          {slide?.description}
+                        </p>
                       </div>
                       <div className="ratio ratio-4x3 w-100 rounded-3 overflow-hidden mt-auto">
                         <Image
@@ -94,9 +101,12 @@ const WhyChoose = () => {
           </div>
 
           <div className="col-12 col-md-auto order-md-2 align-self-center text-center animateThis fadeIn">
-            <a href="#" className="ctaBtn white arw">
+            <button
+              onClick={() => router.push("/about-us")}
+              className="ctaBtn white arw"
+            >
               Explore More
-            </a>
+            </button>
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ import {
   ProductCard,
   normalizeProduct,
 } from "@/common-component/product-card/ProductCard";
-import EMPTY_IMAGE from "@/assets/images/wishlist.jpg";
+import EMPTY_IMAGE from "@/assets/images/prd-detail/wishlist.jpg";
 import { useGetWishlistQuery } from "@/redux/apis/addToWishlistApi";
 
 const normalizeWishlistItems = (res) => {
@@ -78,7 +78,7 @@ const MyWishlist = ({
             <h2 className={styles.emptyTitle}>{emptyTitle}</h2>
             <p className={styles.emptyText}>{emptyText}</p>
             <Link
-              href={shopBtnHref || "/product-category/safety"}
+              href={shopBtnHref || "/product-listing"}
               className="ctaBtn"
               prefetch={true}
             >

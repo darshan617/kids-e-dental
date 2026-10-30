@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import Image from "next/image";
-import groupMascot from "@/assets/images/groupMascot.png";
+import groupMascot from "@/assets/images/contact-us/groupMascot.png";
 import styles from "@/components/contact-us/ContactUs.module.css";
 
 const ContactUs = () => {
