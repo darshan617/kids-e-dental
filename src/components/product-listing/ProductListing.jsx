@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import distributorImg from "@/assets/images/distributorImg.png";
+import distributorImg from "@/assets/images/home/distributorImg.png";
 import styles from "@/components/product-listing/ProductListing.module.css";
 import {
   ProductCard,
@@ -304,9 +304,9 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
               <PriceFilter />
             </FilterSection>
 
-            <FilterSection id="fltr_Gender" title="Gender">
+            {/* <FilterSection id="fltr_Gender" title="Gender">
               <CheckboxList items={genders} />
-            </FilterSection>
+            </FilterSection> */}
           </ul>
         </div>
       </div>
@@ -372,7 +372,6 @@ function ProductListing() {
     })),
   }));
 
-  // Support common API response structures.
   const apiProducts = Array.isArray(productData?.data)
     ? productData.data
     : Array.isArray(productData?.data?.products)
@@ -381,9 +380,6 @@ function ProductListing() {
         ? productData.products
         : [];
 
-  // Normalize the API product into the props ProductCard expects
-  // (image, price, oldPrice, rating, reviews, variants, ...) while keeping
-  // the raw fields needed for filtering and sorting.
   const allProducts = apiProducts.map((product) => {
     const normalized = normalizeProduct(product);
 

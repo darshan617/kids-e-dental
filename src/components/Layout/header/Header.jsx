@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import Logo from "@/assets/images/KidseDental_Logo.png";
-import distributorImg from "@/assets/images/distributorImg.png";
+import distributorImg from "@/assets/images/home/distributorImg.png";
 import styles from "@/components/Layout/header/Header.module.css";
 import { useRouter } from "next/router";
 import AuthPopup from "@/common-component/auth-popup/AuthPopup";

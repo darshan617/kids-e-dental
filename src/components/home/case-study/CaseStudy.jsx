@@ -4,46 +4,46 @@ import Image from "next/image";
 import React, { useEffect, useRef } from "react";
 import Swiper from "swiper/bundle";
 import "swiper/css/bundle";
-import csImg from "@/assets/images/csImg.jpg";
-import distributorImg from "@/assets/images/distributorImg.png";
+// import csImg from "@/assets/images/csImg.jpg";
+import distributorImg from "@/assets/images/home/distributorImg.png";
 import styles from "@/components/home/case-study/CaseStudy.module.css";
 import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
 import { useRouter } from "next/router";
 
-const slides = [
-  {
-    title: "Kids-e-Crown®",
-    subtitle: "Reliable Pediatric Crown Solutions",
-    product: "Kids-e-Crown®",
-    application: "Pediatric Crown Restoration",
-    benefit: "Durable & child-friendly solution",
-    img: csImg,
-  },
-  {
-    title: "Kids-e-Crown®",
-    subtitle: "Reliable Pediatric Crown Solutions",
-    product: "Kids-e-Crown®",
-    application: "Pediatric Crown Restoration",
-    benefit: "Durable & child-friendly solution",
-    img: csImg,
-  },
-  {
-    title: "Kids-e-Crown®",
-    subtitle: "Reliable Pediatric Crown Solutions",
-    product: "Kids-e-Crown®",
-    application: "Pediatric Crown Restoration",
-    benefit: "Durable & child-friendly solution",
-    img: csImg,
-  },
-  {
-    title: "Kids-e-Crown®",
-    subtitle: "Reliable Pediatric Crown Solutions",
-    product: "Kids-e-Crown®",
-    application: "Pediatric Crown Restoration",
-    benefit: "Durable & child-friendly solution",
-    img: csImg,
-  },
-];
+// const slides = [
+//   {
+//     title: "Kids-e-Crown®",
+//     subtitle: "Reliable Pediatric Crown Solutions",
+//     product: "Kids-e-Crown®",
+//     application: "Pediatric Crown Restoration",
+//     benefit: "Durable & child-friendly solution",
+//     img: csImg,
+//   },
+//   {
+//     title: "Kids-e-Crown®",
+//     subtitle: "Reliable Pediatric Crown Solutions",
+//     product: "Kids-e-Crown®",
+//     application: "Pediatric Crown Restoration",
+//     benefit: "Durable & child-friendly solution",
+//     img: csImg,
+//   },
+//   {
+//     title: "Kids-e-Crown®",
+//     subtitle: "Reliable Pediatric Crown Solutions",
+//     product: "Kids-e-Crown®",
+//     application: "Pediatric Crown Restoration",
+//     benefit: "Durable & child-friendly solution",
+//     img: csImg,
+//   },
+//   {
+//     title: "Kids-e-Crown®",
+//     subtitle: "Reliable Pediatric Crown Solutions",
+//     product: "Kids-e-Crown®",
+//     application: "Pediatric Crown Restoration",
+//     benefit: "Durable & child-friendly solution",
+//     img: csImg,
+//   },
+// ];
 
 const CaseStudy = () => {
   const { data, isLoading } = useGetHomeDataQuery();

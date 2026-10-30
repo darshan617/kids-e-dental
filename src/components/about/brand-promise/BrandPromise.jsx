@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React, { useEffect, useRef } from "react";
-import promiseMascot from "@/assets/images/promiseMascot.png";
+import promiseMascot from "@/assets/images/about/promiseMascot.png";
 import styles from "@/components/about/brand-promise/BrandPromise.module.css";
 
 const BrandPromise = () => {

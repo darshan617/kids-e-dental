@@ -1,10 +1,10 @@
 import Image from "next/image";
 import React, { useRef, useState } from "react";
 import styles from "@/components/case-study/CaseStudy.module.css";
-import csImg from "@/assets/images/csImg.jpg";
+import csImg from "@/assets/images/home/csImg.jpg";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 
-const PER_PAGE = 2;
+const PER_PAGE = 4;
 
 const caseStudies = [
   {

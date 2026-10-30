@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import Swiper from "swiper";
 import "swiper/css";
 import { Autoplay } from "swiper/modules";
-import bgWorldMap from "@/assets/images/bgWorldMap.jpg";
+import bgWorldMap from "@/assets/images/home/bgWorldMap.jpg";
 import styles from "@/components/home/trusted-countries/TrustedCountries.module.css";
 
 const COUNTRY_ROWS = [

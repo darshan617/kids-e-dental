@@ -7,9 +7,9 @@ import { Autoplay, Pagination, Parallax } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import styles from "@/components/home/banner/Banner.module.css";
-import heroBannerMob1 from "@/assets/images/heroBanner_mob1.jpg";
-import heroBanner1 from "@/assets/images/heroBanner_1.jpg";
-import uspMascot from "@/assets/images/uspMascot.png";
+// import heroBannerMob1 from "@/assets/images/heroBanner_mob1.jpg";
+
+import uspMascot from "@/assets/images/home/uspMascot.png";
 import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
 import BannerShimmer from "./BannerShimmer";
 

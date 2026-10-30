@@ -349,14 +349,6 @@ export const ProductCard = ({
     await addItem();
   };
 
-  const handleBuyNow = async () => {
-    if (hasVariants || needsDetailsPage) {
-      router.push(detailsHref);
-      return;
-    }
-    const ok = await addItem();
-    if (ok) router.push("/cart");
-  };
 
   const handleConfirmVariant = async (variantId, qty) => {
     const ok = await addItem(variantId, qty);
@@ -506,7 +498,6 @@ export const ProductCard = ({
           <button
             type="button"
             className={`${styles.pibBtn} ${styles.buyBtn}`}
-            onClick={handleBuyNow}
             disabled={isCartLoading}
           >
             Buy Now

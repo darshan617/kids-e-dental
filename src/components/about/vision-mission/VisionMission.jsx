@@ -1,19 +1,18 @@
 import Image from "next/image";
 import React from "react";
-import styles from '@/components/about/vision-mission/VisionMission.module.css'
-import mvMascot from "@/assets/images/mvMascot.png";
+import styles from "@/components/about/vision-mission/VisionMission.module.css";
+import mvMascot from "@/assets/images/about/mvMascot.png";
 
 const VisionMission = () => {
   return (
     <section className="sitePadding py-5 overflow-hidden">
-      <div
-        className="container-fluid pt-5"
-        style={{ maxWidth: "1500px" }}
-      >
+      <div className="container-fluid pt-5" style={{ maxWidth: "1500px" }}>
         <div className="row">
           <div className="col-lg-auto col-12 order-lg-2 text-center">
             <div className={`${styles.mvMascotBox} mx-auto mb-4 mb-lg-0`}>
-              <div className={`${styles.mvArrow} ${styles.mvTop} animateOne curtainLeft `}>
+              <div
+                className={`${styles.mvArrow} ${styles.mvTop} animateOne curtainLeft `}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 1000 189.1"
@@ -24,7 +23,9 @@ const VisionMission = () => {
                 </svg>
               </div>
 
-              <div className={`${styles.mvArrow} ${styles.mvBtm} animateOne curtainRight`}>
+              <div
+                className={`${styles.mvArrow} ${styles.mvBtm} animateOne curtainRight`}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 1000 189.1"

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
 import styles from "@/common-component/auth-popup/AuthPopup.module.css";
 import Image from "next/image";
-import aboutMascot from "@/assets/images/aboutMascot.png";
+import aboutMascot from "@/assets/images/about/aboutMascot.png";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import {
@@ -309,7 +309,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
       closeIcon={false}
       maxWidth="800px"
     >
-      <div className="loginModal bgPrimary d-flex flex-wrap align-items-stretch p-1">
+      <div className="loginModal bgPrimary d-flex flex-wrap align-items-stretch p-1 rounded">
         <div className="col-md-7 p-sm-5 p-4 pb-4 bg-white position-relative">
           <button
             type="button"

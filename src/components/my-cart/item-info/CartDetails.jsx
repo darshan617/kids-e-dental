@@ -4,9 +4,9 @@ import Link from "next/link";
 import { ImBin } from "react-icons/im";
 import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
-import csImg from "@/assets/images/csImg.jpg";
+import csImg from "@/assets/images/home/csImg.jpg";
 import { useRouter } from "next/router";
-import emptyCartImg from "@/assets/images/wishlist.jpg";
+import emptyCartImg from "@/assets/images/prd-detail/wishlist.jpg";
 
 export const EmptyCart = () => (
   <div className={styles.emptySection}>

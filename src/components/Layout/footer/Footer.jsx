@@ -1,7 +1,7 @@
 import Image from "next/image";
 import React from "react";
 import styles from "@/components/Layout/footer/Footer.module.css";
-import footMascot from "@/assets/images/footMascot.png";
+import footMascot from "@/assets/images/home/footMascot.png";
 import { useRouter } from "next/router";
 
 const Footer = () => {

@@ -6,11 +6,11 @@ import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 import BioflxCrownsKit from "@/assets/images/bioflx/Bioflx-Crowns-Kit-IFU.jpg";
-import kidsEcrownAnteriorTechnique from "@/assets/images/kids-e-crown_anterior-technique.jpg";
-import posteriorTechnique from "@/assets/images/kids-e-crown_posterior-technique.jpg";
-import eSdfTechnique from "@/assets/images/e-sdf-technique.jpg";
-import PulpotomyTechnique from "@/assets/images/e-MTA-Pulpotomy-technique.jpg";
-import SPLINTTechnique from "@/assets/images/e-SPLINT-technique.jpg";
+import kidsEcrownAnteriorTechnique from "@/assets/images/education/kids-e-crown_anterior-technique.jpg";
+import posteriorTechnique from "@/assets/images/education/kids-e-crown_posterior-technique.jpg";
+import eSdfTechnique from "@/assets/images/education/e-sdf-technique.jpg";
+import PulpotomyTechnique from "@/assets/images/education/e-MTA-Pulpotomy-technique.jpg";
+import SPLINTTechnique from "@/assets/images/education/e-SPLINT-technique.jpg";
 
 import styles from "@/components/education/Education.module.css";
 

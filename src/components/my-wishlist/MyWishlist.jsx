@@ -6,7 +6,7 @@ import {
   ProductCard,
   normalizeProduct,
 } from "@/common-component/product-card/ProductCard";
-import EMPTY_IMAGE from "@/assets/images/wishlist.jpg";
+import EMPTY_IMAGE from "@/assets/images/prd-detail/wishlist.jpg";
 import { useGetWishlistQuery } from "@/redux/apis/addToWishlistApi";
 
 const normalizeWishlistItems = (res) => {
