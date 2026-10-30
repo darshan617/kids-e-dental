@@ -67,6 +67,13 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [password, setPassword] = useState("");
   const [showSignupPwd, setShowSignupPwd] = useState(false);
 
+  // const [formData, setFormData] = useState({
+  //   name: "",
+  //   email: "",
+  //   password: "",
+  //   showSignupPwd: "",
+  // });
+
   // login fields
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -187,9 +194,6 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
         });
       }
 
-      console.log("User data saved:", userData);
-      console.log("User ID:", userData?.id);
-
       showToast(response?.message || "Logged in successfully", "success");
 
       setLoginEmail("");
@@ -249,10 +253,33 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
         body: { email: otpEmail, otp: otp.join("") },
       }).unwrap();
 
-      showToast(response?.message || "Email verified successfully", "success");
+      if (response?.status) {
+        showToast(
+          response?.message || "Email verified successfully",
+          "success",
+        );
 
-      clearOtpBoxes();
-      onClose?.();
+        const userData = response?.user;
+        const token = response?.token;
+
+        if (userData) {
+          Cookies.set("userData", JSON.stringify(userData), {
+            expires: 7,
+            sameSite: "Lax",
+          });
+        }
+
+        if (token) {
+          Cookies.set("token", token, {
+            expires: 7,
+            sameSite: "Lax",
+          });
+        }
+        clearOtpBoxes();
+        onClose?.();
+      } else {
+        console.log(res);
+      }
     } catch (err) {
       console.error("OTP verification failed:", err);
       showError(err, "Invalid code. Please try again.");

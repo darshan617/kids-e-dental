@@ -20,6 +20,7 @@ import {
 } from "react-icons/hi2";
 import Link from "next/link";
 import { useGetCartQuery } from "@/redux/apis/addToCartApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -149,13 +150,14 @@ const readUserDataFromCookie = () => {
 };
 
 const Header = () => {
+  const router = useRouter();
+  const { showToast } = useToast();
   const headerRef = useRef(null);
   const userMenuRef = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
-  const router = useRouter();
 
   const { data: cartData } = useGetCartQuery();
   const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
@@ -176,9 +178,13 @@ const Header = () => {
     setIsLogoutLoading(true);
     try {
       Cookies.remove("userData");
+      Cookies.remove("token");
       setUser(null);
       closeUserMenu();
       router.push("/");
+      showToast("Logout Successfull", "success");
+    } catch (error) {
+      console.log(error, "error");
     } finally {
       setIsLogoutLoading(false);
     }
