@@ -10,12 +10,14 @@ import CaseStudy from "./case-study/CaseStudy";
 const HomeComponents = () => {
   return (
     <Layout>
-      <Banner />
-      <FeaturedProduct />
-      <Overview />
-      <WhyChoose />
-      <TrustedCountries title="Supply worldwide" />
-      {/* <CaseStudy /> */}
+      <div className="overflow-hidden">
+        <Banner />
+        <FeaturedProduct />
+        <Overview />
+        <WhyChoose />
+        <TrustedCountries title="Supply worldwide" />
+        <CaseStudy />
+      </div>
     </Layout>
   );
 };

@@ -8,7 +8,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import styles from "@/components/home/banner/Banner.module.css";
 // import heroBannerMob1 from "@/assets/images/heroBanner_mob1.jpg";
-
+// import heroBanner1 from "@/assets/images/heroBanner_1.jpg";
 import uspMascot from "@/assets/images/home/uspMascot.png";
 import { useGetHomeDataQuery } from "@/redux/apis/homeApi";
 import BannerShimmer from "./BannerShimmer";
@@ -156,11 +156,11 @@ const Banner = () => {
     if (!Array.isArray(banners) || banners.length === 0) return [];
 
     return banners.map((item, index) => ({
-      id: item.id ?? index,
-      href: item.link || "#",
-      desktopSrc: item.image || item.desktopImage,
-      mobileSrc: item.mobileImage || item.image,
-      alt: item.title || item.alt || "Hero Banner",
+      id: item?.id ?? index,
+      href: item?.link || "#",
+      desktopSrc: item?.image || item?.desktopImage,
+      mobileSrc: item?.mobile_image || item?.image,
+      alt: item?.title || item?.alt || "Hero Banner",
       priority: index === 0,
     }));
   }, [homeResult]);
@@ -184,7 +184,7 @@ const Banner = () => {
   }, [slides]);
 
   return (
-    <>
+    <div className="overflow-hidden">
       {isLoading ? (
         <BannerShimmer />
       ) : slides.length > 0 ? (
@@ -223,7 +223,7 @@ const Banner = () => {
       ) : null}
 
       <section
-        className={`${styles.uspSection} overflow-hidden sitePadding z-1 position-relative mb-5 animateThis`}
+        className={`${styles.uspSection} sitePadding z-1 position-relative mb-5 animateThis `}
       >
         <div
           className={`${styles.brandUSP} container-fluid bgPrimary py-sm-5 py-4 animateThis curtainLeft`}
@@ -254,7 +254,7 @@ const Banner = () => {
           className={`${styles.uspMascot} d-block h-auto`}
         />
       </section>
-    </>
+    </div>
   );
 };
 
