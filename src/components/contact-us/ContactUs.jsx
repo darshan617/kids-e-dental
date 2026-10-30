@@ -191,7 +191,7 @@ const ContactUs = () => {
                   </svg>
                 </div>
                 <div className="pt-1">
-                  <a href="tel:+919960560199" className="fw-medium">
+                  <a href="tel:+919960560199">
                     +91 99605 60199
                   </a>
                 </div>
@@ -215,11 +215,10 @@ const ContactUs = () => {
                 <div className="vstack gap-2 pt-1">
                   <a
                     href="mailto:enquiry@kids-e-dental.com"
-                    className="fw-medium"
                   >
                     enquiry@kids-e-dental.com
                   </a>
-                  <a href="mailto:kidsedental@gmail.com" className="fw-medium">
+                  <a href="mailto:kidsedental@gmail.com">
                     kidsedental@gmail.com
                   </a>
                 </div>

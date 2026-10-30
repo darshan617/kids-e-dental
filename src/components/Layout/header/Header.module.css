@@ -1,13 +1,5 @@
-.pageHeader {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  transition: box-shadow 0.35s ease;
-}
-/* :global(.stick) .pageHeader {
-  top: var(--hTH);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-} */
+.pageHeader {position:sticky;top:0;z-index:1000;transition:all .5s ease;}
+:global(.stick) .pageHeader {top:var(--hTH);box-shadow:0 5px 10px rgba(0,0,0,.1);}
 
 /* .headTop {
   overflow: hidden;
@@ -18,7 +10,6 @@
   transition:
     transform 0.3s ease,
     opacity 0.3s ease;
-
   will-change: max-height, opacity;
 } */
 :global(.stick) .headTop {
@@ -29,7 +20,7 @@
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
-}
+} 
 
 .headTopLinks a {
   color: #fff;
@@ -384,15 +375,15 @@
     position: unset;
   }
   .siteMenu {
-    & li {
+    & > li {
       padding: 0 0.5vw;
     }
-    & a {
+    & > li > a {
       padding: 0.75rem 0.833vw;
       position: relative;
       z-index: 1;
     }
-    & > li > a:before {
+    & > li > a[role="button"]:before {
       content: "";
       width: 100%;
       height: 300%;
@@ -402,7 +393,7 @@
       left: 0;
       z-index: -1;
     }
-    & > li:hover > a:before {
+    & > li:hover > a[role="button"]:before {
       display: block;
     }
 
@@ -418,8 +409,8 @@
   .subMenu {
     width: 100%;
     height: 0;
-    display: none;
     position: absolute;
+    display: none;
     top: 100%;
     left: 0;
     background: #f3f3f3;
@@ -448,18 +439,16 @@
 }
 
 @media (min-width: 992px) and (hover: hover) {
-  .pageHeader {
-    font-size: clamp(0.75rem, calc(0.333rem + 0.556vw), 1rem);
-  }
+  .pageHeader {font-size: clamp(0.75rem, calc(0.333rem + 0.556vw), 1rem);}
 
-  /* :global(.stick) .pageHeader:hover .headTop {
+  :global(.stick) .pageHeader:hover .headTop {
     max-height: 100px;
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
-  } */
+  }
 
   .headTopLinks a {
     & svg {
@@ -520,6 +509,8 @@
       border-radius: 3px;
       overflow: hidden;
       transition: all 0.3s ease;
+      font-weight: 400;
+      text-transform:unset;
     }
     & li a:hover {
       background: #111;
@@ -535,6 +526,12 @@
 
   .pgLogo {
     width: 200px;
+  }
+
+  .siteMenu .subMenuBox {border-bottom:1px solid #fff;}
+  .siteMenu .subMenuBtn {font-weight:600;padding:.75rem 0;display:block;position:relative;
+      &:after {content:'';width:.8rem;aspect-ratio:1;display:block;position:absolute;right:.5rem;top:0;bottom:0;margin:auto;background: url("data:image/svg+xml,<svg viewBox='0 0 7 12' xmlns='http://www.w3.org/2000/svg'><path d='M4.94626 6.00001L0.873012 1.92701C0.734678 1.78851 0.663845 1.61443 0.660512 1.40476C0.657345 1.19526 0.728178 1.01801 0.873012 0.873012C1.01801 0.728178 1.19368 0.655762 1.40001 0.655762C1.60634 0.655762 1.78201 0.728178 1.92701 0.873012L6.42126 5.36726C6.51476 5.46093 6.58076 5.55968 6.61926 5.66351C6.65776 5.76735 6.67701 5.87951 6.67701 6.00001C6.67701 6.12051 6.65776 6.23268 6.61926 6.33651C6.58076 6.44035 6.51476 6.5391 6.42126 6.63276L1.92701 11.127C1.78851 11.2653 1.61443 11.3362 1.40476 11.3395C1.19526 11.3427 1.01801 11.2718 0.873012 11.127C0.728178 10.982 0.655762 10.8063 0.655762 10.6C0.655762 10.3937 0.728178 10.218 0.873012 10.073L4.94626 6.00001Z' fill='%231A1A1A'/></svg>")no-repeat center;background-size:contain;transition:all .3s ease;transform:rotate(0deg);}
+      &[aria-expanded="true"]:after {transform:rotate(90deg);}
   }
 }
 
