@@ -164,7 +164,7 @@ const CaseStudy = () => {
         onMouseMove={handleMouseMove}
         className="sitePadding py-md-5 py-4 bgPrimary position-relative distributor"
       >
-        <div ref={distributorGradRef} className={styles.distributorGrad}>
+        <div ref={distributorGradRef} className={styles.distributorGrad}  style={{ "--x":"849px", "--y": "311px" }}>
           <span></span>
           <span></span>
         </div>
