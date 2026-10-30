@@ -4,7 +4,7 @@ import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import Logo from "@/assets/images/KidseDental_Logo.png";
-import distributorImg from "@/assets/images/distributorImg.png";
+import distributorImg from "@/assets/images/home/distributorImg.png";
 import styles from "@/components/Layout/header/Header.module.css";
 import { useRouter } from "next/router";
 import AuthPopup from "@/common-component/auth-popup/AuthPopup";
@@ -20,6 +20,7 @@ import {
 } from "react-icons/hi2";
 import Link from "next/link";
 import { useGetCartQuery } from "@/redux/apis/addToCartApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -40,13 +41,21 @@ const TOP_BAR_LINKS = [
   {
     id: "track",
     label: "Track Order",
-    icon: <FaMapMarkerAlt size={22} />,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <path d="M256,0C150,0.1,64.1,86,64,192c0,137.8,178.9,310.5,186.5,317.8c3.1,3,8,3,11,0C269.1,502.5,448,329.8,448,192C447.9,86,362,0.1,256,0z M256,280c-48.6,0-88-39.4-88-88s39.4-88,88-88s88,39.4,88,88C344,240.6,304.6,280,256,280z" />
+      </svg>
+    ),
     url: "",
   },
   {
     id: "help",
     label: "Help Center",
-    icon: <MdHeadsetMic size={22} />,
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <path d="M256,28.5c-89.4,0-164.7,61-179.4,142.3H63.5c-19.4,0-35,15.6-35,35v100.3c0,19.4,15.6,35,35,35h16.8c19.4,0,35-15.6,35-35V199.8c0-71.6,61.6-130,140.6-130c79,0,140.7,58.4,140.7,130v112.3c0,71.6-61.6,130-140.7,130c-11.4,0-20.7,9.3-20.7,20.7c0,11.4,9.3,20.7,20.7,20.7c89.4,0,164.7-61,179.4-142.3h13.1c19.4,0,35-15.6,35-35V205.9c0-19.4-15.6-35-35-35h-13.1C420.7,89.5,345.4,28.5,256,28.5L256,28.5z M212.1,338.5c-12.9,0-23.7,10.8-19.3,22.8c9.3,25.9,34.1,44.3,63.2,44.3c29.1,0,53.8-18.5,63.2-44.3c4.4-12-6.5-22.8-19.3-22.8H212.1z" />
+      </svg>
+    ),
     url: "/help-center",
   },
 ];
@@ -141,13 +150,14 @@ const readUserDataFromCookie = () => {
 };
 
 const Header = () => {
+  const router = useRouter();
+  const { showToast } = useToast();
   const headerRef = useRef(null);
   const userMenuRef = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
-  const router = useRouter();
 
   const { data: cartData } = useGetCartQuery();
   const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
@@ -168,9 +178,13 @@ const Header = () => {
     setIsLogoutLoading(true);
     try {
       Cookies.remove("userData");
+      Cookies.remove("token");
       setUser(null);
       closeUserMenu();
       router.push("/");
+      showToast("Logout Successfull", "success");
+    } catch (error) {
+      console.log(error, "error");
     } finally {
       setIsLogoutLoading(false);
     }

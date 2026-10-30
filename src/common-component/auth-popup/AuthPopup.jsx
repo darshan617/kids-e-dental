@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
 import styles from "@/common-component/auth-popup/AuthPopup.module.css";
 import Image from "next/image";
-import aboutMascot from "@/assets/images/aboutMascot.png";
+import aboutMascot from "@/assets/images/about/aboutMascot.png";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import {
@@ -66,6 +66,13 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showSignupPwd, setShowSignupPwd] = useState(false);
+
+  // const [formData, setFormData] = useState({
+  //   name: "",
+  //   email: "",
+  //   password: "",
+  //   showSignupPwd: "",
+  // });
 
   // login fields
   const [loginEmail, setLoginEmail] = useState("");
@@ -187,9 +194,6 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
         });
       }
 
-      console.log("User data saved:", userData);
-      console.log("User ID:", userData?.id);
-
       showToast(response?.message || "Logged in successfully", "success");
 
       setLoginEmail("");
@@ -249,10 +253,33 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
         body: { email: otpEmail, otp: otp.join("") },
       }).unwrap();
 
-      showToast(response?.message || "Email verified successfully", "success");
+      if (response?.status) {
+        showToast(
+          response?.message || "Email verified successfully",
+          "success",
+        );
 
-      clearOtpBoxes();
-      onClose?.();
+        const userData = response?.user;
+        const token = response?.token;
+
+        if (userData) {
+          Cookies.set("userData", JSON.stringify(userData), {
+            expires: 7,
+            sameSite: "Lax",
+          });
+        }
+
+        if (token) {
+          Cookies.set("token", token, {
+            expires: 7,
+            sameSite: "Lax",
+          });
+        }
+        clearOtpBoxes();
+        onClose?.();
+      } else {
+        console.log(res);
+      }
     } catch (err) {
       console.error("OTP verification failed:", err);
       showError(err, "Invalid code. Please try again.");
@@ -309,7 +336,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
       closeIcon={false}
       maxWidth="800px"
     >
-      <div className="loginModal bgPrimary d-flex flex-wrap align-items-stretch p-1">
+      <div className="loginModal bgPrimary d-flex flex-wrap align-items-stretch p-1 rounded">
         <div className="col-md-7 p-sm-5 p-4 pb-4 bg-white position-relative">
           <button
             type="button"

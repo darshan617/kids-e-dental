@@ -1,8 +1,8 @@
 import Image from "next/image";
 import React from "react";
-import drMukulJain from "@/assets/images/dr-mukul-jain.png";
-import prithviKhakar from "@/assets/images/prithvi-khakar.png";
-import nikhilKitawat from "@/assets/images/nikhil-kitawat.png";
+import drMukulJain from "@/assets/images/about/dr-mukul-jain.png";
+import prithviKhakar from "@/assets/images/about/prithvi-khakar.png";
+import nikhilKitawat from "@/assets/images/about/nikhil-kitawat.png";
 import styles from "@/components/about/about-banner/AboutBanner.module.css";
 
 const leadershipData = [

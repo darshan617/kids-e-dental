@@ -1,11 +1,9 @@
 import Image from "next/image";
 import React from "react";
-import wdu1 from '@/assets/images/wdu_1.jpg'
-import wdu2 from '@/assets/images/wdu_2.jpg'
-import wdu3 from '@/assets/images/wdu_3.jpg'
-import styles from '@/components/about/about-banner/AboutBanner.module.css'
-
-
+import wdu1 from "@/assets/images/home/wdu_1.jpg";
+import wdu2 from "@/assets/images/home/wdu_2.jpg";
+import wdu3 from "@/assets/images/home/wdu_3.jpg";
+import styles from "@/components/about/about-banner/AboutBanner.module.css";
 
 const WhatDrives = () => {
   return (
@@ -25,13 +23,11 @@ const WhatDrives = () => {
       <div className="container-fluid">
         <div className="row row-cols-lg-3 row-cols-md-2 row-cols-1 justify-content-center g-md-4 g-0 staggerList">
           <div className="col animateThis fadeGrow">
-            <div className={`${styles.wduBox} bgPrimary p-2 h-100 rounded-4 vstack`}>
+            <div
+              className={`${styles.wduBox} bgPrimary p-2 h-100 rounded-4 vstack`}
+            >
               <div className="ratio ratio-16x9 w-100 rounded-3 overflow-hidden">
-                <Image
-                  src={wdu1}
-                  alt=""
-                  className="wdu_img object-fit-cover"
-                />
+                <Image src={wdu1} alt="" className="wdu_img object-fit-cover" />
               </div>
               <div className="p-2 p-md-3">
                 <h3 className={styles.wduTitle}>
@@ -48,13 +44,11 @@ const WhatDrives = () => {
             </div>
           </div>
           <div className="col animateThis fadeGrow">
-            <div className={`${styles.wduBox} bgPrimary p-2 h-100 rounded-4 vstack`}>
+            <div
+              className={`${styles.wduBox} bgPrimary p-2 h-100 rounded-4 vstack`}
+            >
               <div className="ratio ratio-16x9 w-100 rounded-3 overflow-hidden">
-                <Image
-                  src={wdu2}
-                  alt=""
-                  className="wdu_img object-fit-cover"
-                />
+                <Image src={wdu2} alt="" className="wdu_img object-fit-cover" />
               </div>
               <div className="p-2 p-md-3">
                 <h3 className={styles.wduTitle}>
@@ -71,13 +65,11 @@ const WhatDrives = () => {
             </div>
           </div>
           <div className="col animateThis fadeGrow">
-            <div className={`${styles.wduBox} bgPrimary p-2 h-100 rounded-4 vstack`}>
+            <div
+              className={`${styles.wduBox} bgPrimary p-2 h-100 rounded-4 vstack`}
+            >
               <div className="ratio ratio-16x9 w-100 rounded-3 overflow-hidden">
-                <Image
-                  src={wdu3}
-                  alt=""
-                  className="wdu_img object-fit-cover"
-                />
+                <Image src={wdu3} alt="" className="wdu_img object-fit-cover" />
               </div>
               <div className="p-2 p-md-3">
                 <h3 className={styles.wduTitle}>

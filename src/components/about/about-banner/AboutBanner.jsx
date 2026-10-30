@@ -1,8 +1,8 @@
 import Image from "next/image";
 import React from "react";
-import abtBanner from "@/assets/images/aboutBanner.jpg";
+import abtBanner from "@/assets/images/about/aboutBanner.jpg";
 import styles from "@/components/about/about-banner/AboutBanner.module.css";
-import aboutContentImg from "@/assets/images/aboutContentImg.jpg";
+import aboutContentImg from "@/assets/images/about/aboutContentImg.jpg";
 
 const AboutBanner = () => {
   return (

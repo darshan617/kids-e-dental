@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
-import stars from "@/assets/images/stars.gif";
+import stars from "@/assets/images/prd-detail/stars.gif";
 import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
 

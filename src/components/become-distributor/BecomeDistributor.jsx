@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React from "react";
-import distributorImg from "@/assets/images/distributorImg.png";
+import distributorImg from "@/assets/images/home/distributorImg.png";
 const BecomeDistributor = () => {
   return (
     <>

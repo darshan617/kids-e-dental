@@ -20,7 +20,7 @@ import {
 } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiInstagram, FiLink } from "react-icons/fi";
-import delivery from "@/assets/images/fast-delivery.png";
+import delivery from "@/assets/images/prd-detail/fast-delivery.png";
 import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
 import { useAddToWishlistMutation } from "@/redux/apis/addToWishlistApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
@@ -186,7 +186,7 @@ const ProductInfo = ({ product }) => {
 
     setArch(nextArch);
 
-    if (!availableSizes.map(String).includes(String(size))) {
+    if (!availableSizes?.map(String).includes(String(size))) {
       setSize(String(availableSizes[0] ?? ""));
     }
     setQty(1);
@@ -214,7 +214,7 @@ const ProductInfo = ({ product }) => {
 
   const getUserData = () => {
     try {
-      const raw = Cookies.get("userData");
+      const raw = Cookies?.get("userData");
 
       if (!raw) return null;
 
@@ -241,8 +241,8 @@ const ProductInfo = ({ product }) => {
     try {
       const res = await addToWishlist({
         body: {
-          user_id: userData.id,
-          product_id: product.id,
+          user_id: userData?.id,
+          product_id: product?.id,
           variant_id: selectedVariant?.id ?? null,
         },
       });
@@ -255,11 +255,11 @@ const ProductInfo = ({ product }) => {
         return;
       }
 
-      if (res.data?.success || res.data?.status) {
+      if (res.data?.success || res?.data?.status) {
         setWishlisted(true);
-        showToast(res.data?.message || "Added to wishlist", "success");
+        showToast(res?.data?.message || "Added to wishlist", "success");
       } else {
-        showToast(res.data?.message || "Failed to add to wishlist", "error");
+        showToast(res?.data?.message || "Failed to add to wishlist", "error");
       }
     } catch (error) {
       console.error("Add to wishlist failed:", error);
@@ -281,7 +281,7 @@ const ProductInfo = ({ product }) => {
     try {
       const res = await addToCart({
         body: {
-          product_id: product.id,
+          product_id: product?.id,
           variant_id: selectedVariant?.id ?? null,
           quantity: qty,
         },
@@ -295,7 +295,6 @@ const ProductInfo = ({ product }) => {
 
   const handleBuyNow = () => {};
 
-  /* ---------- Share ---------- */
   const copyLink = async () => {
     const link = window.location.href;
     try {
