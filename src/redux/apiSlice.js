@@ -43,13 +43,20 @@ export const apiSlice = createApi({
   },
 
   tagTypes: [
-    "registerApi",
-    "categoryApi",
-    "addToWishlistApi",
+    "home",
+    "auth",
+    "category",
     "products",
     "wishlist",
     "listing",
+    "checkout",
+    "Cart",
+    "coupon",
     "contactUs",
+    "privacyPolicy",
+    "termsConditions",
+    "salesPolicy",
+    "subscribeEmail",
   ],
 
   overrideExisting: true,

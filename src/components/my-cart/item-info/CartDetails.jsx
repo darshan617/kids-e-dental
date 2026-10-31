@@ -24,7 +24,7 @@ export const EmptyCart = () => (
     <div className={styles.emptyContent}>
       <h2 className={styles.emptyTitle}>Your Cart is empty!</h2>
       <p className={styles.emptyText}>Add product and proceed</p>
-      <Link href="/product-listing" className='ctaBtn'>
+      <Link href="/product-listing" className="ctaBtn">
         CONTINUE SHOPPING
       </Link>
     </div>
@@ -33,6 +33,7 @@ export const EmptyCart = () => (
 
 const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
   const product = item?.product ?? {};
+  console.log(product, "ppppppppppp");
 
   return (
     <div className={styles.productCartWrapper}>
@@ -48,7 +49,7 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
 
           <div className={styles.productCartContent}>
             <h4 className={styles.productCartName}>
-              <Link href={`/product/${product?.slug || ""}`}>
+              <Link href={`/product-details/${product?.slug || ""}`}>
                 {product?.name || "Product"}
               </Link>
             </h4>
@@ -118,21 +119,13 @@ const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
   const isCheckoutPage = router.pathname === "/checkout";
 
   const [cartItems, setCartItems] = useState([]);
+  console.log("cartData", cartItems);
 
   useEffect(() => {
-    const items = cartData?.data;
+    const items = cartData;
 
-    if (Array.isArray(items)) {
-      setCartItems(
-        items.map((item) => ({
-          ...item,
-          quantity: Number(item?.quantity) || 1,
-          product: {
-            ...item.product,
-            thumbnail: item?.product?.thumbnail || csImg,
-          },
-        })),
-      );
+    if (items) {
+      setCartItems(cartData);
     }
   }, [cartData]);
 

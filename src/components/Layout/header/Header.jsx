@@ -9,8 +9,7 @@ import styles from "@/components/Layout/header/Header.module.css";
 import { useRouter } from "next/router";
 import AuthPopup from "@/common-component/auth-popup/AuthPopup";
 import { BsCart, BsSearch } from "react-icons/bs";
-import { FaMapMarkerAlt } from "react-icons/fa";
-import { MdHeadsetMic } from "react-icons/md";
+import { FaMapMarkerAlt, FaRegHeart } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import {
   HiOutlinePower,
@@ -21,6 +20,8 @@ import {
 import Link from "next/link";
 import { useGetCartQuery } from "@/redux/apis/addToCartApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useDispatch } from "react-redux";
+import { apiSlice } from "@/redux/apiSlice";
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -38,16 +39,16 @@ const TOP_BAR_LINKS = [
     ),
     url: "/become-a-distributor",
   },
-  {
-    id: "track",
-    label: "Track Order",
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-        <path d="M256,0C150,0.1,64.1,86,64,192c0,137.8,178.9,310.5,186.5,317.8c3.1,3,8,3,11,0C269.1,502.5,448,329.8,448,192C447.9,86,362,0.1,256,0z M256,280c-48.6,0-88-39.4-88-88s39.4-88,88-88s88,39.4,88,88C344,240.6,304.6,280,256,280z" />
-      </svg>
-    ),
-    url: "",
-  },
+  // {
+  //   id: "track",
+  //   label: "Track Order",
+  //   icon: (
+  //     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  //       <path d="M256,0C150,0.1,64.1,86,64,192c0,137.8,178.9,310.5,186.5,317.8c3.1,3,8,3,11,0C269.1,502.5,448,329.8,448,192C447.9,86,362,0.1,256,0z M256,280c-48.6,0-88-39.4-88-88s39.4-88,88-88s88,39.4,88,88C344,240.6,304.6,280,256,280z" />
+  //     </svg>
+  //   ),
+  //   url: "",
+  // },
   {
     id: "help",
     label: "Help Center",
@@ -137,6 +138,7 @@ const TRENDING_SEARCHES = [
 const USER_MENU_ITEMS = [
   { label: "My Profile", href: "/my-profile", icon: HiOutlineUser },
   { label: "My Orders", href: "/", icon: HiOutlineShoppingBag },
+  { label: "My Wishlist", href: "/my-wishlist", icon: FaRegHeart  },
 ];
 
 const readUserDataFromCookie = () => {
@@ -152,6 +154,7 @@ const readUserDataFromCookie = () => {
 const Header = () => {
   const router = useRouter();
   const { showToast } = useToast();
+  const dispatch = useDispatch();
   const headerRef = useRef(null);
   const userMenuRef = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -179,6 +182,7 @@ const Header = () => {
     try {
       Cookies.remove("userData");
       Cookies.remove("token");
+      dispatch(apiSlice.util.invalidateTags(["Cart"]));
       setUser(null);
       closeUserMenu();
       router.push("/");
@@ -506,7 +510,7 @@ const Header = () => {
                                               <li key={product?.id}>
                                                 <Link
                                                   href={
-                                                    `product-category/${product?.url}` ||
+                                                    `/product-category/${product?.url}` ||
                                                     "#"
                                                   }
                                                 >

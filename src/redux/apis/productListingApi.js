@@ -7,7 +7,7 @@ const productListingApi = apiSlice.injectEndpoints({
         url: "/product-listings",
         method: "GET",
       }),
-      providesTags: ["listing"],
+      providesTags: ["listing", "home"],
     }),
   }),
 });

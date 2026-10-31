@@ -3,8 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import ProductDetailComponent from "@/components/product-detail/ProductDetailComponent";
-import { useProductDetailsMutation } from "@/redux/apis/productDetailApi";
 import { useRouter } from "next/router";
+import { useProductDetailsMutation } from "@/redux/apis/productDetailApi";
 
 const ProductDetailsPage = () => {
   const params = useParams();

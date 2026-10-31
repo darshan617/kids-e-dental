@@ -12,22 +12,20 @@ import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { CiHeart, CiMail } from "react-icons/ci";
 import { IoLogoFacebook, IoShareSocialOutline } from "react-icons/io5";
-import {
-  FaWhatsapp,
-  FaFacebookF,
-  FaEnvelope,
-  FaInstagram,
-} from "react-icons/fa";
+import { FaWhatsapp, FaInstagram, FaHeart, FaRegHeart } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
-import { FiInstagram, FiLink } from "react-icons/fi";
 import delivery from "@/assets/images/prd-detail/fast-delivery.png";
 import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
-import { useAddToWishlistMutation } from "@/redux/apis/addToWishlistApi";
+import {
+  useAddToWishlistMutation,
+  useRemoveFromWishlistMutation,
+} from "@/redux/apis/addToWishlistApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import Cookies from "js-cookie";
 import { useAddToCartMutation } from "@/redux/apis/addToCartApi";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
 import { IoIosLink } from "react-icons/io";
+import AllCoupons from "../all-coupons/AllCoupons";
 
 const MAX_QTY_PER_ORDER = 10;
 const PINCODE_REGEX = /^[1-9][0-9]{5}$/;
@@ -44,6 +42,9 @@ const ProductInfo = ({ product }) => {
   const [addToWishlist, { isLoading: isWishlistLoading }] =
     useAddToWishlistMutation();
   const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
+
+  const [removeFromWishlist, { isLoading: isRemoveLoading }] =
+    useRemoveFromWishlistMutation();
 
   const variants = product?.variants ?? [];
   const variantTypes = product?.variant_types ?? [];
@@ -63,11 +64,16 @@ const ProductInfo = ({ product }) => {
     String(initialVariant?.size ?? variantTypes[0]?.available_sizes?.[0] ?? ""),
   );
   const [qty, setQty] = useState(1);
-  const [wishlisted, setWishlisted] = useState(false);
+  const [wishlisted, setWishlisted] = useState(Boolean(product?.is_wishlist));
   const [openItem, setOpenItem] = useState(null);
   const [pincode, setPincode] = useState("");
   const [deliveryMsg, setDeliveryMsg] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [couponsOpen, setCouponsOpen] = useState(false);
+
+  useEffect(() => {
+    setWishlisted(Boolean(product?.is_wishlist));
+  }, [product?.is_wishlist]);
 
   const gallery = useMemo(
     () => [...new Set((product?.gallery ?? []).filter(Boolean))],
@@ -223,6 +229,66 @@ const ProductInfo = ({ product }) => {
       console.error("Failed to read userData cookie:", error);
       return null;
     }
+  };
+
+  const handleRemoveFromWishlist = async () => {
+    if (!product?.id) {
+      showToast("Product ID is missing", "error");
+      return;
+    }
+
+    try {
+      const res = await removeFromWishlist({
+        body: { product_id: Number(product.id) },
+      });
+
+      if (res.error) {
+        showToast(
+          res.error?.data?.message || "Failed to remove from wishlist",
+          "error",
+        );
+        return;
+      }
+
+      if (res.data?.success || res.data?.status) {
+        setWishlisted(false);
+        showToast(res.data?.message || "Removed from wishlist", "success");
+      } else {
+        showToast(
+          res.data?.message || "Failed to remove from wishlist",
+          "error",
+        );
+      }
+    } catch (error) {
+      console.error("Remove from wishlist failed:", error);
+      showToast("Something went wrong. Please try again.", "error");
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product?.name || "Check out this product",
+      text: product?.name || "Have a look at this product",
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Share failed:", error);
+          setShareOpen(true);
+        }
+      }
+    } else {
+      setShareOpen(true);
+    }
+  };
+
+  const handleWishlistClick = () => {
+    if (wishlisted) handleRemoveFromWishlist();
+    else handleAddToWishlist();
   };
 
   const handleAddToWishlist = async () => {
@@ -483,7 +549,8 @@ const ProductInfo = ({ product }) => {
                   <button
                     type="button"
                     className={`${styles.shareBtn} rounded-circle`}
-                    onClick={() => setShareOpen(true)}
+                    // onClick={() => setShareOpen(true)}
+                    onClick={handleShare}
                     aria-label="Share"
                   >
                     <IoShareSocialOutline />
@@ -603,7 +670,15 @@ const ProductInfo = ({ product }) => {
                   </div>
                 )}
               </div>
-
+              <div>
+                <button
+                  type="button"
+                  className={styles.btnLink}
+                  onClick={() => setCouponsOpen(true)}
+                >
+                  View all coupons & offers
+                </button>
+              </div>
               <div className="d-flex flex-row flex-wrap gap-3 mb-5">
                 <div className="col-12 text-center hstack gap-3">
                   <hr className="w-100" />
@@ -613,11 +688,18 @@ const ProductInfo = ({ product }) => {
                       wishlisted ? "active" : ""
                     }`}
                     aria-pressed={wishlisted}
-                    title="Add to Wishlist"
-                    disabled={isWishlistLoading}
-                    onClick={handleAddToWishlist}
+                    title={
+                      wishlisted ? "Remove from Wishlist" : "Add to Wishlist"
+                    }
+                    disabled={isWishlistLoading || isRemoveLoading}
+                    onClick={handleWishlistClick}
                   >
-                    <CiHeart size={20} /> Add to Wishlist
+                    {wishlisted ? (
+                      <FaHeart size={18} color="#e63946" />
+                    ) : (
+                      <FaRegHeart size={18} />
+                    )}{" "}
+                    {wishlisted ? "Wishlisted" : "Add to Wishlist"}
                   </button>
                   <hr className="w-100" />
                 </div>
@@ -758,6 +840,7 @@ const ProductInfo = ({ product }) => {
           </div>
         </div>
       </CustomPopup>
+      <AllCoupons isOpen={couponsOpen} onClose={() => setCouponsOpen(false)} />
     </>
   );
 };

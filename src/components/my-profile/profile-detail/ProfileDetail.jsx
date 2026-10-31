@@ -48,7 +48,7 @@ const ProfileDetail = () => {
       id: "email",
       label: "Email ID",
       type: "email",
-      required: true,
+      required: false,
     },
     {
       id: "mobile",
@@ -91,10 +91,14 @@ const ProfileDetail = () => {
                 name={field.id}
                 type={field.type}
                 value={form[field.id] || ""}
-                disabled={!isEditing}
+                disabled={
+                  !isEditing || field.id === "email" || field.id === "mobile"
+                }
                 onChange={handleChange}
                 className={`${styles.fieldInput}${
-                  isEditing ? " field-input--active" : ""
+                  isEditing && field.id === "fullName"
+                    ? " field-input--active"
+                    : ""
                 }`}
               />
             </div>

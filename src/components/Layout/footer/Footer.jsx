@@ -1,11 +1,35 @@
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 import styles from "@/components/Layout/footer/Footer.module.css";
 import footMascot from "@/assets/images/home/footMascot.png";
 import { useRouter } from "next/router";
+import { useSubscribeEmailMutation } from "@/redux/apis/subscribeEmail";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
 const Footer = () => {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const { showToast } = useToast();
+
+  const [subscribeEmail, { isLoading: isSubscribeEmailLoading }] =
+    useSubscribeEmailMutation();
+
+  const handleSubscribe = async () => {
+    if (isSubscribeEmailLoading) return;
+    if (!email) return showToast("Please enter your email", "error");
+    try {
+      const res = await subscribeEmail({ body: { email } });
+      if (res?.data?.success || res?.data?.status) {
+        showToast(res?.data?.message, "success");
+        setEmail("");
+      } else {
+        showToast(res?.error?.data?.message || "Something went wrong", "error");
+      }
+    } catch (error) {
+      console.log(error, "error");
+      showToast(error?.message || "Something went wrong", "error");
+    }
+  };
   return (
     <footer className={`${styles.pageFooter} sitePadding py-4`}>
       <div className="container-fluid">
@@ -28,15 +52,17 @@ const Footer = () => {
                 className={`${styles.nlfInput} input-group mb-3 rounded-pill overflow-hidden`}
               >
                 <input
-                  type="text"
+                  type="email"
                   className="form-control rounded-pill border-0"
                   placeholder="Enter Your Email Address"
-                  aria-label="Button"
-                  aria-describedby=""
+                  aria-label="Email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
                 <button
                   className={`${styles.nlBtn} btn px-sm-4 `}
                   type="button"
+                  onClick={handleSubscribe}
                   id=""
                 >
                   Subscribe
@@ -50,19 +76,25 @@ const Footer = () => {
                 <h5 className="footHead fw-semibold mb-4">Quick Links</h5>
                 <ul className={`${styles.footLinks} vstack gap-2`}>
                   <li>
-                  <a onClick={() => router.push("/my-profile")}>My Account</a>
-                    </li>
+                    <a onClick={() => router.push("/my-profile")}>My Account</a>
+                  </li>
                   <li>
                     <a href="/product-listing">Shop</a>
                   </li>
                   <li>
-                    <a onClick={() => router.push("/privacy-policy")}>Privacy Policy</a>
+                    <a onClick={() => router.push("/privacy-policy")}>
+                      Privacy Policy
+                    </a>
                   </li>
                   <li>
-                    <a onClick={() => router.push("/terms-conditions")}>Terms & Conditions</a>
+                    <a onClick={() => router.push("/terms-conditions")}>
+                      Terms & Conditions
+                    </a>
                   </li>
                   <li>
-                    <a onClick={() => router.push("/sales-policy")}>Sales Policy</a>
+                    <a onClick={() => router.push("/sales-policy")}>
+                      Sales Policy
+                    </a>
                   </li>
                 </ul>
               </div>

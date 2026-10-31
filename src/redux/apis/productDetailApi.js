@@ -6,9 +6,9 @@ const productDetailApi = apiSlice.injectEndpoints({
       query: ({ slug, body }) => ({
         url: `/product/${slug}`,
         method: "POST",
-        body: body
+        body: body,
       }),
-      invalidatesTags: ["products"],
+      invalidatesTags: ["products" , 'wishlist'],
     }),
   }),
 });

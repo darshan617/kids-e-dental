@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 
 import Layout from "@/components/Layout/Layout";
@@ -8,9 +7,22 @@ import DeliveryAddress from "@/components/my-profile/delivery-address/DeliveryAd
 import CartSummary from "@/components/my-cart/cart-summary/cartSummary";
 
 import CartDetails from "@/components/my-cart/item-info/CartDetails";
+import {
+  useGetBuyNowQuery,
+  useRemoveCheckoutItemMutation,
+  useUpdateCheckoutMutation,
+} from "@/redux/apis/checkoutApi";
+import {
+  useRemoveCartMutation,
+  useUpdateCartMutation,
+} from "@/redux/apis/addToCartApi";
 
 const CheckoutPage = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
+  const { data: buyNowData, refetch } = useGetBuyNowQuery();
+
+  const [updateCheckout] = useUpdateCheckoutMutation();
+  const [removeCheckout] = useRemoveCheckoutItemMutation();
 
   const address = {
     name: "Darshan",
@@ -25,8 +37,40 @@ const CheckoutPage = () => {
     console.log("Change delivery address clicked");
   };
 
-  const handleUpdateCart = (a, b, addressId) => {
-    console.log("Update cart with address", addressId);
+  const handleUpdateCart = async (id, quantity, addressId) => {
+    try {
+      const res = await updateCheckout({
+        body: {
+          buy_now_id: id,
+          quantity: quantity,
+        },
+      }).unwrap();
+
+      if (res?.success || res?.status) {
+        refetch();
+      } else {
+        console.error(res?.message || "Failed to update cart");
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+    }
+  };
+  const handleRemoveCart = async (id) => {
+    try {
+      const res = await removeCheckout({
+        body: {
+          buy_now_id: id,
+        },
+      }).unwrap();
+
+      if (res?.success || res?.status) {
+        refetch();
+      } else {
+        console.error(res?.message || "Failed to remove cart");
+      }
+    } catch (error) {
+      console.error("Error removing cart item:", error);
+    }
   };
 
   const refetchCartData = () => {
@@ -46,15 +90,19 @@ const CheckoutPage = () => {
               showAddressForm={showAddressForm}
               setShowAddressForm={setShowAddressForm}
               handleUpdateCart={handleUpdateCart}
-              refetchCartData={refetchCartData}
+              refetchCartData={refetch}
             />
 
             <div className="mt-3">
-              <CartDetails />
+              <CartDetails
+                cartData={buyNowData?.data}
+                handleUpdateCart={handleUpdateCart}
+                handleRemoveCart={handleRemoveCart}
+              />
             </div>
           </div>
           <div className="col-12 col-lg-4 mt-3 mb-3">
-            <CartSummary />
+            <CartSummary cartData={buyNowData} />
           </div>
         </div>
       </div>
