@@ -7,6 +7,7 @@ const homeApi = apiSlice.injectEndpoints({
         url: "/home",
         method: "GET",
       }),
+      providesTags: ['home']
     }),
   }),
 });

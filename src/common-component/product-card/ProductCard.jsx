@@ -21,6 +21,7 @@ import {
   useRemoveFromWishlistMutation,
 } from "@/redux/apis/addToWishlistApi";
 import CustomPopup from "../custom-popup/CustomPopup";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 const PRODUCT_ROUTE = "/product-details";
 const WISHLIST_PATH = "/wishlist";
@@ -57,7 +58,6 @@ export const normalizeProduct = (raw) => {
   const mrp = Number(item?.price ?? 0);
   const productId = item?.id ?? raw?.product_id ?? null;
 
-  // Row id (wishlist / cart row) is kept separately.
   const wishlistId =
     raw?.wishlist_id ??
     raw?.cart_id ??
@@ -82,6 +82,7 @@ export const normalizeProduct = (raw) => {
     rating: item?.average_rating ?? item?.rating ?? 0,
     reviews: item?.total_reviews ?? item?.review_count ?? 0,
     tag: item?.badge,
+    isWishlist: Boolean(item?.is_wishlist ?? raw?.is_wishlist),
     variants,
     hasVariants:
       variants.length > 0 ||
@@ -277,6 +278,7 @@ const VariantPopup = ({ product, onClose, onConfirm, loading }) => {
 export const ProductCard = ({
   id,
   wishlistId = null,
+  isWishlist = false,
   slug,
   name = "",
   image,
@@ -290,6 +292,11 @@ export const ProductCard = ({
   path,
   onRemove,
 }) => {
+  const [wishlisted, setWishlisted] = useState(Boolean(isWishlist));
+
+  useEffect(() => {
+    setWishlisted(Boolean(isWishlist));
+  }, [isWishlist]);
   const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
   const [addToWishlist, { isLoading: isWishlistLoading }] =
     useAddToWishlistMutation();
@@ -349,7 +356,6 @@ export const ProductCard = ({
     await addItem();
   };
 
-
   const handleConfirmVariant = async (variantId, qty) => {
     const ok = await addItem(variantId, qty);
     if (ok) closeVariants();
@@ -388,7 +394,6 @@ export const ProductCard = ({
   };
 
   const handleRemoveFromWishlist = async () => {
-    // Remove uses the product id, same as `product.id` in ProductInfo.
     if (id === undefined || id === null || id === "") {
       showToast("Product ID is missing", "error");
       return;
@@ -416,6 +421,8 @@ export const ProductCard = ({
     if (isWishlistPage) {
       if (onRemove) onRemove();
       else handleRemoveFromWishlist();
+    } else if (wishlisted) {
+      handleRemoveFromWishlist();
     } else {
       handleAddToWishlist();
     }
@@ -426,7 +433,7 @@ export const ProductCard = ({
     : "Add to Wishlist";
 
   return (
-    <div className="position-relative">
+    <>
       <div className={styles.prodItemBox}>
         <div className="p-3 p-lg-4 vstack gap-1 h-100">
           <div className="d-flex justify-content-between align-items-center position-relative z-3">
@@ -444,8 +451,15 @@ export const ProductCard = ({
                 }`}
                 title={wishlistLabel}
                 aria-label={wishlistLabel}
+                aria-pressed={!isWishlistPage ? wishlisted : undefined}
               >
-                {isWishlistPage ? "×" : ""}
+                {isWishlistPage ? (
+                  "×"
+                ) : wishlisted ? (
+                  <FaHeart size={18} color="#e63946" />
+                ) : (
+                  <FaRegHeart size={18} />
+                )}
               </button>
             </div>
           </div>
@@ -515,7 +529,7 @@ export const ProductCard = ({
           loading={isCartLoading}
         />
       )}
-    </div>
+    </>
   );
 };
 

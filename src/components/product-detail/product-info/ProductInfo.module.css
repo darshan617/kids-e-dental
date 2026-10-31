@@ -645,6 +645,9 @@
   transition: background 0.2s;
 }
 
-.shareItem:hover {
-  
+.btnLink{
+  background: none;
+  border: none;
+  color: #777;
+  text-decoration: underline ;
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { FaChevronRight, FaChevronLeft } from "react-icons/fa";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import styles from "@/components/product-detail/similar-product/SimilarProduct.module.css";
 import {
   ProductCard,
   normalizeProduct,
 } from "@/common-component/product-card/ProductCard";
+import { useGetWishlistQuery } from "@/redux/apis/addToWishlistApi";
 
 const AUTOPLAY_DELAY = 3000;
 const ANIMATION_MS = 350;
@@ -28,6 +29,15 @@ const SimilarProduct = ({ products = [] }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [autoplayKey, setAutoplayKey] = useState(0);
   const isPausedRef = useRef(false);
+
+  const { data: wishlistRes } = useGetWishlistQuery();
+
+  const wishlistIds = useMemo(() => {
+    const rows = Array.isArray(wishlistRes?.data) ? wishlistRes.data : [];
+    return new Set(
+      rows.map((w) => Number(w?.product_id ?? w?.product?.id)).filter(Boolean),
+    );
+  }, [wishlistRes]);
 
   useEffect(() => {
     const update = () => {
@@ -61,6 +71,7 @@ const SimilarProduct = ({ products = [] }) => {
     return () => clearInterval(timer);
   }, [maxIndex, autoplayKey, visibleItems.length]);
 
+  // early return stays after ALL hooks
   if (!visibleItems.length) return null;
 
   const isAtStart = currentIndex === 0;
@@ -119,18 +130,28 @@ const SimilarProduct = ({ products = [] }) => {
                 : "none",
             }}
           >
-            {visibleItems.map((product) => (
-              <div
-                className={styles.slide}
-                key={product?.id ?? product?.slug ?? product?.name}
-                style={{
-                  "--visible-count": visibleCount,
-                  "--slide-gap": `${gap}px`,
-                }}
-              >
-                <ProductCard {...normalizeProduct(product)} />
-              </div>
-            ))}
+            {visibleItems.map((product) => {
+              const normalized = normalizeProduct(product);
+              return (
+                <div
+                  className={styles.slide}
+                  key={product?.id ?? product?.slug ?? product?.name}
+                  style={{
+                    "--visible-count": visibleCount,
+                    "--slide-gap": `${gap}px`,
+                    padding: "10px"
+                  }}
+                >
+                  <ProductCard
+                    {...normalized}
+                    isWishlist={
+                      normalized.isWishlist ||
+                      wishlistIds.has(Number(normalized.id))
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
         </div>
 
