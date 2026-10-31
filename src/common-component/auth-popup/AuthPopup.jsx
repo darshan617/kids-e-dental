@@ -7,6 +7,7 @@ import Image from "next/image";
 import aboutMascot from "@/assets/images/about/aboutMascot.png";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useDispatch } from "react-redux";
 import {
   useLoginMutation,
   useRegisterMutation,
@@ -15,6 +16,7 @@ import {
   useResendOtpMutation,
 } from "@/redux/apis/registerApi";
 import Cookies from "js-cookie";
+import { apiSlice } from "@/redux/apiSlice";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 30;
@@ -52,6 +54,7 @@ const maskEmail = (value = "") => {
 const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [mode, setMode] = useState(initialMode);
   const { showToast } = useToast();
+  const dispatch = useDispatch();
 
   // api calls
   const [register, { isLoading: isSignupLoading }] = useRegisterMutation();
@@ -194,6 +197,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
         });
       }
 
+      dispatch(apiSlice.util.invalidateTags(["Cart"]));
       showToast(response?.message || "Logged in successfully", "success");
 
       setLoginEmail("");
@@ -275,6 +279,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
             sameSite: "Lax",
           });
         }
+        dispatch(apiSlice.util.invalidateTags(["Cart"]));
         clearOtpBoxes();
         onClose?.();
       } else {

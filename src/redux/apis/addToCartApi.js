@@ -7,7 +7,7 @@ const addToCartApi = apiSlice.injectEndpoints({
         url: "/get-cart",
         method: "GET",
       }),
-      providesTags: ["Cart"], 
+      providesTags: ["Cart"],
     }),
 
     addToCart: builder.mutation({

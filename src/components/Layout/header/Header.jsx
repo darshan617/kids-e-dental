@@ -21,6 +21,8 @@ import {
 import Link from "next/link";
 import { useGetCartQuery } from "@/redux/apis/addToCartApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
+import { useDispatch } from "react-redux";
+import { apiSlice } from "@/redux/apiSlice";
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -152,6 +154,7 @@ const readUserDataFromCookie = () => {
 const Header = () => {
   const router = useRouter();
   const { showToast } = useToast();
+  const dispatch = useDispatch();
   const headerRef = useRef(null);
   const userMenuRef = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
@@ -179,6 +182,7 @@ const Header = () => {
     try {
       Cookies.remove("userData");
       Cookies.remove("token");
+      dispatch(apiSlice.util.invalidateTags(["Cart"]));
       setUser(null);
       closeUserMenu();
       router.push("/");
