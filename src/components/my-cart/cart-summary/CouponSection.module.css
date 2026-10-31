@@ -1,0 +1,271 @@
+.couponPanel {
+  margin-top: 16px;
+  padding: 28px 24px 24px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff9df 0%, #ffed9a 100%);
+  color: #000;
+}
+
+.couponTitle {
+  margin: 0 0 16px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.couponForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 10px;
+}
+
+.couponInput {
+  width: 100%;
+  min-width: 0;
+  height: 52px;
+  padding: 0 14px;
+  border: 1px solid #d5d5d5;
+  border-radius: 7px;
+  background: #fff;
+  color: #000;
+  font: inherit;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.couponInput:focus {
+  border-color: #000;
+  outline: 2px solid rgb(0 0 0 / 12%);
+}
+
+.applyButton {
+  min-height: 52px;
+  padding: 0 12px;
+  border: 1px solid #ffcc00;
+  border-radius: 7px;
+  background: #ffcc00;
+  color: #000;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.applyButton:hover {
+  background: #000;
+  color: #ffcc00;
+  border-color: #000;
+}
+
+.couponEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 192px;
+  margin-top: 30px;
+  border: 1px solid #d5d5d5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.couponList {
+  display: grid;
+  gap: 10px;
+  max-height: 270px;
+  margin-top: 20px;
+  overflow-y: auto;
+}
+
+.couponCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px dashed #bda000;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.couponCardContent {
+  min-width: 0;
+}
+
+.couponName {
+  margin: 0 0 5px;
+  font-size: 14px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.couponCode {
+  display: inline-block;
+  margin: 0;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #fff3bf;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.couponDescription {
+  margin: 5px 0 0;
+  color: #555;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.copyButton {
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  background: #fff;
+  color: #000;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.copyButton:hover {
+  background: #000;
+  color: #ffcc00;
+}
+
+.couponMessage {
+  margin: 18px 0 0;
+  padding: 16px;
+  border: 1px solid rgb(0 0 0 / 10%);
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font-size: 13px;
+  text-align: center;
+}
+
+.couponIllustration {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 190px;
+  height: 126px;
+}
+
+.giftLeft,
+.giftRight {
+  position: absolute;
+  color: #000;
+  filter: drop-shadow(0 2px 1px rgb(0 0 0 / 18%));
+}
+
+.giftLeft {
+  left: 3px;
+  top: 29px;
+  width: 68px;
+  height: 68px;
+  transform: rotate(-15deg);
+}
+
+.giftRight {
+  right: 3px;
+  bottom: 14px;
+  width: 54px;
+  height: 54px;
+  color: #d6a900;
+  transform: rotate(12deg);
+}
+
+.couponTicket {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 68px;
+  height: 94px;
+  padding: 7px 4px 5px;
+  border-radius: 7px 7px 2px 2px;
+  background: #000;
+  color: #ffcc00;
+  box-shadow: 0 3px 8px rgb(0 0 0 / 12%);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 100%,
+    90% 94%,
+    80% 100%,
+    70% 94%,
+    60% 100%,
+    50% 94%,
+    40% 100%,
+    30% 94%,
+    20% 100%,
+    10% 94%,
+    0 100%
+  );
+}
+
+.couponTicket span {
+  width: calc(100% + 8px);
+  padding: 4px 1px;
+  border-radius: 3px;
+  background: #ffcc00;
+  color: #000;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.couponCross {
+  width: 42px;
+  height: 42px;
+  stroke-width: 3px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 480px) {
+  .couponPanel {
+    padding: 24px 18px 20px;
+  }
+
+  .couponForm {
+    grid-template-columns: minmax(0, 1fr) 82px;
+    gap: 8px;
+  }
+
+  .couponInput {
+    padding: 0 10px;
+    font-size: 14px;
+  }
+
+  .applyButton {
+    padding: 0 8px;
+    font-size: 14px;
+  }
+
+  .couponEmpty {
+    min-height: 170px;
+    margin-top: 22px;
+  }
+}

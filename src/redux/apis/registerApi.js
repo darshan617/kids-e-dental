@@ -10,7 +10,7 @@ const registerApi = apiSlice.injectEndpoints({
           body: body,
         };
       },
-      invalidatesTags: ["register"],
+      invalidatesTags: ["auth"],
     }),
 
     login: builder.mutation({
@@ -21,7 +21,7 @@ const registerApi = apiSlice.injectEndpoints({
           body: body,
         };
       },
-      invalidatesTags: ["register"],
+      invalidatesTags: ["auth"],
     }),
 
     resetPassword: builder.mutation({
@@ -32,7 +32,7 @@ const registerApi = apiSlice.injectEndpoints({
           body: body,
         };
       },
-      invalidatesTags: ["register"],
+      invalidatesTags: ["auth"],
     }),
     verifyOtp: builder.mutation({
       query: ({ body }) => {
@@ -42,7 +42,7 @@ const registerApi = apiSlice.injectEndpoints({
           body: body,
         };
       },
-      invalidatesTags: ["register"],
+      invalidatesTags: ["auth"],
     }),
     resendOtp: builder.mutation({
       query: ({ body }) => {
@@ -52,10 +52,8 @@ const registerApi = apiSlice.injectEndpoints({
           body: body,
         };
       },
-      invalidatesTags: ["register"],
+      invalidatesTags: ["auth"],
     }),
-
-    
   }),
 });
 
@@ -65,5 +63,5 @@ export const {
   useResetPasswordMutation,
   useVerifyOtpMutation,
   useResendOtpMutation,
-  useAddToCartMutation
+  useAddToCartMutation,
 } = registerApi;
