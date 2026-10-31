@@ -526,7 +526,7 @@ function ProductListing() {
           </p>
         ) : (
           <>
-            <div className={`row g-5 ${styles.productListing}`}>
+            <div className={`mb-5 row g-xl-5 g-lg-4 g-md-3 g-sm-2 g-1 row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-2 ${styles.productListing}`}>
               {visibleProducts.length === 0 ? (
                 <p className="text-center">No products found.</p>
               ) : (
