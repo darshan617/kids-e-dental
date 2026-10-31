@@ -11,6 +11,9 @@
   border-radius: 16px;
   overflow: hidden;
   color: #1a1a1a;
+  position: sticky;
+  top: 180px;
+  align-self: flex-start;
 }
 
 .summaryTitle {

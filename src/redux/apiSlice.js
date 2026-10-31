@@ -43,6 +43,7 @@ export const apiSlice = createApi({
   },
 
   tagTypes: [
+    "home",
     "auth",
     "category",
     "products",
@@ -52,6 +53,10 @@ export const apiSlice = createApi({
     "Cart",
     "coupon",
     "contactUs",
+    "privacyPolicy",
+    "termsConditions",
+    "salesPolicy",
+    "subscribeEmail",
   ],
 
   overrideExisting: true,

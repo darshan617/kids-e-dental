@@ -8,7 +8,7 @@ const addToWishlistApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["wishlist"],
+      invalidatesTags: ["wishlist", 'home'],
     }),
 
     getWishlist: builder.query({
@@ -24,7 +24,7 @@ const addToWishlistApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["wishlist"],
+      invalidatesTags: ["wishlist", "home"],
     }),
   }),
 });

@@ -497,6 +497,9 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                       {showSignupPwd ? <FaRegEye /> : <FaRegEyeSlash />}
                     </button>
                   </div>
+                  <small className={styles.note}>
+                    Note: Minimum 6 characters required
+                  </small>
                 </div>
 
                 <ErrorMessage message={error} />
@@ -505,7 +508,11 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                   <button
                     type="submit"
                     className="ctaBtn arw"
-                    disabled={isSignupLoading}
+                    style={{
+                      opacity: password.length < 6 ? 0.7 : 1,
+                      cursor: password.length < 6 ? "not-allowed" : "pointer",
+                    }}
+                    disabled={isSignupLoading || password.length < 6}
                   >
                     {isSignupLoading ? "Signing up..." : "Continue"}
                   </button>
