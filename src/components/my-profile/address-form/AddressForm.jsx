@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import styles from "./AddressForm.module.css";
+import {
+  useAddAddressMutation,
+  useUpdateAddressMutation,
+} from "@/redux/apis/addressApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
 const EMPTY_FORM = {
   name: "",
@@ -15,7 +20,6 @@ const EMPTY_FORM = {
   country: "INDIA",
 };
 
-// Reusable floating-label input
 const Field = ({ id, label, value, onChange, ...rest }) => (
   <div className={styles.field}>
     <input
@@ -44,11 +48,13 @@ const AddressForm = ({
   isEditing = false,
   addressId = null,
 }) => {
-  // Start with the address being edited (if any), otherwise an empty form
   const [form, setForm] = useState({ ...EMPTY_FORM, ...(initialValues || {}) });
-
+  const [addAddress, { isLoading: isAddingAddress }] = useAddAddressMutation();
+  const [updateAddress, { isLoading: isUpdatingAddress }] =
+    useUpdateAddressMutation();
   const setValue = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+  const { showToast } = useToast();
 
   const isFormValid =
     form.name.trim() &&
@@ -60,15 +66,30 @@ const AddressForm = ({
     form.state.trim() &&
     form.country.trim();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!isFormValid) return;
 
-    onSave?.({
-      ...form,
-      ...(isEditing && addressId ? { id: addressId } : {}),
-    });
-    onClose?.();
+    try {
+      const res = await (isEditing ? updateAddress : addAddress)({
+        body: {
+          ...form,
+          ...(isEditing && addressId ? { id: addressId } : {}),
+        },
+      }).unwrap();
+
+      if (res?.data?.status || res?.data?.success) {
+        showToast("Address " + (isEditing ? "updated" : "added") + " successfully", "success");
+
+        setForm(EMPTY_FORM);
+
+          onClose?.();
+      }
+    } catch (error) {
+      console.log(error);
+      showToast(error?.data?.message || "Something went wrong", "error");
+    }
   };
 
   return (
@@ -178,11 +199,19 @@ const AddressForm = ({
       </div>
 
       <div className={styles.actions}>
-        <button type="button" className={`${styles.cancelBtn} ctaBtn`}  onClick={onClose}>
+        <button
+          type="button"
+          className={`${styles.cancelBtn} ctaBtn`}
+          onClick={onClose}
+        >
           CANCEL
         </button>
 
-        <button type="submit" className={`${styles.saveBtn} ctaBtn`} disabled={!isFormValid}>
+        <button
+          type="submit"
+          className={`${styles.saveBtn} ctaBtn`}
+          disabled={!isFormValid}
+        >
           {isEditing ? "UPDATE" : "SAVE ADDRESS"}
         </button>
       </div>

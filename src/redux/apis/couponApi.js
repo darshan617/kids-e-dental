@@ -17,7 +17,15 @@ const couponApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["coupon", "checkout", "Cart"],
     }),
+    removeCoupon: builder.mutation({
+      query: ({ body }) => ({
+        url: "/remove-coupon",
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["checkout", "Cart"],
+    }),
   }),
 });
 
-export const { useGetAvailableCouponQuery, useApplyCouponMutation } = couponApi;
+export const { useGetAvailableCouponQuery, useApplyCouponMutation, useRemoveCouponMutation } = couponApi;

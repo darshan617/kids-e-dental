@@ -16,6 +16,7 @@ import {
   useRemoveCartMutation,
   useUpdateCartMutation,
 } from "@/redux/apis/addToCartApi";
+import { useGetAddressQuery } from "@/redux/apis/addressApi";
 
 const CheckoutPage = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -23,15 +24,9 @@ const CheckoutPage = () => {
 
   const [updateCheckout] = useUpdateCheckoutMutation();
   const [removeCheckout] = useRemoveCheckoutItemMutation();
-
-  const address = {
-    name: "Darshan",
-    address:
-      "Flat 101, I C Colony, Near Borivali West, Mumbai, Maharashtra, India - 400103",
-    mobile: "9876543210",
-  };
-
-  const addressCount = 1;
+  const { data: addressRes } = useGetAddressQuery();
+  const addresses = addressRes?.data ?? [];
+  const hasAddress = addresses.length > 0;
 
   const handleChangeDeliveryAddress = () => {
     console.log("Change delivery address clicked");
@@ -84,8 +79,6 @@ const CheckoutPage = () => {
           <div className="col-12 col-lg-8 mt-3">
             <DeliveryAddress
               type="cart"
-              address={address}
-              addressCount={addressCount}
               handleChangeDeliveryAddress={handleChangeDeliveryAddress}
               showAddressForm={showAddressForm}
               setShowAddressForm={setShowAddressForm}
@@ -102,7 +95,11 @@ const CheckoutPage = () => {
             </div>
           </div>
           <div className="col-12 col-lg-4 mt-3 mb-3">
-            <CartSummary cartData={buyNowData} />
+            <CartSummary
+              cartData={buyNowData}
+              hasAddress={hasAddress}
+              // onProceed={handlePayment}
+            />
           </div>
         </div>
       </div>

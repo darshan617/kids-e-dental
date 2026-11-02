@@ -4,6 +4,7 @@ import styles from "@/components/my-cart/cart-summary/CouponSection.module.css";
 import {
   useApplyCouponMutation,
   useGetAvailableCouponQuery,
+  useRemoveCouponMutation,
 } from "@/redux/apis/couponApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
@@ -18,6 +19,7 @@ const CouponSection = ({ appliedCouponData }) => {
   } = useGetAvailableCouponQuery();
   const [applyCoupon, { isLoading: isApplyingCoupon }] =
     useApplyCouponMutation();
+
   const coupons = Array.isArray(availableCoupon?.data)
     ? availableCoupon.data.filter(
         (coupon) => coupon?.coupon_code ?? coupon?.code,
