@@ -3,21 +3,30 @@ import styles from "@/components/my-cart/cart-summary/cartSummary.module.css";
 import { useRouter } from "next/router";
 import CouponSection from "@/components/my-cart/cart-summary/CouponSection";
 import { BiX } from "react-icons/bi";
+import { useRemoveCouponMutation } from "@/redux/apis/couponApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
-const CartSummary = ({ cartData }) => {
+const CartSummary = ({ cartData, hasAddress = false, onProceed }) => {
   console.log("000000000", cartData);
-
+  const [removeCoupon, { isLoading: isRemovingCoupon }] =
+    useRemoveCouponMutation();
+  const { showToast } = useToast();
   const router = useRouter();
   const isCheckoutPage = router.pathname === "/checkout";
 
   const finalTotal = cartData?.cart_summary?.grand_total;
 
   const handleRemoveCoupon = async () => {
-    // try {
-    //   const res = await
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    try {
+      const res = await removeCoupon({
+        source: isCheckoutPage ? "buy_now" : "cart",
+      }).unwrap();
+
+      showToast(res?.message || "Coupon removed", "success");
+    } catch (error) {
+      console.log("remove coupon error:", error);
+      showToast(error?.data?.message || "Failed to remove coupon", "error");
+    }
   };
 
   return (
@@ -73,16 +82,28 @@ const CartSummary = ({ cartData }) => {
           </div>
 
           {isCheckoutPage && (
-            <div className="d-flex justify-content-center mt-3 gap-3 align-items-center">
+            <div className="d-flex flex-column align-items-center mt-3 gap-2">
               <button
                 type="button"
                 className="ctaBtn"
-                style={{ opacity: "1", cursor: "pointer" }}
+                disabled={!hasAddress}
+                onClick={() => onProceed?.()}
+                style={
+                  hasAddress
+                    ? { opacity: 1, cursor: "pointer" }
+                    : { opacity: 0.5, cursor: "not-allowed" }
+                }
               >
                 <p className="mb-0 fs-6 fw-semibold text-start">
                   Proceed to Payment
                 </p>
               </button>
+
+              {!hasAddress && (
+                <small className="text-danger">
+                  Please add a delivery address to continue.
+                </small>
+              )}
             </div>
           )}
         </div>

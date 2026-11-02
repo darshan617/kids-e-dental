@@ -22,6 +22,7 @@ import {
 } from "@/redux/apis/addToWishlistApi";
 import CustomPopup from "../custom-popup/CustomPopup";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { useAddBuyNowMutation } from "@/redux/apis/buyNowApi";
 
 const PRODUCT_ROUTE = "/product-details";
 const WISHLIST_PATH = "/wishlist";
@@ -121,7 +122,18 @@ const getVariantAttrs = (v) => {
   return attrs;
 };
 
-const VariantPopup = ({ product, onClose, onConfirm, loading }) => {
+const VARIANT_MODE_CART = "cart";
+const VARIANT_MODE_BUY = "buy";
+
+const VariantPopup = ({
+  product,
+  onClose,
+  onConfirm,
+  loading,
+  mode = VARIANT_MODE_CART,
+}) => {
+  const isBuyMode = mode === VARIANT_MODE_BUY;
+
   const rows = useMemo(
     () =>
       (product.variants || []).map((variant) => ({
@@ -185,6 +197,9 @@ const VariantPopup = ({ product, onClose, onConfirm, loading }) => {
 
   // variant image first, then product image, then fallback
   const displayImage = matched?.image || product.image || CanineMasterKit;
+
+  const actionLabel = isBuyMode ? "Buy Now" : "Add to Cart";
+  const loadingLabel = isBuyMode ? "Processing..." : "Adding...";
 
   return (
     <CustomPopup isOpen onClose={onClose} maxWidth="520px">
@@ -268,7 +283,7 @@ const VariantPopup = ({ product, onClose, onConfirm, loading }) => {
           disabled={loading || outOfStock}
           onClick={() => onConfirm(matched.id, qty)}
         >
-          {loading ? "Adding..." : "Add to Cart"}
+          {loading ? loadingLabel : actionLabel}
         </button>
       </div>
     </CustomPopup>
@@ -298,6 +313,7 @@ export const ProductCard = ({
     setWishlisted(Boolean(isWishlist));
   }, [isWishlist]);
   const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
+  const [addBuyNow, { isLoading: isBuyNowLoading }] = useAddBuyNowMutation();
   const [addToWishlist, { isLoading: isWishlistLoading }] =
     useAddToWishlistMutation();
   const [removeFromWishlist, { isLoading: isRemoveWishlist }] =
@@ -305,7 +321,8 @@ export const ProductCard = ({
   const { showToast } = useToast();
   const router = useRouter();
 
-  const [showVariants, setShowVariants] = useState(false);
+  // null = closed, "cart" | "buy" = popup open for that action
+  const [variantMode, setVariantMode] = useState(null);
 
   const hasVariants = Array.isArray(variants) && variants.length > 0;
   const needsDetailsPage = !hasVariants && hasVariantsFlag;
@@ -332,7 +349,12 @@ export const ProductCard = ({
     } catch (error) {
       const message = error?.data?.message || "Failed to add to cart";
 
-      if (/variant/i.test(message) && !variantId && slug) {
+      if (
+        error?.status === 422 &&
+        /variant/i.test(message) &&
+        !variantId &&
+        slug
+      ) {
         router.push(detailsHref);
         return false;
       }
@@ -342,11 +364,60 @@ export const ProductCard = ({
     }
   };
 
-  const closeVariants = () => setShowVariants(false);
+  const handleBuyNow = async (variantId = null, qty = 1) => {
+    if (!id) {
+      showToast("Product ID is missing", "error");
+      return false;
+    }
+
+    const safeVariantId =
+      typeof variantId === "number" || typeof variantId === "string"
+        ? variantId
+        : null;
+
+    try {
+      const res = await addBuyNow({
+        body: {
+          product_id: id,
+          variant_id: safeVariantId,
+          quantity: qty,
+          address_id: null,
+          coupon_code: null,
+        },
+      }).unwrap();
+
+      if (res?.status === true) {
+        showToast(res?.message || "Product added to buy now", "success");
+        router.push("/checkout");
+        return true;
+      }
+
+      showToast(res?.message || "Failed to process Buy Now", "error");
+      return false;
+    } catch (error) {
+      const message =
+        error?.data?.message || "Something went wrong. Please try again.";
+
+      if (
+        error?.status === 422 &&
+        /variant/i.test(message) &&
+        !safeVariantId &&
+        slug
+      ) {
+        router.push(detailsHref);
+        return false;
+      }
+
+      showToast(message, "error");
+      return false;
+    }
+  };
+
+  const closeVariants = () => setVariantMode(null);
 
   const handleAddToCart = async () => {
     if (hasVariants) {
-      setShowVariants(true);
+      setVariantMode(VARIANT_MODE_CART);
       return;
     }
     if (needsDetailsPage) {
@@ -356,8 +427,23 @@ export const ProductCard = ({
     await addItem();
   };
 
+  const handleBuyNowClick = async () => {
+    if (hasVariants) {
+      setVariantMode(VARIANT_MODE_BUY);
+      return;
+    }
+    if (needsDetailsPage) {
+      router.push(detailsHref);
+      return;
+    }
+    await handleBuyNow();
+  };
+
   const handleConfirmVariant = async (variantId, qty) => {
-    const ok = await addItem(variantId, qty);
+    const ok =
+      variantMode === VARIANT_MODE_BUY
+        ? await handleBuyNow(variantId, qty)
+        : await addItem(variantId, qty);
     if (ok) closeVariants();
   };
 
@@ -432,6 +518,8 @@ export const ProductCard = ({
     ? "Remove from Wishlist"
     : "Add to Wishlist";
 
+  const isBusy = isCartLoading || isBuyNowLoading;
+
   return (
     <>
       <div className={styles.prodItemBox}>
@@ -503,8 +591,8 @@ export const ProductCard = ({
           <button
             type="button"
             className={`${styles.pibBtn} ${styles.cartBtn}`}
-            onClick={handleAddToCart}
-            disabled={isCartLoading}
+            onClick={() => handleAddToCart()}
+            disabled={isBusy}
           >
             Add to Cart
           </button>
@@ -512,7 +600,8 @@ export const ProductCard = ({
           <button
             type="button"
             className={`${styles.pibBtn} ${styles.buyBtn}`}
-            disabled={isCartLoading}
+            disabled={isBusy}
+            onClick={() => handleBuyNowClick()}
           >
             Buy Now
           </button>
@@ -521,12 +610,15 @@ export const ProductCard = ({
         <Link href={detailsHref} className="stretched-link" title={name} />
       </div>
 
-      {showVariants && hasVariants && (
+      {variantMode && hasVariants && (
         <VariantPopup
           product={{ id, name, image, price, oldPrice, variants }}
+          mode={variantMode}
           onClose={closeVariants}
           onConfirm={handleConfirmVariant}
-          loading={isCartLoading}
+          loading={
+            variantMode === VARIANT_MODE_BUY ? isBuyNowLoading : isCartLoading
+          }
         />
       )}
     </>

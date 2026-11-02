@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
 import { FaRegHeart, FaUserCircle } from "react-icons/fa";
 import { HiOutlineMapPin, HiOutlinePower } from "react-icons/hi2";
 import { PiPackageThin } from "react-icons/pi";
@@ -29,45 +30,57 @@ const MENU_ITEMS = [
   },
 ];
 
-const DUMMY_USER = {
-  name: "Saif shaikh",
-  isLoggedIn: true,
-};
-
 const GUEST_DISPLAY_NAME = "Guest User";
 const GUEST_USER_INITIAL = "G";
+
+const getStoredUser = () => {
+  try {
+    return JSON.parse(Cookies.get("userData") || "null");
+  } catch {
+    return null;
+  }
+};
 
 const CustomerInfo = () => {
   const router = useRouter();
 
-  const [displayName, setDisplayName] = useState(DUMMY_USER.name);
-  const [userInitial, setUserInitial] = useState(
-    DUMMY_USER.name.charAt(0).toUpperCase(),
-  );
+  const [displayName, setDisplayName] = useState(GUEST_DISPLAY_NAME);
+  const [userInitial, setUserInitial] = useState(GUEST_USER_INITIAL);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const name = DUMMY_USER.name || GUEST_DISPLAY_NAME;
+    const loadUser = () => {
+      const user = getStoredUser();
+      const name = user?.name?.trim() || GUEST_DISPLAY_NAME;
 
-    setDisplayName(name);
-    setUserInitial(name.charAt(0).toUpperCase() || GUEST_USER_INITIAL);
+      setDisplayName(name);
+      setUserInitial(name.charAt(0).toUpperCase() || GUEST_USER_INITIAL);
+      setIsLoggedIn(Boolean(user));
+    };
+
+    loadUser();
+
+    window.addEventListener("userDataUpdated", loadUser);
+    return () => window.removeEventListener("userDataUpdated", loadUser);
   }, []);
 
   const isActive = (matchPath) =>
     router.pathname === matchPath || router.asPath === matchPath;
 
   const handleLogout = () => {
+    Cookies.remove("userData");
+    Cookies.remove("token");
+
     setDisplayName(GUEST_DISPLAY_NAME);
     setUserInitial(GUEST_USER_INITIAL);
+    setIsLoggedIn(false);
 
     router.push("/");
   };
 
   return (
     <div className="">
-      
       <aside className={styles.sidebar}>
-        
-
         <div className={styles.profileCard}>
           <div className={styles.profileAvatar} aria-hidden>
             {userInitial ? <span>{userInitial}</span> : <FaUserCircle />}
@@ -109,7 +122,7 @@ const CustomerInfo = () => {
               );
             })}
 
-            {DUMMY_USER.isLoggedIn && (
+            {isLoggedIn && (
               <li className={styles.navItem}>
                 <button
                   className={`${styles.navLink} ${styles.navLinkLogout}`}

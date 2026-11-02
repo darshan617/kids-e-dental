@@ -145,6 +145,21 @@ const Testimonial = () => {
               <div className="swiper-slide h-auto" key={testimonial.id}>
                 <div className={`${styles.testimWrap} rounded-4`}>
                   <div className="d-flex flex-wrap justify-content-md-between justify-content-center flex-grow-1">
+                    <div className="col-md-5 col-12 p-2 d-flex align-items-center">
+                      <div className="vstack justify-content-center align-items-center rounded-3 h-100 bg-white overflow-hidden p-2">
+                        <a
+                          href={testimonial.caseImage.src}
+                          data-fancybox="testimonial-gallery"
+                          data-caption={testimonial.name}
+                        >
+                          <Image
+                            src={testimonial.caseImage}
+                            alt={`${testimonial.name} BioFlx case`}
+                            className={`${styles.csImg} mx-auto d-block`}
+                          />
+                        </a>
+                      </div>
+                    </div>
                     <div
                       className={`${styles.testimDetail} col-12 col-md p-xxl-5 p-sm-4 p-3 rounded-4`}
                     >
@@ -174,22 +189,6 @@ const Testimonial = () => {
                             ></span>
                           </div>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="col-md-5 col-12 p-2 d-flex align-items-center">
-                      <div className="vstack justify-content-center align-items-center rounded-3 h-100 bg-white overflow-hidden p-2">
-                        <a
-                          href={testimonial.caseImage.src}
-                          data-fancybox="testimonial-gallery"
-                          data-caption={testimonial.name}
-                        >
-                          <Image
-                            src={testimonial.caseImage}
-                            alt={`${testimonial.name} BioFlx case`}
-                            className={`${styles.csImg} mx-auto d-block`}
-                          />
-                        </a>
                       </div>
                     </div>
                   </div>
