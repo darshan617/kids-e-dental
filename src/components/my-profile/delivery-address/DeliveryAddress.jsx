@@ -1,37 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AddressForm from "@/components/my-profile/address-form/AddressForm";
 import styles from "@/components/my-profile/delivery-address/DeliveryAddress.module.css";
 import { FaTrash } from "react-icons/fa";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
-
-const DUMMY_ADDRESSES = [
-  {
-    id: 1,
-    name: "Darshan",
-    flat: "Flat 101",
-    area: "I C Colony",
-    landmark: "Near Borivali West",
-    city: "Mumbai",
-    state: "Maharashtra",
-    country: "India",
-    pincode: "400103",
-    phone: "9876543210",
-  },
-  {
-    id: 2,
-    name: "Saif",
-    flat: "Flat 202",
-    area: "Link Road",
-    landmark: "Near Mall",
-    city: "Mumbai",
-    state: "Maharashtra",
-    country: "India",
-    pincode: "400050",
-    phone: "9876543210",
-  },
-];
+import {
+  useGetAddressQuery,
+  useDeleteAddressMutation,
+} from "@/redux/apis/addressApi";
 
 const formatAddressLine = (addr) => {
   const streetPart = [addr.flat, addr.area, addr.landmark]
@@ -47,17 +24,21 @@ const formatAddressLine = (addr) => {
 };
 
 const DeliveryAddress = ({
-  type = "profile", 
+  type = "profile",
   handleUpdateCart,
   setShowAddressForm,
   showAddressForm,
   refetchCartData,
-  address,
-  addressCount,
   handleChangeDeliveryAddress,
 }) => {
   const [localShowForm, setLocalShowForm] = useState(false);
-
+  const {
+    data: addressRes,
+    error: addressError,
+    isLoading: isGettingAddress,
+  } = useGetAddressQuery();
+  const [deleteAddress, { isLoading: isDeletingAddress }] =
+    useDeleteAddressMutation();
   const isControlled =
     typeof showAddressForm === "boolean" &&
     typeof setShowAddressForm === "function";
@@ -65,19 +46,35 @@ const DeliveryAddress = ({
   const formVisible = isControlled ? showAddressForm : localShowForm;
   const setFormVisible = isControlled ? setShowAddressForm : setLocalShowForm;
 
-  const [addresses, setAddresses] = useState(DUMMY_ADDRESSES);
-  const [selectedAddressId, setSelectedAddressId] = useState(
-    DUMMY_ADDRESSES[0]?.id ?? null,
-  );
-  const [deliveryAddressId, setDeliveryAddressId] = useState(
-    DUMMY_ADDRESSES[0]?.id ?? null,
-  );
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [deliveryAddressId, setDeliveryAddressId] = useState(null);
   const [editingAddress, setEditingAddress] = useState(null);
   const [showEditPopup, setShowEditPopup] = useState(false);
   const [showAllAddresses, setShowAllAddresses] = useState(false);
 
   const popupOpen = showEditPopup || formVisible;
   const isCart = type === "cart";
+
+  useEffect(() => {
+    if (addressError) console.log("get address error:", addressError);
+  }, [addressError]);
+
+  useEffect(() => {
+    if (!addressRes || isGettingAddress) return;
+
+    const list = Array.isArray(addressRes?.data) ? addressRes.data : [];
+    const preferred = list.find((a) => a.is_selected) ?? list[0];
+
+    setAddresses(list);
+
+    setSelectedAddressId((prev) =>
+      list.some((a) => a.id === prev) ? prev : (preferred?.id ?? null),
+    );
+    setDeliveryAddressId((prev) =>
+      list.some((a) => a.id === prev) ? prev : (preferred?.id ?? null),
+    );
+  }, [addressRes, isGettingAddress]);
 
   const deliveryAddr = addresses.find((a) => a.id === deliveryAddressId);
   const shownAddress = deliveryAddr
@@ -86,8 +83,8 @@ const DeliveryAddress = ({
         address: formatAddressLine(deliveryAddr),
         mobile: deliveryAddr.phone,
       }
-    : address;
-  const shownCount = addresses.length || addressCount || 0;
+    : null;
+  const shownCount = addresses.length || 0;
 
   const openAddForm = () => {
     setEditingAddress(null);
@@ -120,41 +117,30 @@ const DeliveryAddress = ({
     setShowAllAddresses(false);
   };
 
-  const handleEditAddress = (e, addr) => {
+  const handleEditAddress = async (e, addr) => {
     e.stopPropagation();
     setEditingAddress(addr);
     setShowAllAddresses(false);
     setShowEditPopup(true);
   };
-
-  const handleDeleteAddress = (e, addr) => {
+  const handleDeleteAddress = async (e, addr) => {
     e.stopPropagation();
-    const updated = addresses.filter((item) => item.id !== addr.id);
-    setAddresses(updated);
-    if (selectedAddressId === addr.id) {
-      setSelectedAddressId(updated[0]?.id ?? null);
-    }
-    if (deliveryAddressId === addr.id) {
-      setDeliveryAddressId(updated[0]?.id ?? null);
+    const res = await deleteAddress({ body: { id: addr.id } }).unwrap();
+    if (res?.success || res?.status) {
+      if (isCart && refetchCartData) refetchCartData();
+      const updated = addresses.filter((item) => item.id !== addr.id);
+      setAddresses(updated);
+      if (selectedAddressId === addr.id) {
+        setSelectedAddressId(updated[0]?.id ?? null);
+      }
+      if (deliveryAddressId === addr.id) {
+        setDeliveryAddressId(updated[0]?.id ?? null);
+      }
     }
   };
 
   const handleAddressSave = (saved) => {
-    if (!saved) return;
-
-    if (saved.id) {
-      setAddresses((prev) =>
-        prev.map((item) =>
-          item.id === saved.id ? { ...item, ...saved } : item,
-        ),
-      );
-      setSelectedAddressId(saved.id);
-    } else {
-      const newAddress = { ...saved, id: Date.now() };
-      setAddresses((prev) => [...prev, newAddress]);
-      setSelectedAddressId(newAddress.id);
-      if (!deliveryAddressId) setDeliveryAddressId(newAddress.id);
-    }
+    if (saved?.id) setSelectedAddressId(saved.id);
 
     if (isCart && refetchCartData) refetchCartData();
 

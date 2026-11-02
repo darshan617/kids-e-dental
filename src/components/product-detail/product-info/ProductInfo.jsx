@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Swiper from "swiper";
 import { Navigation, Pagination, Thumbs } from "swiper/modules";
 import "swiper/css";
@@ -10,21 +11,23 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { CiHeart, CiMail } from "react-icons/ci";
+import { CiMail } from "react-icons/ci";
 import { IoLogoFacebook, IoShareSocialOutline } from "react-icons/io5";
 import { FaWhatsapp, FaInstagram, FaHeart, FaRegHeart } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
+import { IoIosLink } from "react-icons/io";
+import Cookies from "js-cookie";
+
 import delivery from "@/assets/images/prd-detail/fast-delivery.png";
 import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
 import {
   useAddToWishlistMutation,
   useRemoveFromWishlistMutation,
 } from "@/redux/apis/addToWishlistApi";
-import { useToast } from "@/custom-hooks/toast/ToastProvider";
-import Cookies from "js-cookie";
 import { useAddToCartMutation } from "@/redux/apis/addToCartApi";
+import { useAddBuyNowMutation } from "@/redux/apis/buyNowApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
-import { IoIosLink } from "react-icons/io";
 import AllCoupons from "../all-coupons/AllCoupons";
 
 const MAX_QTY_PER_ORDER = 10;
@@ -36,15 +39,26 @@ const formatPrice = (amount) =>
     maximumFractionDigits: 2,
   }).format(Number(amount) || 0);
 
+const getUserData = () => {
+  try {
+    const raw = Cookies.get("userData");
+    return raw ? JSON.parse(decodeURIComponent(raw)) : null;
+  } catch (error) {
+    console.error("Failed to read userData cookie:", error);
+    return null;
+  }
+};
+
 const ProductInfo = ({ product }) => {
   const { showToast } = useToast();
+  const router = useRouter();
 
   const [addToWishlist, { isLoading: isWishlistLoading }] =
     useAddToWishlistMutation();
-  const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
-
   const [removeFromWishlist, { isLoading: isRemoveLoading }] =
     useRemoveFromWishlistMutation();
+  const [addToCart, { isLoading: isCartLoading }] = useAddToCartMutation();
+  const [addBuyNow, { isLoading: isBuyNowLoading }] = useAddBuyNowMutation();
 
   const variants = product?.variants ?? [];
   const variantTypes = product?.variant_types ?? [];
@@ -75,14 +89,17 @@ const ProductInfo = ({ product }) => {
     setWishlisted(Boolean(product?.is_wishlist));
   }, [product?.is_wishlist]);
 
-  const gallery = useMemo(
-    () => [...new Set((product?.gallery ?? []).filter(Boolean))],
-    [product],
+  const allGalleryImages = useMemo(
+    () => [
+      ...new Set(
+        [
+          ...(product?.thumbnail ? [product.thumbnail] : []),
+          ...(Array.isArray(product?.gallery) ? product.gallery : []),
+        ].filter(Boolean),
+      ),
+    ],
+    [product?.thumbnail, product?.gallery],
   );
-  const allGalleryImages = [
-    ...(product?.thumbnail ? [product.thumbnail] : []),
-    ...(Array.isArray(product?.gallery) ? product.gallery : []),
-  ];
 
   const sizeOptions =
     variantTypes.find((type) => type.arch === arch)?.available_sizes ?? [];
@@ -183,7 +200,7 @@ const ProductInfo = ({ product }) => {
       mainSwiper.destroy(true, true);
       thumbsSwiper.destroy(true, true);
     };
-  }, [allGalleryImages?.length]);
+  }, [allGalleryImages.length]);
 
   const changeArch = (nextArch) => {
     const availableSizes =
@@ -192,7 +209,7 @@ const ProductInfo = ({ product }) => {
 
     setArch(nextArch);
 
-    if (!availableSizes?.map(String).includes(String(size))) {
+    if (!availableSizes.map(String).includes(String(size))) {
       setSize(String(availableSizes[0] ?? ""));
     }
     setQty(1);
@@ -216,19 +233,6 @@ const ProductInfo = ({ product }) => {
         ? { ok: true }
         : { ok: false, text: "Enter a valid 6-digit pincode." },
     );
-  };
-
-  const getUserData = () => {
-    try {
-      const raw = Cookies?.get("userData");
-
-      if (!raw) return null;
-
-      return JSON.parse(raw);
-    } catch (error) {
-      console.error("Failed to read userData cookie:", error);
-      return null;
-    }
   };
 
   const handleRemoveFromWishlist = async () => {
@@ -265,6 +269,53 @@ const ProductInfo = ({ product }) => {
     }
   };
 
+  const handleAddToWishlist = async () => {
+    const userData = getUserData();
+
+    if (!userData?.id) {
+      showToast("Please log in to use the wishlist", "error");
+      return;
+    }
+
+    if (!product?.id) {
+      showToast("Product ID is missing", "error");
+      return;
+    }
+
+    try {
+      const res = await addToWishlist({
+        body: {
+          user_id: userData.id,
+          product_id: product.id,
+          variant_id: selectedVariant?.id ?? null,
+        },
+      });
+
+      if (res.error) {
+        showToast(
+          res.error?.data?.message || "Failed to add to wishlist",
+          "error",
+        );
+        return;
+      }
+
+      if (res.data?.success || res.data?.status) {
+        setWishlisted(true);
+        showToast(res.data?.message || "Added to wishlist", "success");
+      } else {
+        showToast(res.data?.message || "Failed to add to wishlist", "error");
+      }
+    } catch (error) {
+      console.error("Add to wishlist failed:", error);
+      showToast("Something went wrong. Please try again.", "error");
+    }
+  };
+
+  const handleWishlistClick = () => {
+    if (wishlisted) handleRemoveFromWishlist();
+    else handleAddToWishlist();
+  };
+
   const handleShare = async () => {
     const shareData = {
       title: product?.name || "Check out this product",
@@ -286,53 +337,6 @@ const ProductInfo = ({ product }) => {
     }
   };
 
-  const handleWishlistClick = () => {
-    if (wishlisted) handleRemoveFromWishlist();
-    else handleAddToWishlist();
-  };
-
-  const handleAddToWishlist = async () => {
-    const userData = getUserData();
-
-    if (!userData?.id) {
-      showToast("Please log in to use the wishlist", "error");
-      return;
-    }
-
-    if (!product?.id) {
-      showToast("Product ID is missing", "error");
-      return;
-    }
-
-    try {
-      const res = await addToWishlist({
-        body: {
-          user_id: userData?.id,
-          product_id: product?.id,
-          variant_id: selectedVariant?.id ?? null,
-        },
-      });
-
-      if (res.error) {
-        showToast(
-          res.error?.data?.message || "Failed to add to wishlist",
-          "error",
-        );
-        return;
-      }
-
-      if (res.data?.success || res?.data?.status) {
-        setWishlisted(true);
-        showToast(res?.data?.message || "Added to wishlist", "success");
-      } else {
-        showToast(res?.data?.message || "Failed to add to wishlist", "error");
-      }
-    } catch (error) {
-      console.error("Add to wishlist failed:", error);
-      showToast("Something went wrong. Please try again.", "error");
-    }
-  };
-
   const handleAddToCart = async () => {
     if (!product?.id) {
       showToast("Product ID is missing", "error");
@@ -347,7 +351,7 @@ const ProductInfo = ({ product }) => {
     try {
       const res = await addToCart({
         body: {
-          product_id: product?.id,
+          product_id: product.id,
           variant_id: selectedVariant?.id ?? null,
           quantity: qty,
         },
@@ -359,7 +363,44 @@ const ProductInfo = ({ product }) => {
     }
   };
 
-  const handleBuyNow = () => {};
+  // Takes no arguments on purpose: the selected variant and quantity come
+  // from state, so a click event can never leak into the request payload.
+  const handleBuyNow = async () => {
+    if (!product?.id) {
+      showToast("Product ID is missing", "error");
+      return;
+    }
+
+    if (isVariable && !selectedVariant) {
+      showToast("Please select arch and size", "error");
+      return;
+    }
+
+    try {
+      const res = await addBuyNow({
+        body: {
+          product_id: product.id,
+          variant_id: selectedVariant?.id ?? null,
+          quantity: qty,
+          address_id: null,
+          coupon_code: null,
+        },
+      }).unwrap();
+
+      if (res?.status === true) {
+        showToast(res?.message || "Product added to buy now", "success");
+        router.push("/checkout");
+        return;
+      }
+
+      showToast(res?.message || "Failed to process Buy Now", "error");
+    } catch (error) {
+      showToast(
+        error?.data?.message || "Something went wrong. Please try again.",
+        "error",
+      );
+    }
+  };
 
   const copyLink = async () => {
     const link = window.location.href;
@@ -403,7 +444,7 @@ const ProductInfo = ({ product }) => {
       icon: <IoLogoFacebook size={28} />,
       onClick: () =>
         openShareWindow(
-          `https://www.facebook.com/(
+          `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
             window.location.href,
           )}`,
         ),
@@ -482,7 +523,7 @@ const ProductInfo = ({ product }) => {
                     className={`${styles.prodImgSwiper} swiper pb-4 pb-lg-0`}
                   >
                     <div className="swiper-wrapper">
-                      {allGalleryImages?.map((img, i) => (
+                      {allGalleryImages.map((img, i) => (
                         <div className="swiper-slide" key={`main-${i}`}>
                           <a
                             href={img}
@@ -521,7 +562,7 @@ const ProductInfo = ({ product }) => {
                     className={`${styles.prodImgThumbSwiper} swiper`}
                   >
                     <div className="swiper-wrapper">
-                      {allGalleryImages?.map((img, i) => (
+                      {allGalleryImages.map((img, i) => (
                         <div className="swiper-slide" key={`thumb-${i}`}>
                           <div className={styles.pitBox}>
                             <Image
@@ -549,7 +590,6 @@ const ProductInfo = ({ product }) => {
                   <button
                     type="button"
                     className={`${styles.shareBtn} rounded-circle`}
-                    // onClick={() => setShareOpen(true)}
                     onClick={handleShare}
                     aria-label="Share"
                   >
@@ -707,7 +747,7 @@ const ProductInfo = ({ product }) => {
                   <button
                     type="button"
                     className={`${styles.pibBtn} ${styles.cartBtn} w-100`}
-                    disabled={!inStock || isCartLoading}
+                    disabled={!inStock || isCartLoading || isBuyNowLoading}
                     onClick={handleAddToCart}
                   >
                     {isCartLoading ? "Adding..." : "Add to Cart"}
@@ -717,10 +757,10 @@ const ProductInfo = ({ product }) => {
                   <button
                     type="button"
                     className={`${styles.pibBtn} ${styles.buyBtn} w-100`}
-                    disabled={!inStock}
+                    disabled={!inStock || isBuyNowLoading || isCartLoading}
                     onClick={handleBuyNow}
                   >
-                    Buy Now
+                    {isBuyNowLoading ? "Processing..." : "Buy Now"}
                   </button>
                 </div>
               </div>

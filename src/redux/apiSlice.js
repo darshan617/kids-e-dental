@@ -57,6 +57,8 @@ export const apiSlice = createApi({
     "termsConditions",
     "salesPolicy",
     "subscribeEmail",
+    "address",
+    "profile",
   ],
 
   overrideExisting: true,
