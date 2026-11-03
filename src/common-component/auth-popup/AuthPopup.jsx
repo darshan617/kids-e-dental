@@ -67,6 +67,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   // signup fields
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [number, setNumber] = useState("");
   const [password, setPassword] = useState("");
   const [showSignupPwd, setShowSignupPwd] = useState(false);
 
@@ -141,10 +142,20 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
+    if (password.length < 6) {
+      showToast("Password must be at least 6 characters", "error");
+      return;
+    }
 
     try {
       const response = await register({
-        body: { name, email, password, password_confirmation: password },
+        body: {
+          name,
+          number,
+          email,
+          password,
+          password_confirmation: password,
+        },
       }).unwrap();
 
       showToast(
@@ -218,7 +229,6 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
     setOtp(next);
     setError("");
 
-    // move to next box
     if (digit && index < OTP_LENGTH - 1) {
       otpRefs.current[index + 1]?.focus();
     }
@@ -463,6 +473,23 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                 </div>
                 <div className="col-12">
                   <input
+                    type="tel"
+                    className="form-control"
+                    name="Phone"
+                    maxLength={10}
+                    id="signuNumber"
+                    placeholder="Number"
+                    value={number}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      setNumber(value);
+                    }}
+                    pattern="[0-9]{10}"
+                    required
+                  />
+                </div>
+                <div className="col-12">
+                  <input
                     type="email"
                     className="form-control"
                     name="email"
@@ -508,11 +535,13 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
                   <button
                     type="submit"
                     className="ctaBtn arw"
-                    style={{
-                      opacity: password.length < 6 ? 0.7 : 1,
-                      cursor: password.length < 6 ? "not-allowed" : "pointer",
-                    }}
-                    disabled={isSignupLoading || password.length < 6}
+                    style={
+                      {
+                        // opacity: password.length < 6 ? 0.7 : 1,
+                        // cursor: password.length < 6 ? "not-allowed" : "pointer",
+                      }
+                    }
+                    disabled={isSignupLoading}
                   >
                     {isSignupLoading ? "Signing up..." : "Continue"}
                   </button>
