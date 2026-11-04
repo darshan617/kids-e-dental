@@ -22,6 +22,7 @@ import { useGetCartQuery } from "@/redux/apis/addToCartApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useDispatch } from "react-redux";
 import { apiSlice } from "@/redux/apiSlice";
+import { useGetLocationQuery } from "@/redux/apis/locationApi";
 const TOP_BAR_LINKS = [
   {
     id: "country",
@@ -138,7 +139,7 @@ const TRENDING_SEARCHES = [
 const USER_MENU_ITEMS = [
   { label: "My Profile", href: "/my-profile", icon: HiOutlineUser },
   { label: "My Orders", href: "/", icon: HiOutlineShoppingBag },
-  { label: "My Wishlist", href: "/my-wishlist", icon: FaRegHeart  },
+  { label: "My Wishlist", href: "/my-wishlist", icon: FaRegHeart },
 ];
 
 const readUserDataFromCookie = () => {
@@ -161,6 +162,8 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+
+  const { data: locationData } = useGetLocationQuery();
 
   const { data: cartData } = useGetCartQuery();
   const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
