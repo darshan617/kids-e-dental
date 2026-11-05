@@ -22,14 +22,14 @@ import { useGetCartQuery } from "@/redux/apis/addToCartApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useDispatch } from "react-redux";
 import { apiSlice } from "@/redux/apiSlice";
-import { useGetLocationQuery } from "@/redux/apis/locationApi";
+import { useLocation } from "@/custom-hooks/location/Location";
 const TOP_BAR_LINKS = [
-  {
-    id: "country",
-    label: "India",
-    icon: <span className="fi fi-in"></span>,
-    url: "",
-  },
+  // {
+  //   id: "country",
+  //   label: "India",
+  //   icon: <span className="fi fi-in"></span>,
+  //   url: "",
+  // },
   {
     id: "distributor",
     label: "Become a Distributor",
@@ -163,10 +163,11 @@ const Header = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
 
-  const { data: locationData } = useGetLocationQuery();
-
   const { data: cartData } = useGetCartQuery();
   const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
+
+  const { isIndia, flag } = useLocation();
+  console.log(isIndia, flag, "sssssss");
 
   const syncUser = () => setUser(readUserDataFromCookie());
 
@@ -262,11 +263,18 @@ const Header = () => {
           </div>
           <div className="col-auto d-none d-lg-block">
             <div className={`${styles.headTopLinks} d-flex gap-5`}>
+              <div
+                key={flag?.name}
+                className="col-auto d-flex justify-content-between align-items-center gap-1"
+              >
+                <Image src={flag?.image} width={15} height={10} />
+                <p className="m-0">{flag?.name}</p>
+              </div>
               {TOP_BAR_LINKS?.map((link) => (
                 <div key={link?.id} className="col-auto">
-                  <a onClick={() => router.push(link?.url)}>
+                  <Link href={link?.url}>
                     {link?.icon} {link?.label}
-                  </a>
+                  </Link>
                 </div>
               ))}
             </div>
@@ -288,7 +296,7 @@ const Header = () => {
           </div>
           <div className="col-auto order-xl-3">
             <div
-              className={`${styles.headBtns} d-flex gap-xxl-4 gap-sm-3 gap-2`}
+              className={`${styles.headBtns} d-flex gap-xxl-4 gap-sm-3 gap-2 align-items-center`}
             >
               <div>
                 <button
@@ -304,108 +312,112 @@ const Header = () => {
                 </button>
               </div>
 
-              <div className="position-relative" ref={userMenuRef}>
-                {isLoggedIn ? (
-                  <>
-                    <button
-                      className={`${styles.avatarBtn} bgPrimary rounded-circle`}
-                      title={user?.name || "Account"}
-                      type="button"
-                      aria-haspopup="menu"
-                      aria-expanded={userMenuOpen}
-                      onClick={toggleUserMenu}
-                    >
-                      {userInitial}
-                    </button>
-
-                    {userMenuOpen && (
-                      <div className={`${styles.userDropdown}`} role="menu">
-                        <div className={`${styles.userDropdownHeader}`}>
-                          <div className={`${styles.userAvatar} .bgPrimary`}>
-                            <span>{userInitial}</span>
-                          </div>
-                          <p className={`${styles.userName}`}>{user?.name}</p>
-                        </div>
-
-                        <ul className={`${styles.userMenuList}`}>
-                          {USER_MENU_ITEMS?.map((item) => {
-                            const Icon = item?.icon;
-                            return (
-                              <li key={item?.label}>
-                                <Link
-                                  href={item?.href || "#"}
-                                  className={`${styles.userMenuLink}`}
-                                  onClick={closeUserMenu}
-                                  role="menuitem"
-                                >
-                                  <span className={`${styles.userMenuIcon}`}>
-                                    <Icon size={20} />
-                                  </span>
-                                  <span>{item?.label}</span>
-                                </Link>
-                              </li>
-                            );
-                          })}
-                        </ul>
-
-                        <div className={`${styles.userSignOutWrap}`}>
-                          <button
-                            type="button"
-                            className={`${styles.userSignOutBtn}`}
-                            onClick={handleLogout}
-                            disabled={isLogoutLoading}
-                          >
-                            <HiOutlinePower size={18} />
-                            <span>
-                              {isLogoutLoading ? "Logging out..." : "Logout"}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <button
-                      className={`${styles.headBtn} rounded-circle d-sm-none`}
-                      title="Login"
-                      type="button"
-                      onClick={() => setIsAuthOpen(true)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="currentColor"
-                        viewBox="0 0 16 16"
+              {isIndia && (
+                <div className="position-relative" ref={userMenuRef}>
+                  {isLoggedIn ? (
+                    <>
+                      <button
+                        className={`${styles.avatarBtn} bgPrimary rounded-circle`}
+                        title={user?.name || "Account"}
+                        type="button"
+                        aria-haspopup="menu"
+                        aria-expanded={userMenuOpen}
+                        onClick={toggleUserMenu}
                       >
-                        <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
-                      </svg>
-                    </button>
-                    <button
-                      className={`${styles.loginBtn} ctaBtn d-none d-sm-block`}
-                      title="Login"
-                      type="button"
-                      onClick={() => setIsAuthOpen(true)}
-                    >
-                      Login/Signup
-                    </button>
-                  </>
-                )}
-              </div>
+                        {userInitial}
+                      </button>
 
-              <div>
-                <Link
-                  href="/my-cart"
-                  className={`${styles.headBtn} rounded-circle position-relative`}
-                  title="Cart"
-                >
-                  {cartItems?.length > 0 && (
-                    <span className={`${styles.badge} bgPrimary`}>
-                      {cartItems?.length}
-                    </span>
+                      {userMenuOpen && (
+                        <div className={`${styles.userDropdown}`} role="menu">
+                          <div className={`${styles.userDropdownHeader}`}>
+                            <div className={`${styles.userAvatar} .bgPrimary`}>
+                              <span>{userInitial}</span>
+                            </div>
+                            <p className={`${styles.userName}`}>{user?.name}</p>
+                          </div>
+
+                          <ul className={`${styles.userMenuList}`}>
+                            {USER_MENU_ITEMS?.map((item) => {
+                              const Icon = item?.icon;
+                              return (
+                                <li key={item?.label}>
+                                  <Link
+                                    href={item?.href || "#"}
+                                    className={`${styles.userMenuLink}`}
+                                    onClick={closeUserMenu}
+                                    role="menuitem"
+                                  >
+                                    <span className={`${styles.userMenuIcon}`}>
+                                      <Icon size={20} />
+                                    </span>
+                                    <span>{item?.label}</span>
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+
+                          <div className={`${styles.userSignOutWrap}`}>
+                            <button
+                              type="button"
+                              className={`${styles.userSignOutBtn}`}
+                              onClick={handleLogout}
+                              disabled={isLogoutLoading}
+                            >
+                              <HiOutlinePower size={18} />
+                              <span>
+                                {isLogoutLoading ? "Logging out..." : "Logout"}
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        className={`${styles.headBtn} rounded-circle d-sm-none`}
+                        title="Login"
+                        type="button"
+                        onClick={() => setIsAuthOpen(true)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="currentColor"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
+                        </svg>
+                      </button>
+                      <button
+                        className={`${styles.loginBtn} ctaBtn d-none d-sm-block`}
+                        title="Login"
+                        type="button"
+                        onClick={() => setIsAuthOpen(true)}
+                      >
+                        Login/Signup
+                      </button>
+                    </>
                   )}
-                  <BsCart size={28} />
-                </Link>
-              </div>
+                </div>
+              )}
+
+              {isIndia && (
+                <div>
+                  <Link
+                    href="/my-cart"
+                    className={`${styles.headBtn} rounded-circle position-relative`}
+                    title="Cart"
+                  >
+                    {cartItems?.length > 0 && (
+                      <span className={`${styles.badge} bgPrimary`}>
+                        {cartItems?.length}
+                      </span>
+                    )}
+                    <BsCart size={28} />
+                  </Link>
+                </div>
+              )}
               <div className="d-xl-none">
                 <button
                   className={`${styles.headBtn} rounded-circle`}

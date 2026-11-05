@@ -6,6 +6,11 @@ const imageHostname = rawImageBaseUrl
   .trim();
 
 const remotePatterns = [
+  {
+    protocol: "https",
+    hostname: "flagcdn.com",
+    pathname: "/w80/**",
+  },
   ...(imageHostname
     ? [
         {

@@ -23,6 +23,7 @@ import {
 import CustomPopup from "../custom-popup/CustomPopup";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAddBuyNowMutation } from "@/redux/apis/buyNowApi";
+import { useLocation } from "@/custom-hooks/location/Location";
 
 const PRODUCT_ROUTE = "/product-details";
 const WISHLIST_PATH = "/wishlist";
@@ -308,7 +309,7 @@ export const ProductCard = ({
   onRemove,
 }) => {
   const [wishlisted, setWishlisted] = useState(Boolean(isWishlist));
-
+  const { isIndia } = useLocation();
   useEffect(() => {
     setWishlisted(Boolean(isWishlist));
   }, [isWishlist]);
@@ -529,27 +530,29 @@ export const ProductCard = ({
               <div className={styles.pibTag}>{tag || "New"}</div>
             </div>
 
-            <div className={`${styles.pibWL} align-self-end`}>
-              <button
-                onClick={handleWishlistClick}
-                disabled={isWishlistLoading || isRemoveWishlist}
-                type="button"
-                className={`${styles.wishlistBtn} ${
-                  isWishlistPage ? styles.removeWishlistBtn : ""
-                }`}
-                title={wishlistLabel}
-                aria-label={wishlistLabel}
-                aria-pressed={!isWishlistPage ? wishlisted : undefined}
-              >
-                {isWishlistPage ? (
-                  "×"
-                ) : wishlisted ? (
-                  <FaHeart size={18} color="#e63946" />
-                ) : (
-                  <FaRegHeart size={18} />
-                )}
-              </button>
-            </div>
+            {isIndia && (
+              <div className={`${styles.pibWL} align-self-end`}>
+                <button
+                  onClick={handleWishlistClick}
+                  disabled={isWishlistLoading || isRemoveWishlist}
+                  type="button"
+                  className={`${styles.wishlistBtn} ${
+                    isWishlistPage ? styles.removeWishlistBtn : ""
+                  }`}
+                  title={wishlistLabel}
+                  aria-label={wishlistLabel}
+                  aria-pressed={!isWishlistPage ? wishlisted : undefined}
+                >
+                  {isWishlistPage ? (
+                    "×"
+                  ) : wishlisted ? (
+                    <FaHeart size={18} color="#e63946" />
+                  ) : (
+                    <FaRegHeart size={18} />
+                  )}
+                </button>
+              </div>
+            )}
           </div>
 
           <div className={`${styles.pibImgBox} mx-auto`}>
@@ -572,40 +575,44 @@ export const ProductCard = ({
             </h3>
           </div>
 
+          {isIndia && (
+            <div
+              className={`${styles.pibPriceBox} d-flex align-items-center gap-2`}
+            >
+              <strong className="pibProdPrice">₹ {formatPrice(price)}</strong>
+
+              {oldPrice && (
+                <del className="pibStikePrice opacity-50">
+                  ₹ {formatPrice(oldPrice)}
+                </del>
+              )}
+            </div>
+          )}
+        </div>
+
+        {isIndia && (
           <div
-            className={`${styles.pibPriceBox} d-flex align-items-center gap-2`}
+            className={`${styles.pibBtns} d-flex justify-content-center mt-auto gap-2 p-3 position-relative z-3`}
           >
-            <strong className="pibProdPrice">₹ {formatPrice(price)}</strong>
+            <button
+              type="button"
+              className={`${styles.pibBtn} ${styles.cartBtn}`}
+              onClick={() => handleAddToCart()}
+              disabled={isBusy}
+            >
+              Add to Cart
+            </button>
 
-            {oldPrice && (
-              <del className="pibStikePrice opacity-50">
-                ₹ {formatPrice(oldPrice)}
-              </del>
-            )}
+            <button
+              type="button"
+              className={`${styles.pibBtn} ${styles.buyBtn}`}
+              disabled={isBusy}
+              onClick={() => handleBuyNowClick()}
+            >
+              Buy Now
+            </button>
           </div>
-        </div>
-
-        <div
-          className={`${styles.pibBtns} d-flex justify-content-center mt-auto gap-2 p-3 position-relative z-3`}
-        >
-          <button
-            type="button"
-            className={`${styles.pibBtn} ${styles.cartBtn}`}
-            onClick={() => handleAddToCart()}
-            disabled={isBusy}
-          >
-            Add to Cart
-          </button>
-
-          <button
-            type="button"
-            className={`${styles.pibBtn} ${styles.buyBtn}`}
-            disabled={isBusy}
-            onClick={() => handleBuyNowClick()}
-          >
-            Buy Now
-          </button>
-        </div>
+        )}
 
         <Link href={detailsHref} className="stretched-link" title={name} />
       </div>
