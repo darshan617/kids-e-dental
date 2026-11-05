@@ -29,6 +29,7 @@ import { useAddBuyNowMutation } from "@/redux/apis/buyNowApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
 import AllCoupons from "../all-coupons/AllCoupons";
+import { useLocation } from "@/custom-hooks/location/Location";
 
 const MAX_QTY_PER_ORDER = 10;
 const PINCODE_REGEX = /^[1-9][0-9]{5}$/;
@@ -52,6 +53,7 @@ const getUserData = () => {
 const ProductInfo = ({ product }) => {
   const { showToast } = useToast();
   const router = useRouter();
+  const { isIndia } = useLocation();
 
   const [addToWishlist, { isLoading: isWishlistLoading }] =
     useAddToWishlistMutation();
@@ -610,217 +612,232 @@ const ProductInfo = ({ product }) => {
                 )}
               </div>
 
-              {isVariable &&
-                [
-                  {
-                    label: "Select Arch",
-                    name: "arch",
-                    options: variantTypes.map((type) => type.arch),
-                    value: arch,
-                    onChange: changeArch,
-                  },
-                  {
-                    label: "Select Size",
-                    name: "size",
-                    options: sizeOptions,
-                    value: size,
-                    onChange: changeSize,
-                  },
-                ].map(({ label, name, options, value, onChange }) => (
-                  <div className="mb-3" key={name}>
-                    <small className="d-block mb-1 fw-medium">{label}</small>
+              {isIndia && (
+                <>
+                  {isVariable &&
+                    [
+                      {
+                        label: "Select Arch",
+                        name: "arch",
+                        options: variantTypes.map((type) => type.arch),
+                        value: arch,
+                        onChange: changeArch,
+                      },
+                      {
+                        label: "Select Size",
+                        name: "size",
+                        options: sizeOptions,
+                        value: size,
+                        onChange: changeSize,
+                      },
+                    ].map(({ label, name, options, value, onChange }) => (
+                      <div className="mb-3" key={name}>
+                        <small className="d-block mb-1 fw-medium">
+                          {label}
+                        </small>
+                        <div
+                          className={`btn-group ${styles.prodType} gap-2`}
+                          role="group"
+                          aria-label={label}
+                        >
+                          {options?.map((option) => (
+                            <React.Fragment key={option}>
+                              <input
+                                type="radio"
+                                className="btn-check"
+                                name={name}
+                                id={`${name}${option}`}
+                                autoComplete="off"
+                                checked={String(value) === String(option)}
+                                onChange={() => onChange(option)}
+                              />
+                              <label
+                                className="btn"
+                                htmlFor={`${name}${option}`}
+                              >
+                                {option}
+                              </label>
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  <div className="mb-4">
+                    <small className="d-block mb-1 fw-medium">Quantity</small>
                     <div
-                      className={`btn-group ${styles.prodType} gap-2`}
-                      role="group"
-                      aria-label={label}
+                      className={`${styles.quantitySpinner} input-group border rounded d-inline-flex`}
                     >
-                      {options?.map((option) => (
-                        <React.Fragment key={option}>
-                          <input
-                            type="radio"
-                            className="btn-check"
-                            name={name}
-                            id={`${name}${option}`}
-                            autoComplete="off"
-                            checked={String(value) === String(option)}
-                            onChange={() => onChange(option)}
-                          />
-                          <label className="btn" htmlFor={`${name}${option}`}>
-                            {option}
-                          </label>
-                        </React.Fragment>
-                      ))}
+                      <button
+                        type="button"
+                        className="btn bg-white border-0"
+                        onClick={() => changeQty(qty - 1)}
+                        aria-label="Decrease quantity"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={qty}
+                        onChange={(e) => changeQty(e.target.value)}
+                        className="form-control border-0 text-center px-0"
+                        aria-label="Quantity"
+                      />
+                      <button
+                        type="button"
+                        className="btn bg-white border-0"
+                        onClick={() => changeQty(qty + 1)}
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
                     </div>
+                    <small
+                      className={`d-block mt-1 ${inStock ? "text-success" : "text-danger"}`}
+                    >
+                      {inStock ? "In Stock" : "Out of Stock"}
+                    </small>
                   </div>
-                ))}
 
-              <div className="mb-4">
-                <small className="d-block mb-1 fw-medium">Quantity</small>
-                <div
-                  className={`${styles.quantitySpinner} input-group border rounded d-inline-flex`}
-                >
-                  <button
-                    type="button"
-                    className="btn bg-white border-0"
-                    onClick={() => changeQty(qty - 1)}
-                    aria-label="Decrease quantity"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={qty}
-                    onChange={(e) => changeQty(e.target.value)}
-                    className="form-control border-0 text-center px-0"
-                    aria-label="Quantity"
-                  />
-                  <button
-                    type="button"
-                    className="btn bg-white border-0"
-                    onClick={() => changeQty(qty + 1)}
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
-                <small
-                  className={`d-block mt-1 ${inStock ? "text-success" : "text-danger"}`}
-                >
-                  {inStock ? "In Stock" : "Out of Stock"}
-                </small>
-              </div>
-
-              <div className="d-flex align-items-center pi_price gap-4 mb-4 lh-sm">
-                <div className="col-auto">
-                  {hasDiscount && (
-                    <del className="pibStikePrice opacity-50">
-                      ₹ {formatPrice(mrp)}
-                    </del>
-                  )}
-                  <div className={`${styles.prod_Price} fw-bolder`}>
-                    ₹ {formatPrice(sellingPrice)}
-                  </div>
-                </div>
-                {hasDiscount && (
-                  <div className="col">
-                    <div className={styles.offerTag}>
-                      {discountPct}% <small className="d-block">Off</small>
+                  <div className="d-flex align-items-center pi_price gap-4 mb-4 lh-sm">
+                    <div className="col-auto">
+                      {hasDiscount && (
+                        <del className="pibStikePrice opacity-50">
+                          ₹ {formatPrice(mrp)}
+                        </del>
+                      )}
+                      <div className={`${styles.prod_Price} fw-bolder`}>
+                        ₹ {formatPrice(sellingPrice)}
+                      </div>
                     </div>
+                    {hasDiscount && (
+                      <div className="col">
+                        <div className={styles.offerTag}>
+                          {discountPct}% <small className="d-block">Off</small>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              <div>
-                <button
-                  type="button"
-                  className={styles.btnLink}
-                  onClick={() => setCouponsOpen(true)}
-                >
-                  View all coupons & offers
-                </button>
-              </div>
-              <div className="d-flex flex-row flex-wrap gap-3 mb-5">
-                <div className="col-12 text-center hstack gap-3">
-                  <hr className="w-100" />
-                  <button
-                    type="button"
-                    className={`wishlistBtn ${styles.prodDetWish} flex-shrink-0 ${
-                      wishlisted ? "active" : ""
-                    }`}
-                    aria-pressed={wishlisted}
-                    title={
-                      wishlisted ? "Remove from Wishlist" : "Add to Wishlist"
-                    }
-                    disabled={isWishlistLoading || isRemoveLoading}
-                    onClick={handleWishlistClick}
-                  >
-                    {wishlisted ? (
-                      <FaHeart size={18} color="#e63946" />
-                    ) : (
-                      <FaRegHeart size={18} />
-                    )}{" "}
-                    {wishlisted ? "Wishlisted" : "Add to Wishlist"}
-                  </button>
-                  <hr className="w-100" />
-                </div>
-                <div className="col">
-                  <button
-                    type="button"
-                    className={`${styles.pibBtn} ${styles.cartBtn} w-100`}
-                    disabled={!inStock || isCartLoading || isBuyNowLoading}
-                    onClick={handleAddToCart}
-                  >
-                    {isCartLoading ? "Adding..." : "Add to Cart"}
-                  </button>
-                </div>
-                <div className="col">
-                  <button
-                    type="button"
-                    className={`${styles.pibBtn} ${styles.buyBtn} w-100`}
-                    disabled={!inStock || isBuyNowLoading || isCartLoading}
-                    onClick={handleBuyNow}
-                  >
-                    {isBuyNowLoading ? "Processing..." : "Buy Now"}
-                  </button>
-                </div>
-              </div>
-
-              <div
-                className={`${styles.deliveryCheck} d-flex flex-wrap rounded p-3 gap-3 mb-4`}
-              >
-                <div className="col-12 lh-base text-secondary">
-                  <strong className="d-block fw-bold text-uppercase text-dark">
-                    Check Delivery
-                  </strong>
-                  Enter your pincode to check delivery availability and
-                  estimated delivery time.
-                </div>
-                <div className="col-sm-9 col-10">
-                  <div
-                    className={`${styles.deliveryForm} input-group bg-black rounded-pill overflow-hidden`}
-                  >
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      className="form-control bg-white border-0 rounded-pill"
-                      placeholder="Enter Pincode"
-                      aria-label="Enter Pincode"
-                      value={pincode}
-                      onChange={(e) =>
-                        setPincode(e.target.value.replace(/\D/g, ""))
-                      }
-                      onKeyDown={(e) => e.key === "Enter" && checkDelivery()}
-                    />
+                  <div>
                     <button
-                      className="btn bg-transparent ms-0"
                       type="button"
-                      onClick={checkDelivery}
+                      className={styles.btnLink}
+                      onClick={() => setCouponsOpen(true)}
                     >
-                      Check
+                      View all coupons & offers
                     </button>
                   </div>
-                  {deliveryMsg && (
-                    <div className="pt-2" role="status">
-                      {deliveryMsg.ok ? (
-                        <>
-                          Standard delivery available to this location within{" "}
-                          <strong className="txtRed d-inline-block">
-                            2 working days
-                          </strong>
-                        </>
-                      ) : (
-                        <span className="text-danger">{deliveryMsg?.text}</span>
+                  <div className="d-flex flex-row flex-wrap gap-3 mb-5">
+                    <div className="col-12 text-center hstack gap-3">
+                      <hr className="w-100" />
+                      <button
+                        type="button"
+                        className={`wishlistBtn ${styles.prodDetWish} flex-shrink-0 ${
+                          wishlisted ? "active" : ""
+                        }`}
+                        aria-pressed={wishlisted}
+                        title={
+                          wishlisted
+                            ? "Remove from Wishlist"
+                            : "Add to Wishlist"
+                        }
+                        disabled={isWishlistLoading || isRemoveLoading}
+                        onClick={handleWishlistClick}
+                      >
+                        {wishlisted ? (
+                          <FaHeart size={18} color="#e63946" />
+                        ) : (
+                          <FaRegHeart size={18} />
+                        )}{" "}
+                        {wishlisted ? "Wishlisted" : "Add to Wishlist"}
+                      </button>
+                      <hr className="w-100" />
+                    </div>
+                    <div className="col">
+                      <button
+                        type="button"
+                        className={`${styles.pibBtn} ${styles.cartBtn} w-100`}
+                        disabled={!inStock || isCartLoading || isBuyNowLoading}
+                        onClick={handleAddToCart}
+                      >
+                        {isCartLoading ? "Adding..." : "Add to Cart"}
+                      </button>
+                    </div>
+                    <div className="col">
+                      <button
+                        type="button"
+                        className={`${styles.pibBtn} ${styles.buyBtn} w-100`}
+                        disabled={!inStock || isBuyNowLoading || isCartLoading}
+                        onClick={handleBuyNow}
+                      >
+                        {isBuyNowLoading ? "Processing..." : "Buy Now"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`${styles.deliveryCheck} d-flex flex-wrap rounded p-3 gap-3 mb-4`}
+                  >
+                    <div className="col-12 lh-base text-secondary">
+                      <strong className="d-block fw-bold text-uppercase text-dark">
+                        Check Delivery
+                      </strong>
+                      Enter your pincode to check delivery availability and
+                      estimated delivery time.
+                    </div>
+                    <div className="col-sm-9 col-10">
+                      <div
+                        className={`${styles.deliveryForm} input-group bg-black rounded-pill overflow-hidden`}
+                      >
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={6}
+                          className="form-control bg-white border-0 rounded-pill"
+                          placeholder="Enter Pincode"
+                          aria-label="Enter Pincode"
+                          value={pincode}
+                          onChange={(e) =>
+                            setPincode(e.target.value.replace(/\D/g, ""))
+                          }
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && checkDelivery()
+                          }
+                        />
+                        <button
+                          className="btn bg-transparent ms-0"
+                          type="button"
+                          onClick={checkDelivery}
+                        >
+                          Check
+                        </button>
+                      </div>
+                      {deliveryMsg && (
+                        <div className="pt-2" role="status">
+                          {deliveryMsg.ok ? (
+                            <>
+                              Standard delivery available to this location
+                              within{" "}
+                              <strong className="txtRed d-inline-block">
+                                2 working days
+                              </strong>
+                            </>
+                          ) : (
+                            <span className="text-danger">
+                              {deliveryMsg?.text}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-                <Image
-                  src={delivery}
-                  className={styles.deliveryBg}
-                  alt="Fast delivery"
-                />
-              </div>
+                    <Image
+                      src={delivery}
+                      className={styles.deliveryBg}
+                      alt="Fast delivery"
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="prodBriefContent">
                 {accordionItems.map(({ id, title, body }) => (

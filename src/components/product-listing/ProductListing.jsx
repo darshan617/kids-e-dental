@@ -12,6 +12,7 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { VscSettings } from "react-icons/vsc";
 import { useGetCategoryDataQuery } from "@/redux/apis/categoryApi";
 import { useProductListingQuery } from "@/redux/apis/productListingApi";
+import { useLocation } from "@/custom-hooks/location/Location";
 
 const PRODUCTS_PER_PAGE = 12;
 const MIN_PRICE = 1000;
@@ -142,10 +143,18 @@ function CategoryFilter({
   onSelectCategory,
   onToggleSub,
 }) {
+  console.log(
+    categories,
+    selectedCategory,
+    selectedSubs,
+    onSelectCategory,
+    onToggleSub,
+  );
+
   return (
     <ul className={styles.afiContent}>
-      {categories.map((category) => {
-        const isOpen = selectedCategory === category.id;
+      {categories?.map((category) => {
+        const isOpen = selectedCategory === category?.id;
 
         return (
           <li key={category.id}>
@@ -154,32 +163,34 @@ function CategoryFilter({
                 <input
                   className="form-check-input"
                   type="checkbox"
-                  id={`category_${category.id}`}
+                  id={`category_${category?.id}`}
                   checked={isOpen}
-                  onChange={() => onSelectCategory(isOpen ? null : category.id)}
+                  onChange={() =>
+                    onSelectCategory(isOpen ? null : category?.id)
+                  }
                 />
 
                 <label
                   className="form-check-label"
-                  htmlFor={`category_${category.id}`}
+                  htmlFor={`category_${category?.id}`}
                 >
-                  {category.label}
+                  {category?.label}
                 </label>
               </div>
 
-              {isOpen && category.subs.length > 0 && (
+              {isOpen && category?.subs?.length > 0 && (
                 <ul className="list-unstyled ps-4 mt-3 mb-0">
-                  {category.subs.map((sub) => (
+                  {category?.subs?.map((sub) => (
                     <li
-                      key={sub.id}
+                      key={sub?.id}
                       role="button"
-                      onClick={() => onToggleSub(sub.id)}
+                      onClick={() => onToggleSub(sub?.id)}
                       style={{
                         cursor: "pointer",
-                        fontWeight: selectedSubs.includes(sub.id) ? 700 : 400,
+                        fontWeight: selectedSubs?.includes(sub?.id) ? 700 : 400,
                       }}
                     >
-                      {sub.label}
+                      {sub?.label}
                     </li>
                   ))}
                 </ul>
@@ -241,6 +252,7 @@ function PriceFilter() {
 function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
   const [selectedCategory, setSelectedCategory] = useState(applied.category);
   const [selectedSubs, setSelectedSubs] = useState(applied.subs);
+  const { isIndia } = useLocation();
 
   return (
     <div
@@ -300,9 +312,11 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
               )}
             </FilterSection>
 
-            <FilterSection id="fltr_Price" title="Price">
-              <PriceFilter />
-            </FilterSection>
+            {isIndia && (
+              <FilterSection id="fltr_Price" title="Price">
+                <PriceFilter />
+              </FilterSection>
+            )}
 
             {/* <FilterSection id="fltr_Gender" title="Gender">
               <CheckboxList items={genders} />
@@ -526,7 +540,9 @@ function ProductListing() {
           </p>
         ) : (
           <>
-            <div className={`mb-5 row g-xl-5 g-lg-4 g-md-3 g-sm-2 g-1 row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-2 ${styles.productListing}`}>
+            <div
+              className={`mb-5 row g-xl-5 g-lg-4 g-md-3 g-sm-2 g-1 row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-2 ${styles.productListing}`}
+            >
               {visibleProducts.length === 0 ? (
                 <p className="text-center">No products found.</p>
               ) : (

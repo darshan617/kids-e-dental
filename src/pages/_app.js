@@ -4,14 +4,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Provider } from "react-redux";
 import "flag-icons/css/flag-icons.min.css";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-
 import { storeWrapper } from "@/redux/store";
-
 import "@/styles/globals.css";
 // import "aos/dist/aos.css";
 import { ToastProvider } from "@/custom-hooks/toast/ToastProvider";
-import ProgressBar from "@/custom-hooks/progress-bar/ProgressBar";
+import ProgressBar from "@/common-component/progress-bar/ProgressBar";
 import { FaArrowUp } from "react-icons/fa";
+import { LocationProvider } from "@/custom-hooks/location/Location";
 
 function BackToTopButton() {
   const [show, setShow] = useState(false);
@@ -47,47 +46,49 @@ export default function App({ Component, pageProps, ...rest }) {
 
   return (
     <Provider store={store}>
-      <ToastProvider>
-        <ProgressBar />
-        <AppContent Component={Component} pageProps={pageProps} />
-        <style jsx global>{`
-          .back-to-top-btn {
-            position: fixed;
-            bottom: 32px;
-            right: 32px;
-            z-index: 9999;
-            background: black;
-            color: #fff;
-            border: none;
-            outline: none;
-            padding: 12px 16px;
-            border-radius: 50%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            transition: background 0.2s;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-          }
-          .back-to-top-btn:hover {
-            background:rgb(233, 201, 24);
-          }
-          @media (max-width: 500px) {
+      <LocationProvider>
+        <ToastProvider>
+          <ProgressBar />
+          <AppContent Component={Component} pageProps={pageProps} />
+          <style jsx global>{`
             .back-to-top-btn {
-              bottom: 18px;
-              right: 18px;
-              padding: 10px 13px;
-              font-size: 20px;
-              height: 45px;
-              width: 45px;
+              position: fixed;
+              bottom: 32px;
+              right: 32px;
+              z-index: 9999;
+              background: black;
+              color: #fff;
+              border: none;
+              outline: none;
+              padding: 12px 16px;
+              border-radius: 50%;
+              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+              cursor: pointer;
+              transition: background 0.2s;
+              font-size: 24px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 50px;
+              height: 50px;
             }
-          }
-        `}</style>
-        <BackToTopButton />
-      </ToastProvider>
+            .back-to-top-btn:hover {
+              background: rgb(233, 201, 24);
+            }
+            @media (max-width: 500px) {
+              .back-to-top-btn {
+                bottom: 18px;
+                right: 18px;
+                padding: 10px 13px;
+                font-size: 20px;
+                height: 45px;
+                width: 45px;
+              }
+            }
+          `}</style>
+          <BackToTopButton />
+        </ToastProvider>
+      </LocationProvider>
     </Provider>
   );
 }
