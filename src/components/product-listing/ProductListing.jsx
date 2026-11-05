@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import distributorImg from "@/assets/images/home/distributorImg.png";
 import styles from "@/components/product-listing/ProductListing.module.css";
 import {
@@ -12,16 +12,9 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { VscSettings } from "react-icons/vsc";
 import { useGetCategoryDataQuery } from "@/redux/apis/categoryApi";
 import { useProductListingQuery } from "@/redux/apis/productListingApi";
+import { useLocation } from "@/custom-hooks/location/Location";
 
 const PRODUCTS_PER_PAGE = 12;
-const MIN_PRICE = 1000;
-const MAX_PRICE = 50000;
-const MIN_GAP = 1000;
-
-const genders = [
-  { id: "genderBoy", label: "Boy" },
-  { id: "genderGirl", label: "Girl" },
-];
 
 const sortOptions = [
   { value: "recent", label: "Recently Added" },
@@ -120,32 +113,19 @@ function FilterSection({ id, title, open = false, children }) {
   );
 }
 
-function CheckboxList({ items }) {
-  return (
-    <ul className={styles.afiContent}>
-      {items.map((item) => (
-        <li key={item.id}>
-          <input className="form-check-input" type="checkbox" id={item.id} />
-          <label className="form-check-label" htmlFor={item.id}>
-            {item.label}
-          </label>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function CategoryFilter({
   categories,
   selectedCategory,
   selectedSubs,
+  selectedChildren,
   onSelectCategory,
   onToggleSub,
+  onToggleChild,
 }) {
   return (
     <ul className={styles.afiContent}>
-      {categories.map((category) => {
-        const isOpen = selectedCategory === category.id;
+      {categories?.map((category) => {
+        const isOpen = selectedCategory === category?.id;
 
         return (
           <li key={category.id}>
@@ -158,7 +138,6 @@ function CategoryFilter({
                   checked={isOpen}
                   onChange={() => onSelectCategory(isOpen ? null : category.id)}
                 />
-
                 <label
                   className="form-check-label"
                   htmlFor={`category_${category.id}`}
@@ -167,21 +146,68 @@ function CategoryFilter({
                 </label>
               </div>
 
-              {isOpen && category.subs.length > 0 && (
+              {isOpen && category.subs?.length > 0 && (
                 <ul className="list-unstyled ps-4 mt-3 mb-0">
-                  {category.subs.map((sub) => (
-                    <li
-                      key={sub.id}
-                      role="button"
-                      onClick={() => onToggleSub(sub.id)}
-                      style={{
-                        cursor: "pointer",
-                        fontWeight: selectedSubs.includes(sub.id) ? 700 : 400,
-                      }}
-                    >
-                      {sub.label}
-                    </li>
-                  ))}
+                  {category.subs.map((sub) => {
+                    const isSubSelected = selectedSubs?.includes(sub.id);
+
+                    return (
+                      <li
+                        key={sub.id}
+                        className="mb-2"
+                        style={{ display: "block" }}
+                      >
+                        {/* Subcategory checkbox */}
+                        <div className="d-flex align-items-center gap-2">
+                          <input
+                            className="form-check-input mt-0"
+                            type="checkbox"
+                            id={`sub_${sub.id}`}
+                            checked={isSubSelected}
+                            onChange={() => onToggleSub(sub.id)}
+                          />
+                          <label
+                            className="form-check-label"
+                            htmlFor={`sub_${sub.id}`}
+                          >
+                            {sub.label}
+                          </label>
+                        </div>
+
+                        {/* Child categories, shown below the subcategory */}
+                        {isSubSelected && sub.children?.length > 0 && (
+                          <ul className="list-unstyled ps-4 mt-2 mb-0 w-100">
+                            {sub.children.map((child) => (
+                              <li
+                                key={child.id}
+                                className="mb-1"
+                                style={{ display: "block" }}
+                              >
+                                <div className="d-flex align-items-center gap-2">
+                                  <input
+                                    className="form-check-input mt-0"
+                                    type="checkbox"
+                                    id={`child_${child.id}`}
+                                    checked={selectedChildren?.includes(
+                                      child.id,
+                                    )}
+                                    onChange={() => onToggleChild(child.id)}
+                                  />
+                                  <label
+                                    className="form-check-label"
+                                    htmlFor={`child_${child.id}`}
+                                    style={{ fontSize: "90%" }}
+                                  >
+                                    {child.label}
+                                  </label>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -191,13 +217,37 @@ function CategoryFilter({
     </ul>
   );
 }
+function PriceFilter({ range, selectedRange, onChange }) {
+  const { min_price: rangeMin, max_price: rangeMax } = range;
+  const [minPrice, setMinPrice] = useState(
+    selectedRange?.min ?? rangeMin,
+  );
+  const [maxPrice, setMaxPrice] = useState(
+    selectedRange?.max ?? rangeMax,
+  );
+  const lastEmittedRange = useRef({ min: minPrice, max: maxPrice });
+  const rangeSize = rangeMax - rangeMin;
+  const minPercent =
+    rangeSize > 0 ? ((minPrice - rangeMin) / rangeSize) * 100 : 0;
+  const maxPercent =
+    rangeSize > 0 ? ((maxPrice - rangeMin) / rangeSize) * 100 : 100;
 
-function PriceFilter() {
-  const [minPrice, setMinPrice] = useState(MIN_PRICE);
-  const [maxPrice, setMaxPrice] = useState(MAX_PRICE);
+  useEffect(() => {
+    if (
+      lastEmittedRange.current.min === minPrice &&
+      lastEmittedRange.current.max === maxPrice
+    ) {
+      return;
+    }
 
-  const minPercent = (minPrice / MAX_PRICE) * 100;
-  const maxPercent = (maxPrice / MAX_PRICE) * 100;
+    const timeoutId = setTimeout(() => {
+      const nextRange = { min: minPrice, max: maxPrice };
+      lastEmittedRange.current = nextRange;
+      onChange(nextRange);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [minPrice, maxPrice, onChange]);
 
   return (
     <div className="row g-0 mb-4">
@@ -212,23 +262,21 @@ function PriceFilter() {
         <input
           type="range"
           className={styles.priceRange}
-          min={MIN_PRICE}
-          max={MAX_PRICE}
+          step={500}
+          min={rangeMin}
+          max={maxPrice}
           value={minPrice}
-          onChange={(e) =>
-            setMinPrice(Math.min(+e.target.value, maxPrice - MIN_GAP))
-          }
+          onChange={(e) => setMinPrice(Number(e.target.value))}
         />
 
         <input
           type="range"
           className={styles.priceRange}
-          min={MIN_PRICE}
-          max={MAX_PRICE}
+          step={500}
+          min={minPrice}
+          max={rangeMax}
           value={maxPrice}
-          onChange={(e) =>
-            setMaxPrice(Math.max(+e.target.value, minPrice + MIN_GAP))
-          }
+          onChange={(e) => setMaxPrice(Number(e.target.value))}
         />
       </div>
 
@@ -238,9 +286,21 @@ function PriceFilter() {
   );
 }
 
-function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
+function FilterDrawer({
+  categories,
+  isLoading,
+  isError,
+  applied,
+  priceRange,
+  selectedPriceRange,
+  priceFilterKey,
+  onPriceRangeChange,
+  onApply,
+}) {
+  const { isIndia } = useLocation();
   const [selectedCategory, setSelectedCategory] = useState(applied.category);
   const [selectedSubs, setSelectedSubs] = useState(applied.subs);
+  const [selectedChildren, setSelectedChildren] = useState(applied.children);
 
   return (
     <div
@@ -287,26 +347,43 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
                   categories={categories}
                   selectedCategory={selectedCategory}
                   selectedSubs={selectedSubs}
+                  selectedChildren={selectedChildren}
                   onSelectCategory={(categoryId) => {
                     setSelectedCategory(categoryId);
                     setSelectedSubs([]);
+                    setSelectedChildren([]);
                   }}
-                  onToggleSub={(subId) =>
-                    setSelectedSubs((previous) =>
-                      previous.includes(subId) ? [] : [subId],
+                  onToggleSub={(subId) => {
+                    setSelectedSubs((prev) =>
+                      prev.includes(subId) ? [] : [subId],
+                    );
+                    setSelectedChildren([]);
+                  }}
+                  onToggleChild={(childId) =>
+                    setSelectedChildren((prev) =>
+                      prev.includes(childId) ? [] : [childId],
                     )
                   }
                 />
               )}
             </FilterSection>
 
-            <FilterSection id="fltr_Price" title="Price">
-              <PriceFilter />
-            </FilterSection>
-
-            {/* <FilterSection id="fltr_Gender" title="Gender">
-              <CheckboxList items={genders} />
-            </FilterSection> */}
+            {isIndia && (
+              <FilterSection id="fltr_Price" title="Price">
+                {priceRange ? (
+                  <PriceFilter
+                    key={`${priceFilterKey}:${priceRange.min_price}:${priceRange.max_price}`}
+                    range={priceRange}
+                    selectedRange={selectedPriceRange}
+                    onChange={onPriceRangeChange}
+                  />
+                ) : (
+                  <p className="small text-muted mb-0">
+                    Loading price range...
+                  </p>
+                )}
+              </FilterSection>
+            )}
           </ul>
         </div>
       </div>
@@ -322,7 +399,8 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
           onClick={() => {
             setSelectedCategory(null);
             setSelectedSubs([]);
-            onApply({ category: null, subs: [] });
+            setSelectedChildren([]);
+            onApply({ category: null, subs: [], children: [] });
           }}
         >
           Clear All
@@ -336,6 +414,7 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
             onApply({
               category: selectedCategory,
               subs: selectedSubs,
+              children: selectedChildren,
             })
           }
         >
@@ -348,7 +427,12 @@ function FilterDrawer({ categories, isLoading, isError, applied, onApply }) {
 
 function ProductListing() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [applied, setApplied] = useState({ category: null, subs: [] });
+  const [priceSelection, setPriceSelection] = useState(null);
+  const [applied, setApplied] = useState({
+    category: null,
+    subs: [],
+    children: [],
+  });
   const [sortBy, setSortBy] = useState("");
 
   const {
@@ -356,21 +440,68 @@ function ProductListing() {
     isLoading: categoriesLoading,
     isError: categoriesError,
   } = useGetCategoryDataQuery();
+  const categories = (categoryData?.data ?? []).map((category) => ({
+    id: category.id,
+    label: category.name,
+    slug: category.slug,
+    subs: (category.subcategories ?? []).map((sub) => ({
+      id: String(sub.id),
+      label: sub.name,
+      slug: sub.slug,
+      children: (sub.child_categories ?? []).map((child) => ({
+        id: String(child.id),
+        label: child.name,
+        slug: child.slug,
+      })),
+    })),
+  }));
+  const selectedCategory = categories.find((c) => c.id === applied.category);
+  const selectedSub = selectedCategory?.subs.find((sub) =>
+    applied.subs.includes(sub.id),
+  );
+  const selectedChild = selectedSub?.children.find((child) =>
+    applied.children.includes(child.id),
+  );
+  const filterKey = [
+    selectedCategory?.slug,
+    selectedSub?.slug,
+    selectedChild?.slug,
+  ].join("|");
+  const selectedPriceRange =
+    priceSelection?.filterKey === filterKey ? priceSelection : null;
+  const handlePriceRangeChange = useCallback(
+    (range) => setPriceSelection({ ...range, filterKey }),
+    [filterKey],
+  );
 
   const {
     data: productData,
     isLoading: productsLoading,
     isError: productsError,
-  } = useProductListingQuery();
-
-  const categories = (categoryData?.data ?? []).map((category) => ({
-    id: category.id,
-    label: category.name,
-    subs: (category.subcategories ?? []).map((sub) => ({
-      id: String(sub.id),
-      label: sub.name,
-    })),
-  }));
+  } = useProductListingQuery({
+    category_slug: selectedCategory?.slug,
+    subcategory_slug: selectedSub?.slug,
+    child_category_slug: selectedChild?.slug,
+    min_price: selectedPriceRange?.min,
+    max_price: selectedPriceRange?.max,
+  });
+  const apiPriceRange = productData?.price_range;
+  const rangeMin = Number(apiPriceRange?.min_price);
+  const rangeMax = Number(apiPriceRange?.max_price);
+  const priceRangeValues =
+    apiPriceRange &&
+    apiPriceRange.min_price !== undefined &&
+    apiPriceRange.min_price !== null &&
+    apiPriceRange.max_price !== undefined &&
+    apiPriceRange.max_price !== null &&
+    Number.isFinite(rangeMin) &&
+    Number.isFinite(rangeMax) &&
+    rangeMax >= rangeMin
+      ? {
+          min_price: rangeMin,
+          max_price: rangeMax,
+        }
+      : null;
 
   const apiProducts = Array.isArray(productData?.data)
     ? productData.data
@@ -382,61 +513,36 @@ function ProductListing() {
 
   const allProducts = apiProducts.map((product) => {
     const normalized = normalizeProduct(product);
-
     return {
       ...product,
       ...normalized,
       id: normalized.id ?? product.product_id,
       name:
         normalized.name ?? product.product_name ?? product.title ?? "Product",
-      categoryId:
-        product.category_id ?? product.categoryId ?? product.category?.id,
-      subId: String(
-        product.subcategory_id ??
-          product.subcategoryId ??
-          product.subcategory?.id ??
-          "",
-      ),
     };
   });
 
-  const filteredProducts = allProducts.filter((product) => {
-    const matchesCategory =
-      applied.category === null ||
-      String(product.categoryId) === String(applied.category);
-
-    const matchesSubcategory =
-      applied.subs.length === 0 || applied.subs.includes(product.subId);
-
-    return matchesCategory && matchesSubcategory;
-  });
-
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
+  const sortedProducts = [...allProducts].sort((a, b) => {
     switch (sortBy) {
       case "price-asc":
         return (
           Number(a.price ?? a.selling_price ?? 0) -
           Number(b.price ?? b.selling_price ?? 0)
         );
-
       case "price-desc":
         return (
           Number(b.price ?? b.selling_price ?? 0) -
           Number(a.price ?? a.selling_price ?? 0)
         );
-
       case "brand-asc":
         return String(a.brand ?? "").localeCompare(String(b.brand ?? ""));
-
       case "brand-desc":
         return String(b.brand ?? "").localeCompare(String(a.brand ?? ""));
-
       case "recent":
         return (
           new Date(b.created_at ?? b.createdAt ?? 0).getTime() -
           new Date(a.created_at ?? a.createdAt ?? 0).getTime()
         );
-
       default:
         return 0;
     }
@@ -526,7 +632,9 @@ function ProductListing() {
           </p>
         ) : (
           <>
-            <div className={`mb-5 row g-xl-5 g-lg-4 g-md-3 g-sm-2 g-1 row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-2 ${styles.productListing}`}>
+            <div
+              className={`mb-5 row g-xl-5 g-lg-4 g-md-3 g-sm-2 g-1 row-cols-xl-4 row-cols-lg-4 row-cols-md-3 row-cols-2 ${styles.productListing}`}
+            >
               {visibleProducts.length === 0 ? (
                 <p className="text-center">No products found.</p>
               ) : (
@@ -552,6 +660,10 @@ function ProductListing() {
         isLoading={categoriesLoading}
         isError={categoriesError}
         applied={applied}
+        priceRange={priceRangeValues}
+        selectedPriceRange={selectedPriceRange}
+        priceFilterKey={filterKey}
+        onPriceRangeChange={handlePriceRangeChange}
         onApply={(filters) => {
           setApplied(filters);
           setCurrentPage(1);
