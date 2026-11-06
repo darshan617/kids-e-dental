@@ -17,12 +17,12 @@ import { useLocation } from "@/custom-hooks/location/Location";
 const PRODUCTS_PER_PAGE = 12;
 
 const sortOptions = [
-  { value: "recent", label: "Recently Added" },
+  { value: "recently_added", label: "Recently Added" },
   { value: "relevance", label: "Relevance" },
-  { value: "price-asc", label: "Price (low-high)" },
-  { value: "price-desc", label: "Price (high-low)" },
-  { value: "brand-asc", label: "Brands (A-Z)" },
-  { value: "brand-desc", label: "Brands (Z-A)" },
+  { value: "price_low_high", label: "Price (low-high)" },
+  { value: "price_high_low", label: "Price (high-low)" },
+  { value: "brand_asc", label: "Brands (A-Z)" },
+  { value: "brand_desc", label: "Brands (Z-A)" },
 ];
 
 function Pagination({ currentPage, totalPages, onChange }) {
@@ -219,12 +219,8 @@ function CategoryFilter({
 }
 function PriceFilter({ range, selectedRange, onChange }) {
   const { min_price: rangeMin, max_price: rangeMax } = range;
-  const [minPrice, setMinPrice] = useState(
-    selectedRange?.min ?? rangeMin,
-  );
-  const [maxPrice, setMaxPrice] = useState(
-    selectedRange?.max ?? rangeMax,
-  );
+  const [minPrice, setMinPrice] = useState(selectedRange?.min ?? rangeMin);
+  const [maxPrice, setMaxPrice] = useState(selectedRange?.max ?? rangeMax);
   const lastEmittedRange = useRef({ min: minPrice, max: maxPrice });
   const rangeSize = rangeMax - rangeMin;
   const minPercent =
@@ -484,6 +480,7 @@ function ProductListing() {
     child_category_slug: selectedChild?.slug,
     min_price: selectedPriceRange?.min,
     max_price: selectedPriceRange?.max,
+    sort: sortBy,
   });
   const apiPriceRange = productData?.price_range;
   const rangeMin = Number(apiPriceRange?.min_price);
@@ -524,21 +521,21 @@ function ProductListing() {
 
   const sortedProducts = [...allProducts].sort((a, b) => {
     switch (sortBy) {
-      case "price-asc":
+      case "price_low_high":
         return (
           Number(a.price ?? a.selling_price ?? 0) -
           Number(b.price ?? b.selling_price ?? 0)
         );
-      case "price-desc":
+      case "price_high_low":
         return (
           Number(b.price ?? b.selling_price ?? 0) -
           Number(a.price ?? a.selling_price ?? 0)
         );
-      case "brand-asc":
+      case "brand_asc":
         return String(a.brand ?? "").localeCompare(String(b.brand ?? ""));
-      case "brand-desc":
+      case "brand_desc":
         return String(b.brand ?? "").localeCompare(String(a.brand ?? ""));
-      case "recent":
+      case "recently_added":
         return (
           new Date(b.created_at ?? b.createdAt ?? 0).getTime() -
           new Date(a.created_at ?? a.createdAt ?? 0).getTime()
@@ -627,7 +624,7 @@ function ProductListing() {
         {productsLoading ? (
           <p className="text-center">Loading products...</p>
         ) : productsError ? (
-          <p className="text-center text-danger">
+          <p className="text-center text-muted">
             Failed to load products. Please try again.
           </p>
         ) : (

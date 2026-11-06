@@ -23,6 +23,7 @@ import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import { useDispatch } from "react-redux";
 import { apiSlice } from "@/redux/apiSlice";
 import { useLocation } from "@/custom-hooks/location/Location";
+import { useGetSearchQueryQuery } from "@/redux/apis/searchApi";
 const TOP_BAR_LINKS = [
   // {
   //   id: "country",
@@ -162,13 +163,14 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debounceSearch, setDebounceSearch] = useState("");
+  console.log(searchQuery, debounceSearch);
 
   const { data: cartData } = useGetCartQuery();
   const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
 
   const { isIndia, flag } = useLocation();
-  console.log(isIndia, flag, "sssssss");
-
   const syncUser = () => setUser(readUserDataFromCookie());
 
   useEffect(() => {
@@ -180,6 +182,15 @@ const Header = () => {
 
   const toggleUserMenu = () => setUserMenuOpen((prev) => !prev);
   const closeUserMenu = () => setUserMenuOpen(false);
+
+  const { data } = useGetSearchQueryQuery(
+    {
+      search_query: debounceSearch,
+    },
+    {
+      skip: !debounceSearch,
+    },
+  );
 
   const handleLogout = async () => {
     setIsLogoutLoading(true);
@@ -197,6 +208,14 @@ const Header = () => {
       setIsLogoutLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebounceSearch(searchQuery);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (!userMenuOpen) return;
@@ -579,6 +598,8 @@ const Header = () => {
                 type="search"
                 placeholder="Search for products, brands and more"
                 className={`${styles.searchBar} w-100 h-100 px-5 rounded-pill`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e?.target?.value)}
               />
             </div>
 
