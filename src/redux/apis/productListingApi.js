@@ -9,6 +9,7 @@ const productListingApi = apiSlice.injectEndpoints({
         child_category_slug,
         min_price,
         max_price,
+        sort,
       }) => ({
         url: "/product-listings",
         params: {
@@ -17,6 +18,7 @@ const productListingApi = apiSlice.injectEndpoints({
           ...(child_category_slug ? { child_category_slug } : {}),
           ...(min_price !== undefined ? { min_price } : {}),
           ...(max_price !== undefined ? { max_price } : {}),
+          ...(sort ? { sort } : {}),
         },
         method: "GET",
       }),
