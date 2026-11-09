@@ -9,13 +9,14 @@ import styles from "@/components/Layout/header/Header.module.css";
 import { useRouter } from "next/router";
 import AuthPopup from "@/common-component/auth-popup/AuthPopup";
 import { BsCart, BsSearch } from "react-icons/bs";
-import { FaMapMarkerAlt, FaRegHeart } from "react-icons/fa";
+import { FaRegHeart } from "react-icons/fa";
 import { IoSearchOutline } from "react-icons/io5";
 import {
   HiOutlinePower,
   HiOutlineUser,
   HiOutlineShoppingBag,
-  HiOutlineMapPin,
+  HiOutlineSquares2X2,
+  HiOutlineCube,
 } from "react-icons/hi2";
 import Link from "next/link";
 import { useGetCartQuery } from "@/redux/apis/addToCartApi";
@@ -24,13 +25,11 @@ import { useDispatch } from "react-redux";
 import { apiSlice } from "@/redux/apiSlice";
 import { useLocation } from "@/custom-hooks/location/Location";
 import { useGetSearchQueryQuery } from "@/redux/apis/searchApi";
+
+const SEARCH_HISTORY_COOKIE = "SH";
+const SEARCH_HISTORY_LIMIT = 5;
+
 const TOP_BAR_LINKS = [
-  // {
-  //   id: "country",
-  //   label: "India",
-  //   icon: <span className="fi fi-in"></span>,
-  //   url: "",
-  // },
   {
     id: "distributor",
     label: "Become a Distributor",
@@ -41,16 +40,6 @@ const TOP_BAR_LINKS = [
     ),
     url: "/become-a-distributor",
   },
-  // {
-  //   id: "track",
-  //   label: "Track Order",
-  //   icon: (
-  //     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  //       <path d="M256,0C150,0.1,64.1,86,64,192c0,137.8,178.9,310.5,186.5,317.8c3.1,3,8,3,11,0C269.1,502.5,448,329.8,448,192C447.9,86,362,0.1,256,0z M256,280c-48.6,0-88-39.4-88-88s39.4-88,88-88s88,39.4,88,88C344,240.6,304.6,280,256,280z" />
-  //     </svg>
-  //   ),
-  //   url: "",
-  // },
   {
     id: "help",
     label: "Help Center",
@@ -153,6 +142,21 @@ const readUserDataFromCookie = () => {
   }
 };
 
+const readSearchHistoryFromCookie = () => {
+  try {
+    const saved = JSON.parse(Cookies.get(SEARCH_HISTORY_COOKIE) || "[]");
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+};
+
+// 👇 change the product route if yours is different
+const getSuggestionUrl = (item) =>
+  item.type === "product"
+    ? `/product-details/${item.slug}`
+    : `/product-category/${item.slug}`;
+
 const Header = () => {
   const router = useRouter();
   const { showToast } = useToast();
@@ -165,7 +169,7 @@ const Header = () => {
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debounceSearch, setDebounceSearch] = useState("");
-  console.log(searchQuery, debounceSearch);
+  const [searchHistory, setSearchHistory] = useState([]);
 
   const { data: cartData } = useGetCartQuery();
   const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
@@ -177,21 +181,77 @@ const Header = () => {
     syncUser();
   }, []);
 
+  // load search history once on mount
+  useEffect(() => {
+    setSearchHistory(readSearchHistoryFromCookie());
+  }, []);
+
   const isLoggedIn = !!user;
   const userInitial = user?.name?.trim()?.charAt(0)?.toUpperCase() || "U";
 
   const toggleUserMenu = () => setUserMenuOpen((prev) => !prev);
   const closeUserMenu = () => setUserMenuOpen(false);
 
-  const { data } = useGetSearchQueryQuery(
-    {
-      search_query: debounceSearch,
-    },
-    {
-      skip: !debounceSearch,
-    },
+  // ---------- Search suggestions (API) ----------
+  const { data, isFetching } = useGetSearchQueryQuery(
+    { search_query: debounceSearch },
+    { skip: !debounceSearch.trim() },
   );
 
+  const suggestions = Array.isArray(data?.data) ? data.data : [];
+  const showSuggestions = !!searchQuery.trim();
+
+  // ---------- Search history (cookie) ----------
+  const saveSearch = (term) => {
+    const value = (term || "").trim();
+    if (!value) return;
+
+    const updated = [
+      value,
+      ...searchHistory.filter((t) => t.toLowerCase() !== value.toLowerCase()),
+    ].slice(0, SEARCH_HISTORY_LIMIT);
+
+    setSearchHistory(updated);
+    Cookies.set(SEARCH_HISTORY_COOKIE, JSON.stringify(updated), {
+      expires: 30,
+    });
+  };
+
+  const clearSearchHistory = () => {
+    setSearchHistory([]);
+    Cookies.remove(SEARCH_HISTORY_COOKIE);
+  };
+
+  const resetSearchInput = () => {
+    setSearchQuery("");
+    setDebounceSearch("");
+  };
+
+  // called when a suggestion is clicked
+  const closeSearch = (term) => {
+    saveSearch(term || searchQuery);
+    resetSearchInput();
+    document.getElementById("searchWrapper")?.classList.remove("show");
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key !== "Enter") return;
+    const value = searchQuery.trim();
+    if (!value) return;
+
+    saveSearch(value);
+    resetSearchInput();
+    document.getElementById("searchWrapper")?.classList.remove("show");
+    // 👇 change to your full search results page
+    router.push(`/search?query=${encodeURIComponent(value)}`);
+  };
+
+  const handleHistoryClick = (term) => {
+    setSearchQuery(term);
+    setDebounceSearch(term); // fetch immediately, skip the debounce wait
+  };
+
+  // ---------- Logout ----------
   const handleLogout = async () => {
     setIsLogoutLoading(true);
     try {
@@ -209,10 +269,11 @@ const Header = () => {
     }
   };
 
+  // debounce the search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebounceSearch(searchQuery);
-    }, 1000);
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -286,7 +347,7 @@ const Header = () => {
                 key={flag?.name}
                 className="col-auto d-flex justify-content-between align-items-center gap-1"
               >
-                <Image src={flag?.image} width={15} height={10} />
+                <Image src={flag?.image} width={15} height={10} alt="" />
                 <p className="m-0">{flag?.name}</p>
               </div>
               {TOP_BAR_LINKS?.map((link) => (
@@ -584,6 +645,7 @@ const Header = () => {
         </div>
       </div>
 
+      {/* ---------------- Search panel ---------------- */}
       <div className={`${styles.searchWrapper} collapse`} id="searchWrapper">
         <div
           className="pt-sm-5 py-2 container-fluid sitePadding"
@@ -596,29 +658,109 @@ const Header = () => {
               <IoSearchOutline size={28} className="ms-2" />
               <input
                 type="search"
-                placeholder="Search for products, brands and more"
+                placeholder="Search for products, category and more"
                 className={`${styles.searchBar} w-100 h-100 px-5 rounded-pill`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e?.target?.value)}
+                onKeyDown={handleSearchKeyDown}
               />
             </div>
 
-            <div className="row align-items-center suggestWrap g-0">
-              <div className={`${styles.suggestTitle} col-md mb-1`}>
-                Trending Search :
+            {showSuggestions ? (
+              /* ---------- Suggestions from API ---------- */
+              <div className={styles.suggestBox}>
+                {isFetching || searchQuery !== debounceSearch ? (
+                  <div className={styles.suggestState}>Searching…</div>
+                ) : suggestions.length > 0 ? (
+                  <ul className={styles.suggestList}>
+                    {suggestions.map((item) => (
+                      <li key={`${item.type}-${item.slug}`}>
+                        <Link
+                          href={getSuggestionUrl(item)}
+                          className={styles.suggestItem}
+                          onClick={() => closeSearch(item.name)}
+                        >
+                          <span className={styles.suggestIcon}>
+                            {item.type === "product" ? (
+                              <HiOutlineCube size={20} />
+                            ) : (
+                              <HiOutlineSquares2X2 size={20} />
+                            )}
+                          </span>
+                          <span className={styles.suggestName}>
+                            {item.name}
+                          </span>
+                          <span
+                            className={`${styles.suggestType} ${
+                              item.type === "product"
+                                ? styles.typeProduct
+                                : styles.typeCategory
+                            }`}
+                          >
+                            {item.type === "product" ? "Product" : "Category"}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className={styles.suggestState}>
+                    No results for “{debounceSearch}”
+                  </div>
+                )}
               </div>
-              <div className="col-12 suggestTagList position-relative">
-                <div className="hstack flex-wrap gap-2">
-                  {TRENDING_SEARCHES.map((item) => (
-                    <div key={item?.id}>
-                      <a href={item?.url} className={styles.suggestTag}>
-                        {item?.label}
-                      </a>
+            ) : (
+              /* ---------- Recent + Trending (input empty) ---------- */
+              <div className="vstack gap-3">
+                {searchHistory.length > 0 && (
+                  <div className="row align-items-center suggestWrap g-0">
+                    <div
+                      className={`${styles.suggestTitle} col mb-1 d-flex justify-content-between`}
+                    >
+                      <span>Recent Searches :</span>
+                      <button
+                        type="button"
+                        className={styles.clearHistoryBtn}
+                        onClick={clearSearchHistory}
+                      >
+                        Clear
+                      </button>
                     </div>
-                  ))}
-                </div>
+                    <div className="col-12">
+                      <div className="hstack flex-wrap gap-2">
+                        {searchHistory.map((term) => (
+                          <button
+                            key={term}
+                            type="button"
+                            className={styles.suggestTag}
+                            onClick={() => handleHistoryClick(term)}
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* <div className="row align-items-center suggestWrap g-0">
+                  <div className={`${styles.suggestTitle} col-md mb-1`}>
+                    Trending Search :
+                  </div>
+                  <div className="col-12 suggestTagList position-relative">
+                    <div className="hstack flex-wrap gap-2">
+                      {TRENDING_SEARCHES.map((item) => (
+                        <div key={item?.id}>
+                          <a href={item?.url} className={styles.suggestTag}>
+                            {item?.label}
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div> */}
               </div>
-            </div>
+            )}
 
             <div className="d-flex justify-content-center">
               <button
@@ -626,6 +768,7 @@ const Header = () => {
                 data-bs-toggle="collapse"
                 data-bs-target="#searchWrapper"
                 aria-expanded="true"
+                onClick={() => saveSearch(searchQuery)}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
