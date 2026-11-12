@@ -131,39 +131,41 @@ const ProductInfo = ({ product }) => {
     : "#";
 
   const accordionItems = [
-    (product?.description || product?.details) && {
-      id: "pa_Descp",
-      title: "Product Description",
-      body: (
-        <>
-          {product?.description && (
-            <div dangerouslySetInnerHTML={{ __html: product?.description }} />
-          )}
-          {product?.details && (
-            <div dangerouslySetInnerHTML={{ __html: product?.details }} />
-          )}
-        </>
-      ),
-    },
-    (specs?.length > 0 || features?.length > 0) && {
-      id: "pa_material",
-      title: "Key Specifications",
-      body: (
-        <>
-          {[features, specs].map(
-            (list, index) =>
-              list.length > 0 && (
-                <ul key={index}>
-                  {list.map((text) => (
-                    <li key={text}>{text}</li>
-                  ))}
-                </ul>
-              ),
-          )}
-        </>
-      ),
-    },
-    {
+    (product?.description || product?.details) &&
+      isIndia && {
+        id: "pa_Descp",
+        title: "Product Description",
+        body: (
+          <>
+            {product?.description && (
+              <div dangerouslySetInnerHTML={{ __html: product?.description }} />
+            )}
+            {product?.details && (
+              <div dangerouslySetInnerHTML={{ __html: product?.details }} />
+            )}
+          </>
+        ),
+      },
+    (specs?.length > 0 || features?.length > 0) &&
+      isIndia && {
+        id: "pa_material",
+        title: "Key Specifications",
+        body: (
+          <>
+            {[features, specs].map(
+              (list, index) =>
+                list.length > 0 && (
+                  <ul key={index}>
+                    {list.map((text) => (
+                      <li key={text}>{text}</li>
+                    ))}
+                  </ul>
+                ),
+            )}
+          </>
+        ),
+      },
+    isIndia && {
       id: "pa_ship",
       title: "Shipping and Returns",
       body: (
@@ -840,6 +842,14 @@ const ProductInfo = ({ product }) => {
               )}
 
               <div className="prodBriefContent">
+                {product?.description && !isIndia && (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: product?.description }}
+                  />
+                )}
+                {product?.details && !isIndia && (
+                  <div dangerouslySetInnerHTML={{ __html: product?.details }} />
+                )}
                 {accordionItems.map(({ id, title, body }) => (
                   <div className={`${styles.pbcItem} py-4`} key={id}>
                     <div
