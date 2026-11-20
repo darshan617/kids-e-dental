@@ -12,6 +12,7 @@ import {
   useLoginMutation,
   useRegisterMutation,
   useResetPasswordMutation,
+  useForgotPasswordMutation,
   useVerifyOtpMutation,
   useResendOtpMutation,
 } from "@/redux/apis/registerApi";
@@ -60,7 +61,7 @@ const AuthPopup = ({ isOpen = false, onClose, initialMode = "login" }) => {
   const [register, { isLoading: isSignupLoading }] = useRegisterMutation();
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
   const [passwordReset, { isLoading: isResetLoading }] =
-    useResetPasswordMutation();
+    useForgotPasswordMutation();
   const [verifyOtp, { isLoading: isVerifyLoading }] = useVerifyOtpMutation();
   const [resendOtp, { isLoading: isResendLoading }] = useResendOtpMutation();
 

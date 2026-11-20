@@ -24,6 +24,17 @@ const registerApi = apiSlice.injectEndpoints({
       invalidatesTags: ["auth"],
     }),
 
+    forgotPassword: builder.mutation({
+      query: ({ body }) => {
+        return {
+          url: "/forgot-password",
+          method: "POST",
+          body: body,
+        };
+      },
+      invalidatesTags: ["auth"],
+    }),
+
     resetPassword: builder.mutation({
       query: ({ body }) => {
         return {
@@ -63,5 +74,5 @@ export const {
   useResetPasswordMutation,
   useVerifyOtpMutation,
   useResendOtpMutation,
-  useAddToCartMutation,
+  useForgotPasswordMutation,
 } = registerApi;
