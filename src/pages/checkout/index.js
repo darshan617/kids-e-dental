@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 
 import Layout from "@/components/Layout/Layout";
 
@@ -13,36 +14,81 @@ import {
   useUpdateCheckoutMutation,
 } from "@/redux/apis/checkoutApi";
 import {
+  useGetCartQuery,
   useRemoveCartMutation,
   useUpdateCartMutation,
 } from "@/redux/apis/addToCartApi";
 import { useGetAddressQuery } from "@/redux/apis/addressApi";
 
 const CheckoutPage = () => {
+  const router = useRouter();
+  const isCartCheckout = router.isReady && router.query.source === "cart";
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const { data: buyNowData, refetch } = useGetBuyNowQuery();
+  const {
+    data: buyNowData,
+    refetch: refetchBuyNow,
+    isLoading: isBuyNowLoading,
+    isFetching: isBuyNowFetching,
+  } = useGetBuyNowQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    skip: !router.isReady || isCartCheckout,
+  });
+  const {
+    data: cartResponse,
+    refetch: refetchCart,
+    isLoading: isCartLoading,
+    isFetching: isCartFetching,
+  } = useGetCartQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    skip: !router.isReady || !isCartCheckout,
+  });
 
   const [updateCheckout] = useUpdateCheckoutMutation();
   const [removeCheckout] = useRemoveCheckoutItemMutation();
+  const [updateCart] = useUpdateCartMutation();
+  const [removeCart] = useRemoveCartMutation();
   const { data: addressRes } = useGetAddressQuery();
   const addresses = addressRes?.data ?? [];
   const hasAddress = addresses.length > 0;
+
+  const activeResponse = isCartCheckout ? cartResponse : buyNowData;
+  const checkoutItems = Array.isArray(activeResponse?.data)
+    ? activeResponse.data
+    : [];
+  const isWaitingForItems =
+    !router.isReady ||
+    (checkoutItems.length === 0 &&
+      (isCartCheckout
+        ? isCartLoading || isCartFetching
+        : isBuyNowLoading || isBuyNowFetching));
 
   const handleChangeDeliveryAddress = () => {
     console.log("Change delivery address clicked");
   };
 
-  const handleUpdateCart = async (id, quantity, addressId) => {
+  const refetchCheckout = () => {
+    if (isCartCheckout) refetchCart();
+    else refetchBuyNow();
+  };
+
+  const handleUpdateCart = async (id, quantity) => {
     try {
-      const res = await updateCheckout({
-        body: {
-          buy_now_id: id,
-          quantity: quantity,
-        },
-      }).unwrap();
+      const res = isCartCheckout
+        ? await updateCart({
+            body: {
+              cart_id: id,
+              quantity: quantity,
+            },
+          }).unwrap()
+        : await updateCheckout({
+            body: {
+              buy_now_id: id,
+              quantity: quantity,
+            },
+          }).unwrap();
 
       if (res?.success || res?.status) {
-        refetch();
+        refetchCheckout();
       } else {
         console.error(res?.message || "Failed to update cart");
       }
@@ -52,24 +98,26 @@ const CheckoutPage = () => {
   };
   const handleRemoveCart = async (id) => {
     try {
-      const res = await removeCheckout({
-        body: {
-          buy_now_id: id,
-        },
-      }).unwrap();
+      const res = isCartCheckout
+        ? await removeCart({
+            body: {
+              cart_id: id,
+            },
+          }).unwrap()
+        : await removeCheckout({
+            body: {
+              buy_now_id: id,
+            },
+          }).unwrap();
 
       if (res?.success || res?.status) {
-        refetch();
+        refetchCheckout();
       } else {
         console.error(res?.message || "Failed to remove cart");
       }
     } catch (error) {
       console.error("Error removing cart item:", error);
     }
-  };
-
-  const refetchCartData = () => {
-    console.log("Refetch cart data");
   };
 
   return (
@@ -83,22 +131,23 @@ const CheckoutPage = () => {
               showAddressForm={showAddressForm}
               setShowAddressForm={setShowAddressForm}
               handleUpdateCart={handleUpdateCart}
-              refetchCartData={refetch}
+              refetchCartData={refetchCheckout}
             />
 
             <div className="mt-3">
               <CartDetails
-                cartData={buyNowData?.data}
+                cartData={checkoutItems}
                 handleUpdateCart={handleUpdateCart}
                 handleRemoveCart={handleRemoveCart}
+                isLoading={isWaitingForItems}
               />
             </div>
           </div>
           <div className="col-12 col-lg-4 mt-3 mb-3">
             <CartSummary
-              cartData={buyNowData}
+              cartData={activeResponse}
+              couponSource={isCartCheckout ? "cart" : "buy_now"}
               hasAddress={hasAddress}
-              // onProceed={handlePayment}
             />
           </div>
         </div>

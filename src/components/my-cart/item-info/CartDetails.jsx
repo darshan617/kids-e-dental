@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styles from "@/components/my-cart/item-info/CartDetails.module.css";
 import Link from "next/link";
 import { ImBin } from "react-icons/im";
@@ -31,9 +31,29 @@ export const EmptyCart = () => (
   </div>
 );
 
+const readVariantValue = (...values) => {
+  for (const value of values) {
+    if (value == null || value === "") continue;
+    if (typeof value === "object") {
+      const label = value.name ?? value.label ?? value.value ?? value.title;
+      if (label != null && label !== "") return String(label);
+      continue;
+    }
+    return String(value);
+  }
+  return "";
+};
+
 const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
   const product = item?.product ?? {};
-  console.log(product, "ppppppppppp");
+  const selectedArch = readVariantValue(
+    item?.selected_arch,
+    product?.selected_arch,
+  );
+  const selectedSize = readVariantValue(
+    item?.selected_size,
+    product?.selected_size,
+  );
 
   return (
     <div className={styles.productCartWrapper}>
@@ -53,6 +73,23 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
                 {product?.name || "Product"}
               </Link>
             </h4>
+
+            {(selectedArch || selectedSize) && (
+              <div className={styles.variantMeta}>
+                {selectedArch && (
+                  <span className={styles.variantChip}>
+                    <span className={styles.variantLabel}>Arch</span>
+                    {selectedArch}
+                  </span>
+                )}
+                {selectedSize && (
+                  <span className={styles.variantChip}>
+                    <span className={styles.variantLabel}>Size</span>
+                    {selectedSize}
+                  </span>
+                )}
+              </div>
+            )}
 
             <span>SKU: {product?.sku || "N/A"}</span>
 
@@ -114,33 +151,28 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
   );
 };
 
-const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
+const CartDetails = ({
+  cartData,
+  handleUpdateCart,
+  handleRemoveCart,
+  isLoading = false,
+}) => {
   const router = useRouter();
   const isCheckoutPage = router.pathname === "/checkout";
+  const cartItems = Array.isArray(cartData) ? cartData : [];
 
-  const [cartItems, setCartItems] = useState([]);
-  console.log("cartData", cartItems);
-
-  useEffect(() => {
-    const items = cartData;
-
-    if (items) {
-      setCartItems(cartData);
-    }
-  }, [cartData]);
-
-  const onIncrease = (id, currentQty) => {
-    handleUpdateCart(id, currentQty + 1);
+  const onIncrease = (item) => {
+    handleUpdateCart(item?.id, item?.quantity + 1, undefined, item);
   };
 
-  const onDecrease = (id, currentQty) => {
-    if (currentQty > 1) {
-      handleUpdateCart(id, currentQty - 1);
+  const onDecrease = (item) => {
+    if (item?.quantity > 1) {
+      handleUpdateCart(item?.id, item?.quantity - 1, undefined, item);
     }
   };
 
-  const onDelete = (id) => {
-    handleRemoveCart(id);
+  const onDelete = (item) => {
+    handleRemoveCart(item?.id, item);
   };
 
   const cartTotal = cartItems?.reduce(
@@ -149,7 +181,11 @@ const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
     0,
   );
 
-  if (cartItems?.length === 0) {
+  if (isLoading && cartItems.length === 0) {
+    return null;
+  }
+
+  if (cartItems.length === 0) {
     return <EmptyCart />;
   }
 
@@ -164,16 +200,16 @@ const CartDetails = ({ cartData, handleUpdateCart, handleRemoveCart }) => {
 
       {cartItems?.map((item) => (
         <CartRow
-          key={item.id}
+          key={item?._source ? `${item._source}-${item.id}` : item.id}
           item={item}
-          onIncrease={() => onIncrease(item?.id, item?.quantity)}
-          onDecrease={() => onDecrease(item?.id, item?.quantity)}
-          onDelete={() => onDelete(item?.id)}
+          onIncrease={() => onIncrease(item)}
+          onDecrease={() => onDecrease(item)}
+          onDelete={() => onDelete(item)}
         />
       ))}
 
       {!isCheckoutPage && (
-        <Link href="/checkout" className={styles.checkoutSection}>
+        <Link href="/checkout?source=cart" className={styles.checkoutSection}>
           <button type="button" className={styles.checkoutBtn}>
             <div>
               <div>
