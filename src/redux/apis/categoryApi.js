@@ -9,7 +9,14 @@ const categoryApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["category"],
     }),
+    getFaqData: builder.query({
+      query: ({ slug }) => ({
+        url: `category-faqs/${slug}`,
+        method: "GET",
+      }),
+      providesTags: ["category"],
+    }),
   }),
 });
 
-export const { useGetCategoryDataQuery } = categoryApi;
+export const { useGetCategoryDataQuery, useGetFaqDataQuery } = categoryApi;

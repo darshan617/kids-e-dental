@@ -93,6 +93,11 @@
   font-size: 0.9rem;
   line-height: 1.5;
 }
+.crVideoDesc {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #555;
+}
 .crVideoBox {
   border: 0.3rem solid #fff;
   overflow: hidden;

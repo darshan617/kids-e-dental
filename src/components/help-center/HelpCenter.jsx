@@ -1,39 +1,35 @@
 import React from "react";
 import styles from "@/components/help-center/HelpCenter.module.css";
+import { useGetCategoryDataQuery } from "@/redux/apis/categoryApi";
 
-const faqLinks = [
-  { title: "Bioflx Crowns", slug: "bioflx-crowns" },
-  { title: "Kids-e-Crown®", slug: "" },
-  { title: "Kids-e-Restore", slug: "" },
-  { title: "Kids-e-SSC", slug: "" },
-  { title: "e-Sdf®", slug: "" },
-  { title: "e-Pit And Fissure Sealant", slug: "" },
-  { title: "e-Space Maintainer", slug: "" },
-  { title: "e-MTA®", slug: "" },
-  { title: "e-MTA Putty", slug: "" },
-  { title: "e-MTA Sealer", slug: "" },
-  { title: "e-MTA Carrier", slug: "" },
-  { title: "Kids-e-Files", slug: "" },
-  { title: "e-IodoCal", slug: "" },
-  { title: "Scented-e-Pens", slug: "" },
-  { title: "e-Splint", slug: "" },
-];
+const toCategoryLinks = (categories = []) =>
+  categories.flatMap((category) => {
+    const subs = category.subcategories ?? [];
+    if (!subs.length) {
+      return [
+        {
+          id: `category-${category.id}`,
+          title: category.name,
+          slug: category.slug,
+        },
+      ];
+    }
 
-const tutorialLinks = [
-  { title: "Bioflx Crowns", href: "/toturial/bioflx-crowns" },
-  { title: "Kids-e-Crown®", href: "" },
-  { title: "Kids-e-Restore", href: "" },
-  { title: "Kids-e-SSC", href: "" },
-  { title: "e-Sdf®", href: "" },
-  { title: "e-Pit And Fissure Sealant", href: "" },
-  { title: "e-Space Maintainer", href: "" },
-  { title: "e-MTA®", href: "" },
-  { title: "e-MTA Putty", href: "" },
-  { title: "e-MTA Sealer", href: "" },
-  { title: "e-MTA Carrier", href: "" },
-];
+    return subs.map((sub) => ({
+      id: `sub-${sub.id}`,
+      title: sub.name,
+      slug: sub.slug,
+    }));
+  });
 
 const HelpCenter = () => {
+  const {
+    data: categoryData,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+  } = useGetCategoryDataQuery();
+  const categoryLinks = toCategoryLinks(categoryData?.data ?? []);
+
   return (
     <>
       <section className="py-5 sitePadding bgPrimary">
@@ -77,18 +73,24 @@ const HelpCenter = () => {
                   <ul
                     className={`${styles.helpLinks} vstack gap-1 rounded-3 p-3`}
                   >
-                    {faqLinks.map((item) => (
-                      <li key={item.title}>
-                        <a
-                          href={item.slug ? `/faqs/${item.slug}` : "#"}
-                          onClick={(e) => {
-                            if (!item.slug) e.preventDefault();
-                          }}
-                        >
-                          {item.title}
-                        </a>
-                      </li>
-                    ))}
+                    {categoriesLoading ? (
+                      <li>Loading categories...</li>
+                    ) : categoriesError ? (
+                      <li>Failed to load categories.</li>
+                    ) : (
+                      categoryLinks.map((item) => (
+                        <li key={item.id}>
+                          <a
+                            href={item.slug ? `/faqs/${item.slug}` : "#"}
+                            onClick={(e) => {
+                              if (!item.slug) e.preventDefault();
+                            }}
+                          >
+                            {item.title}
+                          </a>
+                        </li>
+                      ))
+                    )}
                   </ul>
                 </div>
               </div>
@@ -120,18 +122,24 @@ const HelpCenter = () => {
                   <ul
                     className={`${styles.helpLinks} vstack gap-1 rounded-3 p-3`}
                   >
-                    {tutorialLinks.map((item) => (
-                      <li key={item.title}>
-                        <a
-                          href={item.href || "#"}
-                          onClick={(e) => {
-                            if (!item.href) e.preventDefault();
-                          }}
-                        >
-                          {item.title}
-                        </a>
-                      </li>
-                    ))}
+                    {categoriesLoading ? (
+                      <li>Loading categories...</li>
+                    ) : categoriesError ? (
+                      <li>Failed to load categories.</li>
+                    ) : (
+                      categoryLinks.map((item) => (
+                        <li key={item.id}>
+                          <a
+                            href={item.slug ? `/toturial/${item.slug}` : "#"}
+                            onClick={(e) => {
+                              if (!item.slug) e.preventDefault();
+                            }}
+                          >
+                            {item.title}
+                          </a>
+                        </li>
+                      ))
+                    )}
                   </ul>
                 </div>
               </div>
