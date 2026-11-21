@@ -6,8 +6,13 @@ import { BiX } from "react-icons/bi";
 import { useRemoveCouponMutation } from "@/redux/apis/couponApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
-const CartSummary = ({ cartData, hasAddress = false, onProceed }) => {
-  console.log("000000000", cartData);
+const CartSummary = ({
+  cartData,
+  coupons,
+  couponSource,
+  hasAddress = false,
+  onProceed,
+}) => {
   const [removeCoupon, { isLoading: isRemovingCoupon }] =
     useRemoveCouponMutation();
   const { showToast } = useToast();
@@ -15,11 +20,22 @@ const CartSummary = ({ cartData, hasAddress = false, onProceed }) => {
   const isCheckoutPage = router.pathname === "/checkout";
 
   const finalTotal = cartData?.cart_summary?.grand_total;
+  const appliedCoupons =
+    Array.isArray(coupons) && coupons.length > 0
+      ? coupons
+      : cartData?.coupon?.code
+        ? [
+            {
+              ...cartData.coupon,
+              source: couponSource || (isCheckoutPage ? "buy_now" : "cart"),
+            },
+          ]
+        : [];
 
-  const handleRemoveCoupon = async () => {
+  const handleRemoveCoupon = async (source) => {
     try {
       const res = await removeCoupon({
-        source: isCheckoutPage ? "buy_now" : "cart",
+        source,
       }).unwrap();
 
       showToast(res?.message || "Coupon removed", "success");
@@ -44,17 +60,18 @@ const CartSummary = ({ cartData, hasAddress = false, onProceed }) => {
           <div className={styles.summaryRow}>
             <div>
               <span className={styles.summaryLabel}>Discount</span>
-              {cartData?.coupon?.code && (
-                <p className="m-0 text-success">
-                  (Applied Coupon: {cartData?.coupon?.code})
+              {appliedCoupons.map((coupon) => (
+                <p className="m-0 text-success" key={`${coupon.source}-${coupon.code}`}>
+                  (Applied Coupon{coupon.sourceLabel ? ` · ${coupon.sourceLabel}` : ""}: {coupon.code})
                   <button
                     className={styles.removeCoupon}
-                    onClick={handleRemoveCoupon}
+                    onClick={() => handleRemoveCoupon(coupon.source)}
+                    disabled={isRemovingCoupon}
                   >
                     <BiX size={18} />
                   </button>
                 </p>
-              )}
+              ))}
             </div>
             <span
               className={styles.summaryValue}

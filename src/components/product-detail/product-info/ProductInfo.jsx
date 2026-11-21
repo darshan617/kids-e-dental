@@ -367,8 +367,6 @@ const ProductInfo = ({ product }) => {
     }
   };
 
-  // Takes no arguments on purpose: the selected variant and quantity come
-  // from state, so a click event can never leak into the request payload.
   const handleBuyNow = async () => {
     if (!product?.id) {
       showToast("Product ID is missing", "error");
@@ -392,15 +390,14 @@ const ProductInfo = ({ product }) => {
       }).unwrap();
 
       if (res?.status === true) {
-        showToast(res?.message || "Product added to buy now", "success");
-        router.push("/checkout");
+        router.push("/checkout?source=buy_now");
         return;
       }
 
-      showToast(res?.message || "Failed to process Buy Now", "error");
+      showToast(res?.message || "Failed to process Buy Now", "error ");
     } catch (error) {
       showToast(
-        error?.data?.message || "Something went wrong. Please try again.",
+        error?.data?.message || "Something went wrong. Please try again. ",
         "error",
       );
     }

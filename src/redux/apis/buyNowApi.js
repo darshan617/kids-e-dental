@@ -1,6 +1,7 @@
 import { apiSlice } from "../apiSlice";
 
 const buyProductApi = apiSlice.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     addBuyNow: builder.mutation({
       query: ({ body }) => ({
@@ -8,7 +9,7 @@ const buyProductApi = apiSlice.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["getBuyNowData"],
+      invalidatesTags: ["checkout"],
     }),
   }),
 });

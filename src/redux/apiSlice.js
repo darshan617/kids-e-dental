@@ -59,6 +59,7 @@ export const apiSlice = createApi({
     "subscribeEmail",
     "address",
     "profile",
+    "distributor",
   ],
 
   overrideExisting: true,

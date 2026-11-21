@@ -388,8 +388,7 @@ export const ProductCard = ({
       }).unwrap();
 
       if (res?.status === true) {
-        showToast(res?.message || "Product added to buy now", "success");
-        router.push("/checkout");
+        router.push("/checkout?source=buy_now");
         return true;
       }
 

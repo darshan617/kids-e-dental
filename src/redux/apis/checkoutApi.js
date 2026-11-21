@@ -1,6 +1,7 @@
 import { apiSlice } from "../apiSlice";
 
 const checkoutApi = apiSlice.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getBuyNow: builder.query({
       query: () => ({
@@ -8,6 +9,9 @@ const checkoutApi = apiSlice.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["checkout"],
+      // Checkout is opened right after Buy Now. Always read the latest
+      // buy-now payload instead of a cached empty cart from an earlier visit.
+      refetchOnMountOrArgChange: true,
     }),
     updateCheckout: builder.mutation({
       query: ({ body }) => ({
