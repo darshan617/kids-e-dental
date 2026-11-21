@@ -25,6 +25,7 @@ import { useDispatch } from "react-redux";
 import { apiSlice } from "@/redux/apiSlice";
 import { useLocation } from "@/custom-hooks/location/Location";
 import { useGetSearchQueryQuery } from "@/redux/apis/searchApi";
+import { useGetCategoryDataQuery } from "@/redux/apis/categoryApi";
 
 const SEARCH_HISTORY_COOKIE = "SH";
 const SEARCH_HISTORY_LIMIT = 5;
@@ -52,57 +53,35 @@ const TOP_BAR_LINKS = [
   },
 ];
 
-const PRODUCT_COLUMNS = [
-  [
-    {
-      id: "restorative",
-      label: "Restorative",
-      products: [
-        { id: 1, label: "Bioflx", url: "/bioflix" },
-        { id: 2, label: "Kids-e-Crown®", url: "/kids-e-Crown" },
-        { id: 3, label: "Kids-e-Restore", url: "" },
-        { id: 4, label: "Kids-e-SSC", url: "" },
-      ],
-    },
-  ],
-  [
-    {
-      id: "preventive",
-      label: "Preventive",
-      products: [
-        { id: 5, label: "e-Sdf®", url: "" },
-        { id: 6, label: "e-Pit And Fissure Sealant", url: "" },
-        { id: 7, label: "e-Space Maintainer", url: "" },
-      ],
-    },
-  ],
-  [
-    {
-      id: "endodontics",
-      label: "Endodontics",
-      products: [
-        { id: 8, label: "e-MTA®", url: "" },
-        { id: 9, label: "e-MTA Putty", url: "" },
-        { id: 10, label: "e-MTA Sealer", url: "" },
-        { id: 11, label: "e-MTA Carrier", url: "" },
-        { id: 12, label: "Kids-e-Files", url: "" },
-        { id: 13, label: "e-IodoCal", url: "" },
-      ],
-    },
-  ],
-  [
-    {
-      id: "consumables",
-      label: "Consumables",
-      products: [{ id: 14, label: "Scented-e-Pens", url: "" }],
-    },
-    {
-      id: "periodontics",
-      label: "Periodontics",
-      products: [{ id: 15, label: "e-Splint", url: "" }],
-    },
-  ],
-];
+const MENU_COLUMN_COUNT = 4;
+
+const buildProductColumns = (categories = []) => {
+  const items = categories.map((category) => ({
+    id: category.id,
+    label: category.name,
+    products: (category.subcategories ?? []).map((sub) => ({
+      id: sub.id,
+      label: sub.name,
+      slug: sub.slug,
+    })),
+  }));
+
+  if (!items.length) return [];
+
+  const columnCount = Math.min(MENU_COLUMN_COUNT, items.length);
+  const baseSize = Math.floor(items.length / columnCount);
+  const extra = items.length % columnCount;
+  const columns = [];
+  let cursor = 0;
+
+  for (let index = 0; index < columnCount; index += 1) {
+    const size = baseSize + (index >= columnCount - extra ? 1 : 0);
+    columns.push(items.slice(cursor, cursor + size));
+    cursor += size;
+  }
+
+  return columns;
+};
 
 const NAVIGATION_MENU = [
   { id: 1, label: "About Us", url: "/about-us" },
@@ -116,14 +95,6 @@ const NAVIGATION_MENU = [
   { id: 4, label: "Education", url: "/education" },
   { id: 5, label: "Case Studies", url: "/case-study" },
   { id: 6, label: "Contact Us", url: "/contact-us" },
-];
-
-const TRENDING_SEARCHES = [
-  { id: 1, label: "e-MTA Sealer", url: "#" },
-  { id: 2, label: "e-SPLINT", url: "#" },
-  { id: 3, label: "Kids-e-Restore", url: "#" },
-  { id: 4, label: "Crown & Space Maintainer", url: "#" },
-  { id: 5, label: "Zirconia Crown", url: "#" },
 ];
 
 const USER_MENU_ITEMS = [
@@ -173,6 +144,13 @@ const Header = () => {
 
   const { data: cartData } = useGetCartQuery();
   const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
+
+  const {
+    data: categoryData,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+  } = useGetCategoryDataQuery();
+  const productColumns = buildProductColumns(categoryData?.data ?? []);
 
   const { isIndia, flag } = useLocation();
   const syncUser = () => setUser(readUserDataFromCookie());
@@ -248,7 +226,7 @@ const Header = () => {
 
   const handleHistoryClick = (term) => {
     setSearchQuery(term);
-    setDebounceSearch(term); // fetch immediately, skip the debounce wait
+    setDebounceSearch(term);
   };
 
   // ---------- Logout ----------
@@ -578,49 +556,56 @@ const Header = () => {
                           </div>
 
                           <div className="col-xl col-12">
-                            <div className="row row-cols-1 row-cols-xl-4">
-                              {PRODUCT_COLUMNS?.map((column, colIndex) => (
-                                <div className="col" key={colIndex}>
-                                  {column?.map((category) => (
-                                    <div
-                                      key={category?.id}
-                                      className={`${styles.subMenuBox} vstack gap-1`}
-                                    >
-                                      <a
-                                        className={styles.subMenuBtn}
-                                        role="button"
-                                        data-bs-toggle="collapse"
-                                        href={`#mcat_${category?.id}`}
-                                        aria-expanded="false"
-                                      >
-                                        {category?.label}
-                                      </a>
+                            {categoriesLoading ? (
+                              <p className="mb-0">Loading products...</p>
+                            ) : categoriesError ? (
+                              <p className="mb-0">Failed to load products.</p>
+                            ) : (
+                              <div className="row row-cols-1 row-cols-xl-4">
+                                {productColumns.map((column, colIndex) => (
+                                  <div className="col" key={colIndex}>
+                                    {column.map((category) => (
                                       <div
-                                        className="collapse d-xl-block"
-                                        id={`mcat_${category?.id}`}
+                                        key={category.id}
+                                        className={`${styles.subMenuBox} vstack gap-1`}
                                       >
-                                        <ul className="row g-1">
-                                          {category?.products?.map(
-                                            (product) => (
-                                              <li key={product?.id}>
-                                                <Link
-                                                  href={
-                                                    `/product-category/${product?.url}` ||
-                                                    "#"
-                                                  }
-                                                >
-                                                  {product?.label}
-                                                </Link>
-                                              </li>
-                                            ),
-                                          )}
-                                        </ul>
+                                        <a
+                                          className={styles.subMenuBtn}
+                                          role="button"
+                                          data-bs-toggle="collapse"
+                                          href={`#mcat_${category.id}`}
+                                          aria-expanded="false"
+                                        >
+                                          {category.label}
+                                        </a>
+                                        <div
+                                          className="collapse d-xl-block"
+                                          id={`mcat_${category.id}`}
+                                        >
+                                          <ul className="row g-1">
+                                            {category.products.map(
+                                              (product) => (
+                                                <li key={product.id}>
+                                                  <Link
+                                                    href={
+                                                      product.slug
+                                                        ? `/product-category/${product.slug}`
+                                                        : "#"
+                                                    }
+                                                  >
+                                                    {product.label}
+                                                  </Link>
+                                                </li>
+                                              ),
+                                            )}
+                                          </ul>
+                                        </div>
                                       </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                            </div>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -742,23 +727,6 @@ const Header = () => {
                     </div>
                   </div>
                 )}
-
-                {/* <div className="row align-items-center suggestWrap g-0">
-                  <div className={`${styles.suggestTitle} col-md mb-1`}>
-                    Trending Search :
-                  </div>
-                  <div className="col-12 suggestTagList position-relative">
-                    <div className="hstack flex-wrap gap-2">
-                      {TRENDING_SEARCHES.map((item) => (
-                        <div key={item?.id}>
-                          <a href={item?.url} className={styles.suggestTag}>
-                            {item?.label}
-                          </a>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div> */}
               </div>
             )}
 
