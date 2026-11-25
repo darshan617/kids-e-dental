@@ -9,7 +9,13 @@ const locationApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["location"],
     }),
+    getLocationDetails: builder.query({
+      query: () => ({
+        url: "/location-details",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useGetLocationQuery } = locationApi;
+export const { useGetLocationQuery, useGetLocationDetailsQuery } = locationApi;

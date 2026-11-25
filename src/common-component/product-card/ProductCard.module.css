@@ -271,3 +271,47 @@
   height: auto;
   object-fit: contain;
 }
+
+@media (max-width: 768px) {
+  .variantPopup {
+    max-height: calc(100vh - 24px);
+    max-height: calc(100dvh - 24px);
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vpTitle {
+    font-size: clamp(1.25rem, 5vw, 1.5rem);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    padding-right: 1.5rem;
+  }
+
+  .vpImgBox {
+    margin-bottom: 0.75rem;
+  }
+
+  .vpImg {
+    max-width: 180px;
+    max-height: 22vh;
+  }
+
+  .vpLabel {
+    margin-top: 0.75rem;
+  }
+
+  .vpPrice {
+    font-size: clamp(1.5rem, 7vw, 1.8rem);
+    margin: 0.75rem 0;
+  }
+
+  .vpAddBtn {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    box-shadow: 0 -8px 12px rgba(255, 255, 255, 0.9);
+  }
+}

@@ -206,15 +206,6 @@ function AppContent({ Component, pageProps }) {
       }
     }
 
-    const headTop = document.querySelector(".headTop");
-    const pageBody = document.querySelector(".pageBody");
-
-    if (headTop && pageBody) {
-      const headTopHeight = -headTop.getBoundingClientRect().height;
-
-      pageBody.style.setProperty("--hTH", `${headTopHeight}px`);
-    }
-
     window.addEventListener("scroll", checkIfInView);
     window.addEventListener("resize", checkIfInView);
     window.addEventListener("scroll", stickyRelocate);

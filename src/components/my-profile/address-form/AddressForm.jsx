@@ -4,6 +4,7 @@ import {
   useAddAddressMutation,
   useUpdateAddressMutation,
 } from "@/redux/apis/addressApi";
+import { useGetLocationDetailsQuery } from "@/redux/apis/locationApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
 const EMPTY_FORM = {
@@ -36,9 +37,25 @@ const Field = ({ id, label, value, onChange, ...rest }) => (
   </div>
 );
 
+const SelectField = ({ id, label, value, onChange, disabled, children }) => (
+  <div className={styles.field}>
+    <select
+      id={id}
+      className={`${styles.input} ${styles.select}`}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      required
+    >
+      {children}
+    </select>
+    <label htmlFor={id} className={`${styles.label} ${styles.selectLabel}`}>
+      {label}
+    </label>
+  </div>
+);
+
 const onlyDigits = (value, max) => value.replace(/[^0-9]/g, "").slice(0, max);
-const onlyLetters = (value, max) =>
-  value.replace(/[^a-zA-Z\s]/g, "").slice(0, max);
 
 const AddressForm = ({
   onClose,
@@ -52,9 +69,27 @@ const AddressForm = ({
   const [addAddress, { isLoading: isAddingAddress }] = useAddAddressMutation();
   const [updateAddress, { isLoading: isUpdatingAddress }] =
     useUpdateAddressMutation();
+  const {
+    data: locationData,
+    isLoading: isLoadingLocations,
+    isError: isLocationError,
+  } = useGetLocationDetailsQuery();
   const setValue = (field, value) =>
     setForm((prev) => ({ ...prev, [field]: value }));
   const { showToast } = useToast();
+
+  const states = Array.isArray(locationData?.state) ? locationData.state : [];
+  const selectedState = states.find(
+    (state) =>
+      state?.name?.trim().toLowerCase() === form.state.trim().toLowerCase(),
+  );
+  const cities = Array.isArray(selectedState?.cities)
+    ? selectedState.cities
+    : [];
+  const selectedCity =
+    cities.find(
+      (city) => city.toLowerCase() === form.city.trim().toLowerCase(),
+    ) ?? "";
 
   const isFormValid =
     form.name.trim() &&
@@ -161,6 +196,68 @@ const AddressForm = ({
         />
 
         <Field
+          id="address-country"
+          label="Country*"
+          value={form.country}
+          onChange={(e) => setValue("country", e.target.value)}
+          required
+        />
+
+        <SelectField
+          id="address-state"
+          label="State*"
+          value={selectedState?.name ?? form.state}
+          disabled={
+            isLoadingLocations || isLocationError || states.length === 0
+          }
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              state: e.target.value,
+              city: "",
+            }))
+          }
+        >
+          <option value="">
+            {isLoadingLocations
+              ? "Loading states..."
+              : isLocationError
+                ? "Unable to load states"
+                : "Select state"}
+          </option>
+          {form.state && !selectedState && (
+            <option value={form.state}>{form.state}</option>
+          )}
+          {states.map((state) => (
+            <option key={state.id} value={state.name}>
+              {state.name}
+            </option>
+          ))}
+        </SelectField>
+
+        <SelectField
+          id="address-city"
+          label="City/District/Town*"
+          value={
+            selectedCity || (form.city && cities.length === 0 ? form.city : "")
+          }
+          disabled={!selectedState || cities.length === 0}
+          onChange={(e) => setValue("city", e.target.value)}
+        >
+          <option value="">
+            {selectedState ? "Select city" : "Select state first"}
+          </option>
+          {form.city && !selectedCity && (
+            <option value={form.city}>{form.city}</option>
+          )}
+          {cities.map((city) => (
+            <option key={city} value={city}>
+              {city}
+            </option>
+          ))}
+        </SelectField>
+
+        <Field
           id="address-pincode"
           inputMode="numeric"
           label="Pincode*"
@@ -170,33 +267,12 @@ const AddressForm = ({
           maxLength={6}
           required
         />
-
-        <Field
-          id="address-city"
-          label="City/District/Town*"
-          value={form.city}
-          onChange={(e) => setValue("city", onlyLetters(e.target.value, 20))}
-          maxLength={20}
-          required
-        />
-
-        <Field
-          id="address-state"
-          label="State*"
-          value={form.state}
-          onChange={(e) => setValue("state", onlyLetters(e.target.value, 20))}
-          maxLength={20}
-          required
-        />
-
-        <Field
-          id="address-country"
-          label="Country*"
-          value={form.country}
-          onChange={(e) => setValue("country", e.target.value)}
-          required
-        />
       </div>
+      {isLocationError && (
+        <p className={styles.locationError} role="alert">
+          Could not load states and cities. Please try again later.
+        </p>
+      )}
 
       <div className={styles.actions}>
         <button

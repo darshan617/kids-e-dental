@@ -1,6 +1,8 @@
 import React, { useId, useState } from "react";
 import { MdCardGiftcard, MdClose } from "react-icons/md";
+import Cookies from "js-cookie";
 import styles from "@/components/my-cart/cart-summary/CouponSection.module.css";
+import AuthPopup from "@/common-component/auth-popup/AuthPopup";
 import {
   useApplyCouponMutation,
   useGetAvailableCouponQuery,
@@ -8,10 +10,21 @@ import {
 } from "@/redux/apis/couponApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
+const getUserData = () => {
+  try {
+    const raw = Cookies.get("userData");
+    return raw ? JSON.parse(decodeURIComponent(raw)) : null;
+  } catch (error) {
+    console.error("Failed to read userData cookie:", error);
+    return null;
+  }
+};
+
 const CouponSection = ({ appliedCouponData }) => {
   const inputId = useId();
   const { showToast } = useToast();
   const [couponCode, setCouponCode] = useState("");
+  const [loginOpen, setLoginOpen] = useState(false);
   const {
     data: availableCoupon,
     isLoading,
@@ -20,13 +33,12 @@ const CouponSection = ({ appliedCouponData }) => {
   const [applyCoupon, { isLoading: isApplyingCoupon }] =
     useApplyCouponMutation();
 
-  const coupons = Array.isArray(availableCoupon?.data)
-    ? availableCoupon.data.filter(
-        (coupon) => coupon?.coupon_code ?? coupon?.code,
-      )
-    : [];
-
   const handleApplyCoupon = async () => {
+    if (!getUserData()?.id) {
+      setLoginOpen(true);
+      return;
+    }
+
     try {
       const res = await applyCoupon({
         body: {
@@ -40,6 +52,12 @@ const CouponSection = ({ appliedCouponData }) => {
       console.log(error);
     }
   };
+
+  const coupons = Array.isArray(availableCoupon?.data)
+    ? availableCoupon.data.filter(
+        (coupon) => coupon?.coupon_code ?? coupon?.code,
+      )
+    : [];
 
   return (
     <section
@@ -124,6 +142,7 @@ const CouponSection = ({ appliedCouponData }) => {
           </div>
         </div>
       )}
+      <AuthPopup isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
     </section>
   );
 };

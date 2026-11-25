@@ -28,6 +28,7 @@ import { useAddToCartMutation } from "@/redux/apis/addToCartApi";
 import { useAddBuyNowMutation } from "@/redux/apis/buyNowApi";
 import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
+import AuthPopup from "@/common-component/auth-popup/AuthPopup";
 import AllCoupons from "../all-coupons/AllCoupons";
 import { useLocation } from "@/custom-hooks/location/Location";
 
@@ -86,6 +87,7 @@ const ProductInfo = ({ product }) => {
   const [deliveryMsg, setDeliveryMsg] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [couponsOpen, setCouponsOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   useEffect(() => {
     setWishlisted(Boolean(product?.is_wishlist));
@@ -277,7 +279,7 @@ const ProductInfo = ({ product }) => {
     const userData = getUserData();
 
     if (!userData?.id) {
-      showToast("Please log in to use the wishlist", "error");
+      setLoginOpen(true);
       return;
     }
 
@@ -316,6 +318,11 @@ const ProductInfo = ({ product }) => {
   };
 
   const handleWishlistClick = () => {
+    if (!getUserData()?.id) {
+      setLoginOpen(true);
+      return;
+    }
+
     if (wishlisted) handleRemoveFromWishlist();
     else handleAddToWishlist();
   };
@@ -368,6 +375,11 @@ const ProductInfo = ({ product }) => {
   };
 
   const handleBuyNow = async () => {
+    if (!getUserData()?.id) {
+      setLoginOpen(true);
+      return;
+    }
+
     if (!product?.id) {
       showToast("Product ID is missing", "error");
       return;
@@ -904,6 +916,7 @@ const ProductInfo = ({ product }) => {
           </div>
         </div>
       </CustomPopup>
+      <AuthPopup isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
       <AllCoupons isOpen={couponsOpen} onClose={() => setCouponsOpen(false)} />
     </>
   );

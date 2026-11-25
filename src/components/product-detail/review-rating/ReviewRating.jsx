@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import stars from "@/assets/images/prd-detail/stars.gif";
 import styles from "@/components/product-detail/product-info/ProductInfo.module.css";
 import CustomPopup from "@/common-component/custom-popup/CustomPopup";
+import { useLocation } from "@/custom-hooks/location/Location";
 
 const MAX_VISIBLE_REVIEWS = 5;
 
@@ -65,6 +66,7 @@ const ReviewCard = ({ review }) => (
 const ReviewRating = ({ product }) => {
   const [showAll, setShowAll] = useState(false);
   const [showReviewPopup, setShowReviewPopup] = useState(false);
+  const { isIndia } = useLocation();
 
   const [rating, setRating] = useState("1");
   const [reviewHeading, setReviewHeading] = useState("");
@@ -132,109 +134,117 @@ const ReviewRating = ({ product }) => {
               everything we do.
             </p>
           </div>
-
-          <div className={`${styles.reviewWrap} rounded mb-4`}>
-            {!hasReviews ? (
-              <div className="text-center py-4">
-                <Image
-                  src={stars}
-                  alt="No reviews yet"
-                  style={{ width: "80%", maxWidth: "300px", height: "auto" }}
-                />
-                <h5 className="">We're looking for stars!</h5>
-                <p>Let us know what do you think.</p>
-                {canReview && (
-                  <button
-                    type="button"
-                    className="ctaBtn ctaBlack"
-                    onClick={openReviewPopup}
-                  >
-                    Be the first to write a review
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="row mb-5 animateThis fadeIn">
-                <div className="col-md col-12">
-                  <div
-                    className={`${styles.starItemsWrap} float-md-end pe-lg-4 mx-auto animateOne`}
-                  >
-                    {breakdown.map(({ star, percentage }) => {
-                      const pct = Math.round(Number(percentage) || 0);
-                      return (
-                        <div
-                          key={star}
-                          className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}
-                        >
-                          <div className="col-3">
-                            {star} <div className={styles.starIcon}></div>{" "}
-                          </div>
-                          <div
-                            className="col px-0 progress"
-                            role="progressbar"
-                            aria-label={`${star} ${star === 1 ? "Star" : "Stars"}`}
-                            aria-valuenow={pct}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                          >
-                            <div
-                              className="progress-bar"
-                              style={{ "--pbWidth": `${pct}%` }}
-                            ></div>
-                          </div>
-                          <div className="col-2 text-start">{pct}%</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="col-md-auto d-md-block d-none">
-                  <div className="vr h-100"></div>
-                </div>
-
-                <div className="col-md col-12">
-                  <div
-                    className={`${styles.overallreview} text-center mx-auto float-md-start`}
-                  >
-                    <div className="mx-auto d-inline-block">
-                      <div className={styles.prodRating}>
-                        {average.toFixed(1)}
-                      </div>
-                      <div className={styles.ratingBox}>
-                        <div
-                          className={`${styles.ratedStars} ${starClass(average)}`}
-                        ></div>
-                      </div>
-                      <small className="d-block mb-3">
-                        Average rating based on {totalReviews}{" "}
-                        {totalReviews === 1 ? "Review" : "Reviews"}
-                      </small>
-                      <div className="">
-                        <button
-                          type="button"
-                          className="ctaBtn arw w-100"
-                          disabled={!canReview}
-                          style={{ opacity: !canReview ? 0.7 : 1 }}
-                          onClick={openReviewPopup}
-                        >
-                          Write your review
-                        </button>
-                      </div>
-                    </div>
-                    {!canReview && (
-                      <div className="d-flex mt-2">
-                        <small className="text-danger">
-                          (Only customers who purchased this product can write a
-                          review.)
-                        </small>
-                      </div>
+          {isIndia && (
+            <>
+              <div className={`${styles.reviewWrap} rounded mb-4`}>
+                {!hasReviews ? (
+                  <div className="text-center py-4">
+                    <Image
+                      src={stars}
+                      alt="No reviews yet"
+                      style={{
+                        width: "80%",
+                        maxWidth: "300px",
+                        height: "auto",
+                      }}
+                    />
+                    <h5 className="">We're looking for stars!</h5>
+                    <p>Let us know what do you think.</p>
+                    {canReview && (
+                      <button
+                        type="button"
+                        className="ctaBtn ctaBlack"
+                        onClick={openReviewPopup}
+                      >
+                        Be the first to write a review
+                      </button>
                     )}
                   </div>
-                </div>
+                ) : (
+                  <div className="row mb-5 animateThis fadeIn">
+                    <div className="col-md col-12">
+                      <div
+                        className={`${styles.starItemsWrap} float-md-end pe-lg-4 mx-auto animateOne`}
+                      >
+                        {breakdown.map(({ star, percentage }) => {
+                          const pct = Math.round(Number(percentage) || 0);
+                          return (
+                            <div
+                              key={star}
+                              className={`${styles.starItem} row align-items-center gx-4 mb-3 text-end`}
+                            >
+                              <div className="col-3">
+                                {star}{" "}
+                                <div className={styles.starIcon}></div>{" "}
+                              </div>
+                              <div
+                                className="col px-0 progress"
+                                role="progressbar"
+                                aria-label={`${star} ${star === 1 ? "Star" : "Stars"}`}
+                                aria-valuenow={pct}
+                                aria-valuemin={0}
+                                aria-valuemax={100}
+                              >
+                                <div
+                                  className="progress-bar"
+                                  style={{ "--pbWidth": `${pct}%` }}
+                                ></div>
+                              </div>
+                              <div className="col-2 text-start">{pct}%</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="col-md-auto d-md-block d-none">
+                      <div className="vr h-100"></div>
+                    </div>
+
+                    <div className="col-md col-12">
+                      <div
+                        className={`${styles.overallreview} text-center mx-auto float-md-start`}
+                      >
+                        <div className="mx-auto d-inline-block">
+                          <div className={styles.prodRating}>
+                            {average.toFixed(1)}
+                          </div>
+                          <div className={styles.ratingBox}>
+                            <div
+                              className={`${styles.ratedStars} ${starClass(average)}`}
+                            ></div>
+                          </div>
+                          <small className="d-block mb-3">
+                            Average rating based on {totalReviews}{" "}
+                            {totalReviews === 1 ? "Review" : "Reviews"}
+                          </small>
+                          <div className="">
+                            <button
+                              type="button"
+                              className="ctaBtn arw w-100"
+                              disabled={!canReview}
+                              style={{ opacity: !canReview ? 0.7 : 1 }}
+                              onClick={openReviewPopup}
+                            >
+                              Write your review
+                            </button>
+                          </div>
+                        </div>
+                        {!canReview && (
+                          <div className="d-flex mt-2">
+                            <small className="text-danger">
+                              (Only customers who purchased this product can
+                              write a review.)
+                            </small>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
 
           {visibleReviews.length > 0 && (
             <div className="row justify-content-center g-4 mb-4 reviewBoxList staggerList">
