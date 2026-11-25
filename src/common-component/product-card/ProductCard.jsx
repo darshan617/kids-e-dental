@@ -21,6 +21,7 @@ import {
   useRemoveFromWishlistMutation,
 } from "@/redux/apis/addToWishlistApi";
 import CustomPopup from "../custom-popup/CustomPopup";
+import AuthPopup from "../auth-popup/AuthPopup";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { useAddBuyNowMutation } from "@/redux/apis/buyNowApi";
 import { useLocation } from "@/custom-hooks/location/Location";
@@ -203,7 +204,12 @@ const VariantPopup = ({
   const loadingLabel = isBuyMode ? "Processing..." : "Adding...";
 
   return (
-    <CustomPopup isOpen onClose={onClose} maxWidth="520px">
+    <CustomPopup
+      isOpen
+      onClose={onClose}
+      maxWidth="520px"
+      className={styles.variantPopup}
+    >
       <div className={`${styles.vpWrap} p-3 p-md-4`}>
         <div className={styles.vpImgBox}>
           <Image
@@ -321,9 +327,16 @@ export const ProductCard = ({
     useRemoveFromWishlistMutation();
   const { showToast } = useToast();
   const router = useRouter();
+  const [loginOpen, setLoginOpen] = useState(false);
 
   // null = closed, "cart" | "buy" = popup open for that action
   const [variantMode, setVariantMode] = useState(null);
+
+  const requireLogin = () => {
+    if (getUserData()?.id) return true;
+    setLoginOpen(true);
+    return false;
+  };
 
   const hasVariants = Array.isArray(variants) && variants.length > 0;
   const needsDetailsPage = !hasVariants && hasVariantsFlag;
@@ -366,6 +379,8 @@ export const ProductCard = ({
   };
 
   const handleBuyNow = async (variantId = null, qty = 1) => {
+    if (!requireLogin()) return false;
+
     if (!id) {
       showToast("Product ID is missing", "error");
       return false;
@@ -428,6 +443,8 @@ export const ProductCard = ({
   };
 
   const handleBuyNowClick = async () => {
+    if (!requireLogin()) return;
+
     if (hasVariants) {
       setVariantMode(VARIANT_MODE_BUY);
       return;
@@ -451,7 +468,7 @@ export const ProductCard = ({
     const userData = getUserData();
 
     if (!userData?.id) {
-      showToast("Please log in to use the wishlist", "error");
+      setLoginOpen(true);
       return;
     }
 
@@ -504,6 +521,8 @@ export const ProductCard = ({
   };
 
   const handleWishlistClick = () => {
+    if (!requireLogin()) return;
+
     if (isWishlistPage) {
       if (onRemove) onRemove();
       else handleRemoveFromWishlist();
@@ -627,6 +646,7 @@ export const ProductCard = ({
           }
         />
       )}
+      <AuthPopup isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
     </>
   );
 };

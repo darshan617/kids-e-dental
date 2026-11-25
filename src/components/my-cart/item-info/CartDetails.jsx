@@ -153,6 +153,7 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
 
 const CartDetails = ({
   cartData,
+  totalAmount,
   handleUpdateCart,
   handleRemoveCart,
   isLoading = false,
@@ -175,11 +176,18 @@ const CartDetails = ({
     handleRemoveCart(item?.id, item);
   };
 
-  const cartTotal = cartItems?.reduce(
+  const itemTotal = cartItems?.reduce(
     (acc, item) =>
       acc + (Number(item?.product?.selling_price) || 0) * item?.quantity,
     0,
   );
+  const summaryTotal =
+    totalAmount === null || totalAmount === undefined || totalAmount === ""
+      ? Number.NaN
+      : Number(totalAmount);
+  const checkoutTotal = Number.isFinite(summaryTotal)
+    ? summaryTotal
+    : itemTotal;
 
   if (isLoading && cartItems.length === 0) {
     return null;
@@ -214,7 +222,7 @@ const CartDetails = ({
             <div>
               <div>
                 <span>PROCEED TO CHECKOUT</span>
-                <p>₹ {cartTotal}</p>
+                <p>₹ {checkoutTotal.toFixed(2)}</p>
               </div>
             </div>
 

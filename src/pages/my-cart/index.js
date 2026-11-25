@@ -66,6 +66,7 @@ const cartPage = () => {
           <div className={hasItems ? "col-xl-8 col-md-12 col-12" : "col-12"}>
             <CartDetails
               cartData={cartData?.data}
+              totalAmount={cartData?.cart_summary?.grand_total}
               handleUpdateCart={handleUpdateCart}
               handleRemoveCart={handleRemoveCart}
             />

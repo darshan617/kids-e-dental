@@ -1,34 +1,16 @@
 .pageHeader {
+  position: relative;
+}
+
+.stickyHeader {
   position: sticky;
   top: 0;
   z-index: 1000;
-  transition: all .5s ease;
+  background: #fff;
 }
 
-:global(.stick) .pageHeader {
-  top: var(--hTH);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, .1);
-}
-
-/* .headTop {
-  overflow: hidden;
-  max-height: 100px;
-  opacity: 1;
-  transform: translateY(0);
-  position: relative;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-  will-change: max-height, opacity;
-} */
-:global(.stick) .headTop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  transform: translateY(-100%);
-  opacity: 0;
-  pointer-events: none;
+:global(.stick) .stickyHeader {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
 .headTopLinks a {
@@ -585,15 +567,6 @@
 @media (min-width: 992px) and (hover: hover) {
   .pageHeader {
     font-size: clamp(0.75rem, calc(0.333rem + 0.556vw), 1rem);
-  }
-
-  :global(.stick) .pageHeader:hover .headTop {
-    max-height: 100px;
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
   }
 
   .headTopLinks a {
