@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "@/components/my-cart/item-info/CartDetails.module.css";
 import Link from "next/link";
 import { ImBin } from "react-icons/im";
@@ -6,7 +6,19 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
 import csImg from "@/assets/images/home/csImg.jpg";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import AuthPopup from "@/common-component/auth-popup/AuthPopup";
 import emptyCartImg from "@/assets/images/prd-detail/wishlist.jpg";
+
+const getUserData = () => {
+  try {
+    const raw = Cookies.get("userData");
+    return raw ? JSON.parse(decodeURIComponent(raw)) : null;
+  } catch (error) {
+    console.error("Failed to read userData cookie:", error);
+    return null;
+  }
+};
 
 export const EmptyCart = () => (
   <div className={styles.emptySection}>
@@ -174,6 +186,7 @@ const CartDetails = ({
   isUpdating,
 }) => {
   const router = useRouter();
+  const [loginOpen, setLoginOpen] = useState(false);
   const isCheckoutPage = router.pathname === "/checkout";
   const cartItems = Array.isArray(cartData) ? cartData : [];
 
@@ -204,6 +217,18 @@ const CartDetails = ({
     ? summaryTotal
     : itemTotal;
 
+  const handleProceedToCheckout = (event) => {
+    if (getUserData()?.id) return;
+
+    event.preventDefault();
+    setLoginOpen(true);
+  };
+
+  const handleLoginPopupClose = () => {
+    setLoginOpen(false);
+    if (getUserData()?.id) router.push("/checkout?source=cart");
+  };
+
   if (isLoading && cartItems.length === 0) {
     return null;
   }
@@ -233,7 +258,11 @@ const CartDetails = ({
       ))}
 
       {!isCheckoutPage && (
-        <Link href="/checkout?source=cart" className={styles.checkoutSection}>
+        <Link
+          href="/checkout?source=cart"
+          className={styles.checkoutSection}
+          onClick={handleProceedToCheckout}
+        >
           <button type="button" className={styles.checkoutBtn}>
             <div>
               <div>
@@ -248,6 +277,7 @@ const CartDetails = ({
           </button>
         </Link>
       )}
+      <AuthPopup isOpen={loginOpen} onClose={handleLoginPopupClose} />
     </div>
   );
 };
