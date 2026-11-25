@@ -44,7 +44,7 @@ const readVariantValue = (...values) => {
   return "";
 };
 
-const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
+const CartRow = ({ item, onIncrease, onDecrease, onDelete, isUpdating }) => {
   const product = item?.product ?? {};
   const selectedArch = readVariantValue(
     item?.selected_arch,
@@ -128,7 +128,14 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
               className={styles.productCartDelete}
               onClick={() => onDecrease(item?.id)}
             >
-              -
+              {isUpdating ? (
+                <div
+                  class="spinner-border text-light spinner-border-sm"
+                  role="status"
+                ></div>
+              ) : (
+                "-"
+              )}
             </button>
           )}
 
@@ -139,7 +146,14 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
             className={styles.productCartPlus}
             onClick={() => onIncrease(item?.id)}
           >
-            +
+            {isUpdating ? (
+              <div
+                class="spinner-border text-light spinner-border-sm"
+                role="status"
+              ></div>
+            ) : (
+              "+"
+            )}
           </button>
         </div>
 
@@ -157,6 +171,7 @@ const CartDetails = ({
   handleUpdateCart,
   handleRemoveCart,
   isLoading = false,
+  isUpdating,
 }) => {
   const router = useRouter();
   const isCheckoutPage = router.pathname === "/checkout";
@@ -213,6 +228,7 @@ const CartDetails = ({
           onIncrease={() => onIncrease(item)}
           onDecrease={() => onDecrease(item)}
           onDelete={() => onDelete(item)}
+          isUpdating={isUpdating}
         />
       ))}
 

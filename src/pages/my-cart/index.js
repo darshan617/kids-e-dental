@@ -1,6 +1,7 @@
 import Layout from "@/components/Layout/Layout";
 import CartSummary from "@/components/my-cart/cart-summary/cartSummary";
 import CartDetails from "@/components/my-cart/item-info/CartDetails";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 import {
   useGetCartQuery,
   useUpdateCartMutation,
@@ -15,7 +16,8 @@ const cartPage = () => {
     refetch,
   } = useGetCartQuery();
 
-  const [updateCart] = useUpdateCartMutation();
+  const { showToast } = useToast();
+  const [updateCart, { isLoading: isUpdating }] = useUpdateCartMutation();
   const [removeCart] = useRemoveCartMutation();
 
   const handleUpdateCart = async (id, quantity) => {
@@ -34,6 +36,7 @@ const cartPage = () => {
       }
     } catch (error) {
       console.error("Error updating cart:", error);
+      showToast(error?.data?.message, "error");
     }
   };
 
@@ -69,6 +72,7 @@ const cartPage = () => {
               totalAmount={cartData?.cart_summary?.grand_total}
               handleUpdateCart={handleUpdateCart}
               handleRemoveCart={handleRemoveCart}
+              isUpdating={isUpdating}
             />
           </div>
 

@@ -19,9 +19,11 @@ import {
   useUpdateCartMutation,
 } from "@/redux/apis/addToCartApi";
 import { useGetAddressQuery } from "@/redux/apis/addressApi";
+import { useToast } from "@/custom-hooks/toast/ToastProvider";
 
 const CheckoutPage = () => {
   const router = useRouter();
+  const { showToast } = useToast();
   const isCartCheckout = router.isReady && router.query.source === "cart";
   const [showAddressForm, setShowAddressForm] = useState(false);
   const {
@@ -45,7 +47,7 @@ const CheckoutPage = () => {
 
   const [updateCheckout] = useUpdateCheckoutMutation();
   const [removeCheckout] = useRemoveCheckoutItemMutation();
-  const [updateCart] = useUpdateCartMutation();
+  const [updateCart, { isLoading: isUpdating }] = useUpdateCartMutation();
   const [removeCart] = useRemoveCartMutation();
   const { data: addressRes } = useGetAddressQuery();
   const addresses = addressRes?.data ?? [];
@@ -94,6 +96,7 @@ const CheckoutPage = () => {
       }
     } catch (error) {
       console.error("Error updating cart:", error);
+      showToast(error?.data?.message, "error");
     }
   };
   const handleRemoveCart = async (id) => {
@@ -140,6 +143,7 @@ const CheckoutPage = () => {
                 handleUpdateCart={handleUpdateCart}
                 handleRemoveCart={handleRemoveCart}
                 isLoading={isWaitingForItems}
+                isUpdating={isUpdating}
               />
             </div>
           </div>
