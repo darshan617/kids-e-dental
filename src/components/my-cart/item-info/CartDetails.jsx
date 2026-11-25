@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "@/components/my-cart/item-info/CartDetails.module.css";
 import Link from "next/link";
 import { ImBin } from "react-icons/im";
@@ -6,7 +6,19 @@ import { MdOutlineKeyboardArrowRight } from "react-icons/md";
 import Image from "next/image";
 import csImg from "@/assets/images/home/csImg.jpg";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+import AuthPopup from "@/common-component/auth-popup/AuthPopup";
 import emptyCartImg from "@/assets/images/prd-detail/wishlist.jpg";
+
+const getUserData = () => {
+  try {
+    const raw = Cookies.get("userData");
+    return raw ? JSON.parse(decodeURIComponent(raw)) : null;
+  } catch (error) {
+    console.error("Failed to read userData cookie:", error);
+    return null;
+  }
+};
 
 export const EmptyCart = () => (
   <div className={styles.emptySection}>
@@ -44,7 +56,7 @@ const readVariantValue = (...values) => {
   return "";
 };
 
-const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
+const CartRow = ({ item, onIncrease, onDecrease, onDelete, isUpdating }) => {
   const product = item?.product ?? {};
   const selectedArch = readVariantValue(
     item?.selected_arch,
@@ -128,7 +140,14 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
               className={styles.productCartDelete}
               onClick={() => onDecrease(item?.id)}
             >
-              -
+              {isUpdating ? (
+                <div
+                  class="spinner-border text-light spinner-border-sm"
+                  role="status"
+                ></div>
+              ) : (
+                "-"
+              )}
             </button>
           )}
 
@@ -139,7 +158,14 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
             className={styles.productCartPlus}
             onClick={() => onIncrease(item?.id)}
           >
-            +
+            {isUpdating ? (
+              <div
+                class="spinner-border text-light spinner-border-sm"
+                role="status"
+              ></div>
+            ) : (
+              "+"
+            )}
           </button>
         </div>
 
@@ -153,11 +179,14 @@ const CartRow = ({ item, onIncrease, onDecrease, onDelete }) => {
 
 const CartDetails = ({
   cartData,
+  totalAmount,
   handleUpdateCart,
   handleRemoveCart,
   isLoading = false,
+  isUpdating,
 }) => {
   const router = useRouter();
+  const [loginOpen, setLoginOpen] = useState(false);
   const isCheckoutPage = router.pathname === "/checkout";
   const cartItems = Array.isArray(cartData) ? cartData : [];
 
@@ -175,11 +204,30 @@ const CartDetails = ({
     handleRemoveCart(item?.id, item);
   };
 
-  const cartTotal = cartItems?.reduce(
+  const itemTotal = cartItems?.reduce(
     (acc, item) =>
       acc + (Number(item?.product?.selling_price) || 0) * item?.quantity,
     0,
   );
+  const summaryTotal =
+    totalAmount === null || totalAmount === undefined || totalAmount === ""
+      ? Number.NaN
+      : Number(totalAmount);
+  const checkoutTotal = Number.isFinite(summaryTotal)
+    ? summaryTotal
+    : itemTotal;
+
+  const handleProceedToCheckout = (event) => {
+    if (getUserData()?.id) return;
+
+    event.preventDefault();
+    setLoginOpen(true);
+  };
+
+  const handleLoginPopupClose = () => {
+    setLoginOpen(false);
+    if (getUserData()?.id) router.push("/checkout?source=cart");
+  };
 
   if (isLoading && cartItems.length === 0) {
     return null;
@@ -205,16 +253,21 @@ const CartDetails = ({
           onIncrease={() => onIncrease(item)}
           onDecrease={() => onDecrease(item)}
           onDelete={() => onDelete(item)}
+          isUpdating={isUpdating}
         />
       ))}
 
       {!isCheckoutPage && (
-        <Link href="/checkout?source=cart" className={styles.checkoutSection}>
+        <Link
+          href="/checkout?source=cart"
+          className={styles.checkoutSection}
+          onClick={handleProceedToCheckout}
+        >
           <button type="button" className={styles.checkoutBtn}>
             <div>
               <div>
                 <span>PROCEED TO CHECKOUT</span>
-                <p>₹ {cartTotal}</p>
+                <p>₹ {checkoutTotal.toFixed(2)}</p>
               </div>
             </div>
 
@@ -224,6 +277,7 @@ const CartDetails = ({
           </button>
         </Link>
       )}
+      <AuthPopup isOpen={loginOpen} onClose={handleLoginPopupClose} />
     </div>
   );
 };

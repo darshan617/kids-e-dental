@@ -252,7 +252,9 @@ p {
   position: relative;
   overflow: hidden;
   z-index: 1;
-  &.white {background:#fff;}
+  &.white {
+    background: #fff;
+  }
   &:hover {
     background: #000;
     color: var(--primary);
@@ -419,8 +421,6 @@ p {
   width: 100%;
   max-width: 100%;
 }
-:global(.stick) .pageHeader {
-  top: var(--hTH);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+.pageBody {
+  overflow-x: clip;
 }
-
