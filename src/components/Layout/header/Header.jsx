@@ -132,6 +132,7 @@ const Header = () => {
   const router = useRouter();
   const { showToast } = useToast();
   const dispatch = useDispatch();
+  const headerRef = useRef(null);
   const userMenuRef = useRef(null);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -228,6 +229,18 @@ const Header = () => {
     setDebounceSearch(term);
   };
 
+  const closeSidebar = (callback) => {
+    const sidebar = document.getElementById("navigation");
+    if (!sidebar || !sidebar.classList.contains("show")) {
+      callback?.();
+      return;
+    }
+    const closeButton = sidebar.querySelector('[aria-label="Close"]');
+    if (!closeButton) return;
+    sidebar.addEventListener("hidden.bs.offcanvas", () => callback?.(), { once: true });
+    closeButton.click();
+  };
+
   // ---------- Logout ----------
   const handleLogout = async () => {
     setIsLogoutLoading(true);
@@ -310,7 +323,7 @@ const Header = () => {
   }, []);
 
   return (
-    <>
+    <header ref={headerRef} className={`${styles.pageHeader} w-100`}>
       <div
         className={`${styles.headTop} bg-black text-white py-sm-3 py-1 container-fluid sitePadding`}
       >
@@ -339,39 +352,45 @@ const Header = () => {
         </div>
       </div>
 
-      <header className={`${styles.pageHeader} ${styles.stickyHeader} w-100`}>
-        <div className="bg-white py-3 container-fluid sitePadding">
-          <div className="row justify-content-between align-items-center">
-            <div className="col-auto order-xl-1">
-              <Link href={"/"} className={styles.pgLogo}>
-                <Image
-                  src={Logo}
-                  alt=""
-                  className={styles.pgLogoImg}
-                  sizes="(min-width: 1200px) 20vw, 200px"
-                />
-              </Link>
-            </div>
-            <div className="col-auto order-xl-3">
-              <div
-                className={`${styles.headBtns} d-flex gap-xxl-4 gap-sm-3 gap-2 align-items-center`}
-              >
-                <div>
-                  <button
-                    className={`${styles.headBtn} headBtn rounded-circle searchMenuBtn`}
-                    title="Search"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#searchWrapper"
-                    aria-expanded="false"
-                    aria-controls="searchWrapper"
-                  >
-                    <BsSearch size={28} />
-                  </button>
+      <div className="bg-white py-3 container-fluid sitePadding">
+        <div className="row justify-content-between align-items-center">
+          <div className="col-auto order-xl-1">
+            <Link href={"/"} className={styles.pgLogo}>
+              <Image
+                src={Logo}
+                alt=""
+                className={styles.pgLogoImg}
+                sizes="(min-width: 1200px) 20vw, 200px"
+              />
+            </Link>
+          </div>
+          <div className="col-auto order-xl-3">
+            <div
+              className={`${styles.headBtns} d-flex gap-xxl-4 gap-sm-3 gap-2 align-items-center`}
+            >
+              <div className={styles.searchAction}>
+                <button
+                  className={`${styles.headBtn} headBtn rounded-circle searchMenuBtn`}
+                  title="Search"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#searchWrapper"
+                  aria-expanded="false"
+                  aria-controls="searchWrapper"
+                >
+                  <BsSearch size={28} />
+                </button>
+              </div>
+              <div className={styles.actionBar} aria-label="Account and shopping actions">
+                <div className={styles.productAction}>
+                  <Link href="/product-listing" className={`${styles.headBtn} rounded-circle`} title="Products">
+                    <HiOutlineSquares2X2 size={28} />
+                    <span className={styles.mobileLabel}>Products</span>
+                  </Link>
                 </div>
 
                 {isIndia && (
-                  <div className="position-relative" ref={userMenuRef}>
+                  <div className={`position-relative ${styles.profileAction}`} ref={userMenuRef}>
                     {isLoggedIn ? (
                       <>
                         <button
@@ -380,38 +399,41 @@ const Header = () => {
                           type="button"
                           aria-haspopup="menu"
                           aria-expanded={userMenuOpen}
-                          onClick={toggleUserMenu}
+                          onClick={() => {
+                            if (window.matchMedia("(max-width: 575.98px)").matches) {
+                              closeUserMenu();
+                              router.push("/my-profile");
+                            } else {
+                              toggleUserMenu();
+                            }
+                          }}
                         >
-                          {userInitial}
+                          <span className={styles.desktopInitial}>{userInitial}</span>
+                          <span className={styles.mobileInitial}>{userInitial}</span>
+                          <span className={styles.mobileLabel}>Profile</span>
                         </button>
 
                         {userMenuOpen && (
                           <div className={`${styles.userDropdown}`} role="menu">
                             <div className={`${styles.userDropdownHeader}`}>
-                              <div
-                                className={`${styles.userAvatar} .bgPrimary`}
-                              >
+                              <div className={`${styles.userAvatar} .bgPrimary`}>
                                 <span>{userInitial}</span>
                               </div>
-                              <p className={`${styles.userName}`}>
-                                {user?.name}
-                              </p>
+                              <p className={`${styles.userName}`}>{user?.name}</p>
                             </div>
 
                             <ul className={`${styles.userMenuList}`}>
                               {USER_MENU_ITEMS?.map((item) => {
                                 const Icon = item?.icon;
                                 return (
-                                  <li key={item?.label}>
+                                  <li key={item?.label} className={item.href === "/my-wishlist" ? styles.desktopWishlist : undefined}>
                                     <Link
                                       href={item?.href || "#"}
                                       className={`${styles.userMenuLink}`}
                                       onClick={closeUserMenu}
                                       role="menuitem"
                                     >
-                                      <span
-                                        className={`${styles.userMenuIcon}`}
-                                      >
+                                      <span className={`${styles.userMenuIcon}`}>
                                         <Icon size={20} />
                                       </span>
                                       <span>{item?.label}</span>
@@ -430,9 +452,7 @@ const Header = () => {
                               >
                                 <HiOutlinePower size={18} />
                                 <span>
-                                  {isLogoutLoading
-                                    ? "Logging out..."
-                                    : "Logout"}
+                                  {isLogoutLoading ? "Logging out..." : "Logout"}
                                 </span>
                               </button>
                             </div>
@@ -454,6 +474,7 @@ const Header = () => {
                           >
                             <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
                           </svg>
+                          <span className={styles.mobileLabel}>Profile</span>
                         </button>
                         <button
                           className={`${styles.loginBtn} ctaBtn d-none d-sm-block`}
@@ -469,7 +490,7 @@ const Header = () => {
                 )}
 
                 {isIndia && (
-                  <div>
+                  <div className={styles.cartAction}>
                     <Link
                       href="/my-cart"
                       className={`${styles.headBtn} rounded-circle position-relative`}
@@ -481,286 +502,327 @@ const Header = () => {
                         </span>
                       )}
                       <BsCart size={28} />
+                      <span className={styles.mobileLabel}>Cart</span>
                     </Link>
                   </div>
                 )}
-                <div className="d-xl-none">
-                  <button
-                    className={`${styles.headBtn} rounded-circle`}
-                    title="Menu"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#navigation"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 16 16"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
-                      />
-                    </svg>
-                  </button>
-                </div>
               </div>
-            </div>
-            <div
-              className={`${styles.navigation} col order-xl-2 offcanvas-xl offcanvas-end`}
-              id="navigation"
-            >
-              <div className="d-xl-none w-100 px-3 py-2 text-end position-absolute start-0 z-3">
+              <div className="d-xl-none">
                 <button
                   type="button"
-                  className={`${styles.headBtn} rounded-circle float-end`}
-                  aria-label="Close"
+                  className={`${styles.headBtn} rounded-circle`}
+                  title="Menu"
                   data-bs-toggle="offcanvas"
                   data-bs-target="#navigation"
-                  style={{ height: "2rem", aspectRatio: "1" }}
+                  aria-controls="navigation"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="currentColor"
                     viewBox="0 0 16 16"
                   >
-                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                    <path
+                      fillRule="evenodd"
+                      d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"
+                    />
                   </svg>
                 </button>
               </div>
-
-              <ul
-                className={`${styles.siteMenu} d-xl-flex justify-content-end`}
+            </div>
+          </div>
+          <div
+            className={`${styles.navigation} col order-xl-2 offcanvas-xl offcanvas-end`}
+            id="navigation"
+          >
+            <div className="d-xl-none w-100 px-3 py-2 text-end position-absolute start-0 z-3">
+              <button
+                type="button"
+                className={`${styles.headBtn} rounded-circle float-end`}
+                aria-label="Close"
+                data-bs-dismiss="offcanvas"
+                data-bs-target="#navigation"
+                style={{ height: "2rem", aspectRatio: "1" }}
               >
-                {NAVIGATION_MENU?.map((menuItem) => (
-                  <li key={menuItem?.id}>
-                    {menuItem?.isDropdown ? (
-                      <>
-                        <a
-                          href="#productMenu"
-                          role="button"
-                          data-bs-toggle="collapse"
-                        >
-                          {menuItem?.label}
-                        </a>
-                        <div
-                          className={`${styles.subMenu} container-fluid sitePadding collapse`}
-                          id="productMenu"
-                        >
-                          <div className="row gx-xl-5 gx-4 py-xl-4">
-                            <div className="col-xl-4 col-12">
-                              <div className="p-3 mb-4 mb-xl-0 bgPrimary rounded-3 overflow-hidden position-relative">
-                                <Image
-                                  src={distributorImg}
-                                  alt=""
-                                  className="w-100 h-auto mb-5"
-                                />
-                                <div className="position-absolute bottom-0 py-4 w-100 d-flex justify-content-center">
-                                  <Link
-                                    href="/product-listing"
-                                    className="ctaBtn white arw d-inline-block shadow-lg"
-                                  >
-                                    View All Products
-                                  </Link>
-                                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                </svg>
+              </button>
+            </div>
+
+            <ul className={`${styles.siteMenu} d-xl-flex justify-content-end`}>
+              {isIndia && (
+                <li className={styles.sidebarAccount}>
+                  <div className={styles.accountHeading}>My Account</div>
+                  {isLoggedIn && (
+                    <div className={styles.sidebarUser}>
+                      <span className={styles.sidebarAvatar}>{userInitial}</span>
+                      <div className={styles.sidebarUserInfo}>
+                        <small>Welcome,</small>
+                        <strong>{user?.name}</strong>
+                      </div>
+                    </div>
+                  )}
+                  {USER_MENU_ITEMS.filter((item) => isLoggedIn || item.href !== "/").map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button key={item.label} type="button"
+                        className={styles.sidebarAccountLink}
+                        onClick={() => closeSidebar(() => {
+                          if (isLoggedIn) router.push(item.href);
+                          else setIsAuthOpen(true);
+                        })}>
+                        <Icon size={22} />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </li>
+              )}
+              {NAVIGATION_MENU?.map((menuItem) => (
+                <li key={menuItem?.id}>
+                  {menuItem?.isDropdown ? (
+                    <>
+                      <a
+                        href="#productMenu"
+                        role="button"
+                        data-bs-toggle="collapse"
+                      >
+                        {menuItem?.label}
+                      </a>
+                      <div
+                        className={`${styles.subMenu} container-fluid sitePadding collapse`}
+                        id="productMenu"
+                      >
+                        <div className="row gx-xl-5 gx-4 py-xl-4">
+                          <div className="col-xl-4 col-12">
+                            <div className="p-3 mb-4 mb-xl-0 bgPrimary rounded-3 overflow-hidden position-relative">
+                              <Image
+                                src={distributorImg}
+                                alt=""
+                                className="w-100 h-auto mb-5"
+                              />
+                              <div className="position-absolute bottom-0 py-4 w-100 d-flex justify-content-center">
+                                <Link
+                                  href="/product-listing"
+                                  className="ctaBtn white arw d-inline-block shadow-lg"
+                                >
+                                  View All Products
+                                </Link>
                               </div>
                             </div>
+                          </div>
 
-                            <div className="col-xl col-12">
-                              {categoriesLoading ? (
-                                <p className="mb-0">Loading products...</p>
-                              ) : categoriesError ? (
-                                <p className="mb-0">Failed to load products.</p>
-                              ) : (
-                                <div className="row row-cols-1 row-cols-xl-4">
-                                  {productColumns.map((column, colIndex) => (
-                                    <div className="col" key={colIndex}>
-                                      {column.map((category) => (
-                                        <div
-                                          key={category.id}
-                                          className={`${styles.subMenuBox} vstack gap-1`}
+                          <div className="col-xl col-12">
+                            {categoriesLoading ? (
+                              <p className="mb-0">Loading products...</p>
+                            ) : categoriesError ? (
+                              <p className="mb-0">Failed to load products.</p>
+                            ) : (
+                              <div className="row row-cols-1 row-cols-xl-4">
+                                {productColumns.map((column, colIndex) => (
+                                  <div className="col" key={colIndex}>
+                                    {column.map((category) => (
+                                      <div
+                                        key={category.id}
+                                        className={`${styles.subMenuBox} vstack gap-1`}
+                                      >
+                                        <a
+                                          className={styles.subMenuBtn}
+                                          role="button"
+                                          data-bs-toggle="collapse"
+                                          href={`#mcat_${category.id}`}
+                                          aria-expanded="false"
                                         >
-                                          <a
-                                            className={styles.subMenuBtn}
-                                            role="button"
-                                            data-bs-toggle="collapse"
-                                            href={`#mcat_${category.id}`}
-                                            aria-expanded="false"
-                                          >
-                                            {category.label}
-                                          </a>
-                                          <div
-                                            className="collapse d-xl-block"
-                                            id={`mcat_${category.id}`}
-                                          >
-                                            <ul className="row g-1">
-                                              {category.products.map(
-                                                (product) => (
-                                                  <li key={product.id}>
-                                                    <Link
-                                                      href={
-                                                        product.slug
-                                                          ? `/product-category/${product.slug}`
-                                                          : "#"
-                                                      }
-                                                    >
-                                                      {product.label}
-                                                    </Link>
-                                                  </li>
-                                                ),
-                                              )}
-                                            </ul>
-                                          </div>
+                                          {category.label}
+                                        </a>
+                                        <div
+                                          className="collapse d-xl-block"
+                                          id={`mcat_${category.id}`}
+                                        >
+                                          <ul className="row g-1">
+                                            {category.products.map(
+                                              (product) => (
+                                                <li key={product.id}>
+                                                  <Link
+                                                    href={
+                                                      product.slug
+                                                        ? `/product-category/${product.slug}`
+                                                        : "#"
+                                                    }
+                                                  >
+                                                    {product.label}
+                                                  </Link>
+                                                </li>
+                                              ),
+                                            )}
+                                          </ul>
                                         </div>
-                                      ))}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </>
-                    ) : menuItem?.target === "_blank" ? (
-                      <a
-                        href={menuItem?.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {menuItem?.label}
-                      </a>
-                    ) : (
-                      <a onClick={() => router.push(menuItem?.url)}>
-                        {menuItem?.label}
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* ---------------- Search panel ---------------- */}
-        <div className={`${styles.searchWrapper} collapse`} id="searchWrapper">
-          <div
-            className="pt-sm-5 py-2 container-fluid sitePadding"
-            style={{ background: "#f3f3f3" }}
-          >
-            <div className={`${styles.searchContainer} mx-auto vstack gap-4`}>
-              <div
-                className={`${styles.searchBarWrap} overflow-hidden d-flex align-items-center`}
-              >
-                <IoSearchOutline size={28} className="ms-2" />
-                <input
-                  type="search"
-                  placeholder="Search for products, category and more"
-                  className={`${styles.searchBar} w-100 h-100 px-5 rounded-pill`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e?.target?.value)}
-                  onKeyDown={handleSearchKeyDown}
-                />
-              </div>
-
-              {showSuggestions ? (
-                /* ---------- Suggestions from API ---------- */
-                <div className={styles.suggestBox}>
-                  {isFetching || searchQuery !== debounceSearch ? (
-                    <div className={styles.suggestState}>Searching…</div>
-                  ) : suggestions.length > 0 ? (
-                    <ul className={styles.suggestList}>
-                      {suggestions.map((item) => (
-                        <li key={`${item.type}-${item.slug}`}>
-                          <Link
-                            href={getSuggestionUrl(item)}
-                            className={styles.suggestItem}
-                            onClick={() => closeSearch(item.name)}
-                          >
-                            <span className={styles.suggestIcon}>
-                              {item.type === "product" ? (
-                                <HiOutlineCube size={20} />
-                              ) : (
-                                <HiOutlineSquares2X2 size={20} />
-                              )}
-                            </span>
-                            <span className={styles.suggestName}>
-                              {item.name}
-                            </span>
-                            <span
-                              className={`${styles.suggestType} ${
-                                item.type === "product"
-                                  ? styles.typeProduct
-                                  : styles.typeCategory
-                              }`}
-                            >
-                              {item.type === "product" ? "Product" : "Category"}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
+                      </div>
+                    </>
+                  ) : menuItem?.target === "_blank" ? (
+                    <a
+                      href={menuItem?.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {menuItem?.label}
+                    </a>
                   ) : (
-                    <div className={styles.suggestState}>
-                      No results for “{debounceSearch}”
-                    </div>
+                    <a onClick={() => router.push(menuItem?.url)}>
+                      {menuItem?.label}
+                    </a>
                   )}
-                </div>
-              ) : (
-                /* ---------- Recent + Trending (input empty) ---------- */
-                <div className="vstack gap-3">
-                  {searchHistory.length > 0 && (
-                    <div className="row align-items-center suggestWrap g-0">
-                      <div
-                        className={`${styles.suggestTitle} col mb-1 d-flex justify-content-between`}
-                      >
-                        <span>Recent Searches :</span>
-                        <button
-                          type="button"
-                          className={styles.clearHistoryBtn}
-                          onClick={clearSearchHistory}
-                        >
-                          Clear
-                        </button>
-                      </div>
-                      <div className="col-12">
-                        <div className="hstack flex-wrap gap-2">
-                          {searchHistory.map((term) => (
-                            <button
-                              key={term}
-                              type="button"
-                              className={styles.suggestTag}
-                              onClick={() => handleHistoryClick(term)}
-                            >
-                              {term}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="d-flex justify-content-center">
-                <button
-                  className={`${styles.searchClose} ${styles.headBtn} rounded-circle bg-white`}
-                  data-bs-toggle="collapse"
-                  data-bs-target="#searchWrapper"
-                  aria-expanded="true"
-                  onClick={() => saveSearch(searchQuery)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="currentColor"
-                    viewBox="0 0 16 16"
+                </li>
+              ))}
+              {isIndia && isLoggedIn && (
+                <li className={styles.sidebarLogoutItem}>
+                  <button
+                    type="button"
+                    className={styles.sidebarLogoutBtn}
+                    disabled={isLogoutLoading}
+                    onClick={() => closeSidebar(handleLogout)}
                   >
-                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
-                  </svg>
-                </button>
+                    <HiOutlinePower size={22} />
+                    <span>{isLogoutLoading ? "Logging out..." : "Logout"}</span>
+                  </button>
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------------- Search panel ---------------- */}
+      <div className={`${styles.searchWrapper} collapse`} id="searchWrapper">
+        <div
+          className="pt-sm-5 py-2 container-fluid sitePadding"
+          style={{ background: "#f3f3f3" }}
+        >
+          <div className={`${styles.searchContainer} mx-auto vstack gap-4`}>
+            <div
+              className={`${styles.searchBarWrap} overflow-hidden d-flex align-items-center`}
+            >
+              <IoSearchOutline size={28} className="ms-2" />
+              <input
+                type="search"
+                placeholder="Search for products, category and more"
+                className={`${styles.searchBar} w-100 h-100 px-5 rounded-pill`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e?.target?.value)}
+                onKeyDown={handleSearchKeyDown}
+              />
+            </div>
+
+            {showSuggestions ? (
+              /* ---------- Suggestions from API ---------- */
+              <div className={styles.suggestBox}>
+                {isFetching || searchQuery !== debounceSearch ? (
+                  <div className={styles.suggestState}>Searching…</div>
+                ) : suggestions.length > 0 ? (
+                  <ul className={styles.suggestList}>
+                    {suggestions.map((item) => (
+                      <li key={`${item.type}-${item.slug}`}>
+                        <Link
+                          href={getSuggestionUrl(item)}
+                          className={styles.suggestItem}
+                          onClick={() => closeSearch(item.name)}
+                        >
+                          <span className={styles.suggestIcon}>
+                            {item.type === "product" ? (
+                              <HiOutlineCube size={20} />
+                            ) : (
+                              <HiOutlineSquares2X2 size={20} />
+                            )}
+                          </span>
+                          <span className={styles.suggestName}>
+                            {item.name}
+                          </span>
+                          <span
+                            className={`${styles.suggestType} ${item.type === "product"
+                              ? styles.typeProduct
+                              : styles.typeCategory
+                              }`}
+                          >
+                            {item.type === "product" ? "Product" : "Category"}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className={styles.suggestState}>
+                    No results for “{debounceSearch}”
+                  </div>
+                )}
               </div>
+            ) : (
+              /* ---------- Recent + Trending (input empty) ---------- */
+              <div className="vstack gap-3">
+                {searchHistory.length > 0 && (
+                  <div className="row align-items-center suggestWrap g-0">
+                    <div
+                      className={`${styles.suggestTitle} col mb-1 d-flex justify-content-between`}
+                    >
+                      <span>Recent Searches :</span>
+                      <button
+                        type="button"
+                        className={styles.clearHistoryBtn}
+                        onClick={clearSearchHistory}
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    <div className="col-12">
+                      <div className="hstack flex-wrap gap-2">
+                        {searchHistory.map((term) => (
+                          <button
+                            key={term}
+                            type="button"
+                            className={styles.suggestTag}
+                            onClick={() => handleHistoryClick(term)}
+                          >
+                            {term}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="d-flex justify-content-center">
+              <button
+                className={`${styles.searchClose} ${styles.headBtn} rounded-circle bg-white`}
+                data-bs-toggle="collapse"
+                data-bs-target="#searchWrapper"
+                aria-expanded="true"
+                onClick={() => saveSearch(searchQuery)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
-      </header>
+      </div>
       <AuthPopup
         isOpen={isAuthOpen}
         onClose={() => {
@@ -768,7 +830,7 @@ const Header = () => {
           syncUser();
         }}
       />
-    </>
+    </header>
   );
 };
 

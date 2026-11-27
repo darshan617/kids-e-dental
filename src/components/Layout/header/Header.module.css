@@ -1,16 +1,34 @@
 .pageHeader {
-  position: relative;
-}
-
-.stickyHeader {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: #fff;
+  transition: all .5s ease;
 }
 
-:global(.stick) .stickyHeader {
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+:global(.stick) .pageHeader {
+  top: var(--hTH);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, .1);
+}
+
+/* .headTop {
+  overflow: hidden;
+  max-height: 100px;
+  opacity: 1;
+  transform: translateY(0);
+  position: relative;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
+  will-change: max-height, opacity;
+} */
+:global(.stick) .headTop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .headTopLinks a {
@@ -569,6 +587,15 @@
     font-size: clamp(0.75rem, calc(0.333rem + 0.556vw), 1rem);
   }
 
+  :global(.stick) .pageHeader:hover .headTop {
+    max-height: 100px;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
   .headTopLinks a {
     & svg {
       width: 1.17vw;
@@ -704,5 +731,340 @@
     &>li {
       padding: 0.25rem 0.5rem;
     }
+  }
+}
+
+/* Mobile bottom navigation — existing header actions, no duplicate controls */
+.actionBar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.mobileLabel,
+.mobileProfileIcon,
+.mobileWishlist {
+  display: none;
+}
+
+@media (min-width: 576px) {
+  .actionBar {
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1400px) {
+  .actionBar {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  :global(body):has(.pageHeader) {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .actionBar {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    min-height: 68px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    background: #fff;
+    border-top: 1px solid #e8e8e8;
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, .09);
+    justify-content: space-around;
+    gap: 0;
+    z-index: 20;
+  }
+
+  .actionBar>div {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .profileAction {
+    order: 0;
+  }
+
+  .searchAction {
+    order: 1;
+  }
+
+  .cartAction {
+    order: 2;
+  }
+
+  .actionBar .headBtn,
+  .actionBar .avatarBtn {
+    width: 100%;
+    height: 48px;
+    aspect-ratio: auto;
+    flex-direction: column;
+    gap: 5px;
+    background: transparent !important;
+    box-shadow: none;
+    border: 0;
+    color: #111;
+    text-decoration: none;
+    border-radius: 8px !important;
+  }
+
+  .actionBar .headBtn svg,
+  .actionBar .avatarBtn svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .mobileLabel {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.2;
+  }
+
+  .mobileProfileIcon {
+    display: block;
+  }
+
+  .desktopInitial,
+  .desktopWishlist {
+    display: none;
+  }
+
+  .actionBar .badge {
+    top: 0;
+    bottom: auto;
+    left: calc(50% + 5px);
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+
+  .actionBar .userDropdown {
+    top: auto;
+    bottom: calc(100% + 12px);
+    left: 0;
+    right: auto;
+    width: min(260px, calc(100vw - 24px));
+  }
+
+  .mobileWishlist {
+    display: block;
+  }
+
+  .siteMenu .mobileWishlist>a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+  }
+
+  .navigation {
+    max-width: 90%;
+  }
+
+  .searchWrapper {
+    max-height: calc(100dvh - 150px - env(safe-area-inset-bottom, 0px));
+  }
+
+  :global(body):has(.pageHeader) :global(.back-to-top-btn) {
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    right: 18px;
+    z-index: 999;
+  }
+}
+
+
+.mobileInitial,
+.sidebarAccount,
+.sidebarLogoutItem {
+  display: none;
+}
+
+@media (max-width: 575.98px) {
+  .siteMenu>.sidebarAccount {
+    display: block;
+    padding: 16px 12px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .accountHeading {
+    font-size: 11px;
+    font-weight: 700;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0 12px;
+    margin-bottom: 12px;
+  }
+
+  .sidebarUser {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 12px;
+    background: #fff9df;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+
+  .sidebarAvatar {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--primary, #ffcc00);
+    color: #111;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .sidebarUserInfo {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .sidebarUserInfo strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sidebarAccountLink {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #222;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+  }
+
+  .sidebarAccountLink svg {
+    flex-shrink: 0;
+  }
+
+  .sidebarAccountLink:hover {
+    background: #f5f5f5;
+  }
+
+  .siteMenu>.sidebarLogoutItem {
+    display: block;
+    padding: 16px 12px;
+    margin-top: 15px;
+    border-top: 1px solid #e5e5e5;
+    border-bottom: none;
+  }
+
+  .sidebarLogoutBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 16px;
+    background: #fff1f1;
+    color: #dc2626;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+
+  .sidebarLogoutBtn:hover {
+    background: #dc2626;
+    color: #fff;
+  }
+
+  .sidebarLogoutBtn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .mobileInitial {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--primary, #ffcc00);
+    color: #111;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .desktopInitial {
+    display: none;
+  }
+
+  :global(.stick) .pageHeader {
+    top: 0;
+  }
+}
+
+.productAction {
+  display: none;
+}
+
+@media (max-width: 575.98px) {
+  .actionBar>.productAction {
+    display: flex;
+    order: 0;
+  }
+
+  .profileAction {
+    order: 1;
+  }
+
+  .cartAction {
+    order: 2;
+  }
+
+  .searchAction {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .searchAction .headBtn {
+    flex-shrink: 0;
+  }
+
+}
+
+@media (max-width: 575.98px) {
+  .headBtns>.searchAction {
+    order: 1;
+  }
+
+  .headBtns> :global(.d-xl-none) {
+    order: 2;
+  }
+}
+
+
+@media (max-width: 575.98px) {
+  .actionBar .userDropdown {
+    display: none;
   }
 }
